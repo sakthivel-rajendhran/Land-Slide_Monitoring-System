@@ -1,6 +1,8 @@
 # SlopeGuard — AI-Powered Landslide Risk Monitoring & Early Warning System
 
-SlopeGuard is an intelligent landslide hazard monitoring and early warning system designed to protect vulnerable communities and assist disaster management authorities in mountainous regions such as the Western Ghats of India.
+SlopeGuard is an intelligent landslide hazard monitoring and early warning system designed to protect vulnerable communities and assist disaster management authorities in mountainous regions such as the Western Ghats and Northeast Region of India.
+
+> 📖 **Comprehensive Master Documentation:** For complete system architecture, technology stack, chronological development history (Phases 1–12.8), scientific limitations, test reports, and local execution guides, see [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md).
 
 ---
 
