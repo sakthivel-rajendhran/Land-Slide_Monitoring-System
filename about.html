@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About SlopeGuard — AI-Based Landslide Risk Monitoring for NER</title>
+  <meta name="description" content="Methodology, data sources, classification criteria, and operational limitations of SlopeGuard for the North Eastern Region of India.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C7F464'/><polygon points='4,32 16,14 24,32' fill='%23294B32'/></svg>">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/shells.css">
+
+  <style>
+    .about-hero {
+      padding: 120px 24px 60px;
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .about-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(201, 111, 79, 0.08);
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--radius-button, 4px);
+      color: var(--lw-cta, #C96F4F);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .about-hero h1 {
+      font-family: var(--font-captain, 'American Captain', Impact, 'Arial Black', sans-serif);
+      font-size: clamp(2.5rem, 5vw, 3.75rem);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      color: var(--color-text-primary);
+    }
+    .about-hero h1 span {
+      color: var(--lw-cta, #C96F4F);
+    }
+    .about-hero p {
+      font-size: 1.125rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .about-section {
+      max-width: 1100px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+
+    .section-title-wrap {
+      margin-bottom: 36px;
+      text-align: left;
+    }
+    .section-title-wrap h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+      margin: 0 0 8px 0;
+    }
+    .section-title-wrap p {
+      font-size: 0.9375rem;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+    }
+    .step-card {
+      background: var(--lw-surface, #FFFFFF);
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--radius-card, 6px);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(46, 58, 47, 0.04);
+    }
+    .step-number {
+      font-family: var(--lw-font-mono);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--lw-cta, #C96F4F);
+      line-height: 1;
+    }
+    .step-card h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+    .step-card p {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .info-types-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+    .info-type-card {
+      background: var(--lw-surface, #FFFFFF);
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: 6px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(46, 58, 47, 0.04);
+    }
+    .info-type-card .badge {
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+
+    .faq-item {
+      background: var(--lw-surface, #FFFFFF);
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: 4px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .faq-question {
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      font-size: 0.9375rem;
+      user-select: none;
+    }
+    .faq-answer {
+      padding: 0 20px 18px;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      display: none;
+    }
+    .faq-item.active .faq-answer {
+      display: block;
+    }
+    .faq-item.active .faq-question svg {
+      transform: rotate(180deg);
+    }
+
+    @media (max-width: 900px) {
+      .step-grid, .info-types-grid {
+        grid-template-columns: 1fr;
+      }
+      .about-hero h1 {
+        font-size: 2.125rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .about-section {
+        padding: 0 16px;
+        margin-bottom: 48px;
+      }
+      .about-hero {
+        padding: calc(var(--nav-height) + 2rem) 16px 2.5rem;
+      }
+      .about-hero h1 {
+        font-size: 1.85rem;
+      }
+      .about-hero p {
+        font-size: 0.95rem;
+      }
+      .step-card, .info-type-card {
+        padding: 18px 16px;
+      }
+      .faq-question {
+        padding: 14px 16px;
+      }
+      .faq-answer {
+        padding: 0 16px 14px;
+      }
+    }
+  </style>
+</head>
+<body class="public-body">
+
+  <!-- Main Navigation Header -->
+  <header class="public-header">
+    <div class="nav-container">
+      <div class="brand-group">
+        <a href="dashboard.html" class="logo-link">
+          <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="4,32 16,14 24,32" fill="#2E3A2F" />
+            <polygon points="12,32 23,6 34,32" fill="#C96F4F" />
+            <polygon points="23,6 23,24 16,32" fill="#2E3A2F" />
+            <polygon points="23,6 30,19 23,24" fill="#D9C9B2" />
+            <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
+          </svg>
+          <span class="brand-text">Slope<span>Guard</span></span>
+        </a>
+      </div>
+
+      <nav class="nav-links">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="map.html" class="nav-link">Risk Map</a>
+        <a href="notifications.html" class="nav-link">Alerts</a>
+        <a href="about.html" class="nav-link active">About</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="login.html" class="btn-nav-login">Sign In</a>
+        <a href="map.html" class="nav-cta-btn">
+          <span>Explore Map</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="about-hero">
+    <span class="about-badge">Scientific Methodology & Architecture</span>
+    <h1>Engineered for Himalayan <span>Slope Resilience</span></h1>
+    <p>
+      SlopeGuard provides high-resolution terrain analysis, precipitation tracking, and geotechnical monitoring across vulnerable sectors in the North Eastern Region (NER) of India.
+    </p>
+  </section>
+
+  <!-- Three-Step Operational Methodology -->
+  <section class="about-section">
+    <div class="section-title-wrap">
+      <h2>How SlopeGuard Operates</h2>
+      <p>Three interconnected stages converting raw geological telemetry into life-saving early warning notices.</p>
+    </div>
+
+    <div class="step-grid">
+      <div class="step-card">
+        <div class="step-number">01</div>
+        <h3>Continuous Data Ingestion</h3>
+        <p>
+          Aggregates automated rain gauge networks (ARG), piezometer pore pressure sensors, and European Space Agency Sentinel-1 InSAR synthetic aperture radar passes over steep mountain corridors.
+        </p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">02</div>
+        <h3>AI-Based Risk Assessment</h3>
+        <p>
+          Computational limit-equilibrium stability models combine real-time soil saturation thresholds with high-resolution digital elevation models (DEM) to estimate factor-of-safety reduction.
+        </p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">03</div>
+        <h3>Early Warning & Alert Fan-Out</h3>
+        <p>
+          When threshold breaches are confirmed or reviewed by geotechnical officers, push advisories and SMS bulletins are dispatched to district disaster management authorities and registered residents.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Information Classification Standards -->
+  <section class="about-section">
+    <div class="section-title-wrap">
+      <h2>Information Classification Types</h2>
+      <p>SlopeGuard clearly distinguishes algorithmic telemetry from human-reviewed advisories.</p>
+    </div>
+
+    <div class="info-types-grid">
+      <div class="info-type-card">
+        <span class="lw-source lw-source--automated badge">AI ESTIMATE</span>
+        <h3 style="font-size: 1.0625rem; color: var(--color-text-primary); margin: 0 0 8px 0;">Algorithmic Telemetry</h3>
+        <p style="font-size: 0.8125rem; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
+          Continuous automated readings from rain gauges and saturation sensors. Rapidly indicates changing slope equilibrium before manual survey crews can be dispatched.
+        </p>
+      </div>
+
+      <div class="info-type-card">
+        <span class="lw-source lw-source--reviewed badge">REVIEWED ALERT</span>
+        <h3 style="font-size: 1.0625rem; color: var(--color-text-primary); margin: 0 0 8px 0;">Staff-Reviewed Notice</h3>
+        <p style="font-size: 0.8125rem; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
+          Telemetry breaches verified by geotechnical monitoring staff or district disaster officers, checking sensor validity against Doppler radar and ground deformation trends.
+        </p>
+      </div>
+
+      <div class="info-type-card">
+        <span class="lw-source lw-source--official badge">OFFICIAL ADVISORY</span>
+        <h3 style="font-size: 1.0625rem; color: var(--color-text-primary); margin: 0 0 8px 0;">Government Bulletin</h3>
+        <p style="font-size: 0.8125rem; color: var(--color-text-secondary); line-height: 1.5; margin: 0;">
+          Formal bulletins published in coordination with District Disaster Management Authorities (DDMA), Geological Survey of India (GSI), and State Emergency Operations Centers.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Data Sources & Known Limitations -->
+  <section class="about-section">
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px;">
+      <div class="step-card">
+        <h3 style="font-size: 1.25rem;">Primary Data Sources</h3>
+        <ul style="margin: 0; padding-left: 20px; font-size: 0.875rem; color: var(--color-text-secondary); line-height: 1.7;">
+          <li><strong>India Meteorological Department (IMD):</strong> 24h precipitation records and gridded monsoon forecasts.</li>
+          <li><strong>Geological Survey of India (GSI):</strong> Historical landslide inventory and susceptibility zonation.</li>
+          <li><strong>Sentinel-1 InSAR:</strong> Interferometric synthetic aperture radar surface displacement measurements.</li>
+          <li><strong>Field Sensor Arrays:</strong> Localized borehole piezometers and telemetry tiltmeters installed across high-risk corridors.</li>
+        </ul>
+      </div>
+
+      <div class="step-card">
+        <h3 style="font-size: 1.25rem;">Known Operational Limitations</h3>
+        <ul style="margin: 0; padding-left: 20px; font-size: 0.875rem; color: var(--color-text-secondary); line-height: 1.7;">
+          <li><strong>Unmonitored Sectors:</strong> Geographic areas outside instrumented sectors are not assessed. The absence of an alert marker does not indicate that an unmonitored mountain slope is safe.</li>
+          <li><strong>Satellite Pass Latency:</strong> InSAR surface deformation tracks depend on 6 to 12-day orbital revisit cycles.</li>
+          <li><strong>Extreme Cloudbursts:</strong> Localized micro-burst precipitation exceeding 100mm/hr can induce debris flows faster than mathematical telemetry polling cycles.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Accordion -->
+  <section class="about-section">
+    <div class="section-title-wrap">
+      <h2>Frequently Asked Questions</h2>
+      <p>Operational clarity on alerts, offline caching, and government coordination.</p>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">
+        <span>Does SlopeGuard replace district evacuation orders?</span>
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+      <div class="faq-answer">
+        No. SlopeGuard is a technical early warning platform designed to assist decision-makers and citizens. In any emergency, residents must prioritize official instructions and evacuation orders issued by their District Disaster Management Authority (DDMA) or the National Disaster Response Force (NDRF).
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">
+        <span>Can I access monitoring data when cellular networks fail during storms?</span>
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+      <div class="faq-answer">
+        Yes. SlopeGuard includes an offline-first service worker and IndexedDB cache. When you lose cellular connection, previously synchronized risk classifications, emergency numbers, and sector coordinates remain accessible, with explicit timestamps showing when the data was last received.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">
+        <span>How are risk levels (Critical, High, Moderate, Low) computed?</span>
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+      <div class="faq-answer">
+        Risk levels are determined by multi-factor safety equations factoring in 24-hour and 72-hour antecedent rainfall indices, slope gradient steepness, soil pore water saturation, and geological fault proximity.
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Disclaimer -->
+  <footer style="background: #FAF8F2; border-top: 1px solid var(--lw-border, #D9C9B2); padding: 40px 24px; text-align: center; font-size: 0.8125rem; color: var(--color-text-muted);">
+    <div style="max-width: 900px; margin: 0 auto; line-height: 1.6;">
+      <p style="margin-bottom: 12px; color: var(--color-text-primary); font-weight: 700;">
+        SlopeGuard — AI-Based Landslide Prediction & Early Warning System (NER)
+      </p>
+      <p>
+        Safety & Operational Notice: Mathematical risk calculations and telemetry models are advisory tools. Unmonitored sectors are not assessed. For emergency assistance in the North Eastern Region, dial State Disaster Management Authority Control: <strong>0361-2237011</strong> or NDRF Helpline: <strong>1078</strong>.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+    }
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.onclick = () => {
+        q.parentElement.classList.toggle('active');
+      };
+    });
+  </script>
+</body>
+</html>

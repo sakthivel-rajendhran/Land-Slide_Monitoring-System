@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assessment Review Queue — SlopeGuard NER</title>
+  <meta name="description" content="Geotechnical officer review queue for automated sensor threshold breaches and mathematical hazard models.">
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C96F4F'/><polygon points='4,32 16,14 24,32' fill='%232E3A2F'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Immediate Authentication & Role Guard -->
+  <script>
+    (function() {
+      function checkAuth() {
+        try {
+          var raw = sessionStorage.getItem("sg_user") || localStorage.getItem("sg_user");
+          var user = raw ? JSON.parse(raw) : null;
+          if (!user) {
+            var page = window.location.pathname.split('/').pop() || 'assessments.html';
+            var next = encodeURIComponent("admin/" + page + window.location.search);
+            window.location.replace("../login.html?next=" + next);
+            return;
+          }
+          var role = (user.role || "").toUpperCase();
+          if (role !== "ADMIN" && role !== "OFFICER") {
+            window.location.replace("../dashboard.html");
+          }
+        } catch (e) {
+          window.location.replace("../login.html");
+        }
+      }
+      checkAuth();
+      window.addEventListener("pageshow", function(e) {
+        if (e.persisted) checkAuth();
+      });
+    })();
+  </script>
+
+  <style>
+    /* Tab Navigation */
+    .admin-tabs-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--lw-border, #D9C9B2);
+      padding-bottom: 8px;
+    }
+    .admin-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--color-text-secondary, #6B7F5B);
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: var(--radius-button, 4px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .admin-tab-btn:hover {
+      color: var(--color-text-primary, #2E3A2F);
+      background: rgba(201, 111, 79, 0.06);
+    }
+    .admin-tab-btn.active {
+      background: rgba(201, 111, 79, 0.12);
+      border-color: rgba(201, 111, 79, 0.35);
+      color: var(--lw-cta, #C96F4F);
+    }
+    .admin-tab-badge {
+      font-size: 0.6875rem;
+      font-family: var(--lw-font-mono, monospace);
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: rgba(46, 58, 47, 0.08);
+      color: var(--color-text-primary, #2E3A2F);
+    }
+    .admin-tab-btn.active .admin-tab-badge {
+      background: var(--lw-cta, #C96F4F);
+      color: #FFFFFF;
+    }
+
+    /* Metric Cards Grid */
+    .metrics-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .summary-card {
+      background: var(--lw-surface, #FFFFFF);
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--radius-card, 6px);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 8px rgba(46, 58, 47, 0.04);
+    }
+    .summary-card-label {
+      font-size: 0.75rem;
+      color: var(--color-text-muted, #72826F);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+    .summary-card-value {
+      font-size: 1.625rem;
+      font-family: var(--lw-font-mono, monospace);
+      font-weight: 800;
+      color: var(--color-text-primary, #2E3A2F);
+    }
+    .summary-card-meta {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary, #6B7F5B);
+      margin-top: 4px;
+    }
+
+    /* Status Filters */
+    .filter-pills-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .filter-pill {
+      background: #FAF8F2;
+      border: 1px solid var(--lw-border, #D9C9B2);
+      color: var(--color-text-secondary, #6B7F5B);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .filter-pill:hover {
+      border-color: var(--lw-cta, #C96F4F);
+      color: var(--color-text-primary, #2E3A2F);
+    }
+    .filter-pill.active {
+      background: rgba(201, 111, 79, 0.12);
+      border-color: var(--lw-cta, #C96F4F);
+      color: var(--lw-cta, #C96F4F);
+    }
+
+    /* Review Status Badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.7125rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .status-pending { background: rgba(217, 201, 178, 0.25); color: #8C6A3C; border: 1px solid #D9C9B2; }
+    .status-under_review { background: rgba(107, 127, 91, 0.15); color: #4B633C; border: 1px solid rgba(107, 127, 91, 0.35); }
+    .status-confirmed { background: rgba(107, 127, 91, 0.2); color: #2E3A2F; border: 1px solid rgba(107, 127, 91, 0.4); }
+    .status-corrected { background: rgba(201, 111, 79, 0.15); color: #C96F4F; border: 1px solid rgba(201, 111, 79, 0.35); }
+    .status-flagged { background: rgba(201, 111, 79, 0.2); color: #9E3F24; border: 1px solid rgba(201, 111, 79, 0.4); }
+    .status-verified { background: rgba(107, 127, 91, 0.18); color: #2E3A2F; border: 1px solid rgba(107, 127, 91, 0.35); }
+    .status-resolved { background: rgba(107, 127, 91, 0.15); color: #3A5531; border: 1px solid rgba(107, 127, 91, 0.3); }
+    .status-rejected { background: rgba(201, 111, 79, 0.15); color: #C96F4F; border: 1px solid rgba(201, 111, 79, 0.3); }
+    .status-info { background: rgba(217, 201, 178, 0.3); color: #6B7F5B; border: 1px solid #D9C9B2; }
+
+    /* Modal Overlay & Card */
+    .sg-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(46, 58, 47, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .sg-modal-card {
+      background: #FFFFFF;
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: 6px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 16px 36px rgba(46, 58, 47, 0.15);
+      display: flex;
+      flex-direction: column;
+    }
+    .sg-modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--lw-border, #D9C9B2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: #FFFFFF;
+      z-index: 10;
+    }
+    .sg-modal-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-text-primary, #2E3A2F);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sg-modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--color-text-muted, #72826F);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s ease;
+    }
+    .sg-modal-close-btn:hover { color: var(--color-text-primary, #2E3A2F); }
+    .sg-modal-body {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .sg-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--lw-border, #D9C9B2);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: #FAF8F2;
+    }
+    .info-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: #FAF8F2;
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: 4px;
+      padding: 12px 14px;
+    }
+    .info-item-label {
+      font-size: 0.6875rem;
+      color: var(--color-text-muted, #72826F);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .info-item-value {
+      font-size: 0.8125rem;
+      color: var(--color-text-primary, #2E3A2F);
+      font-weight: 600;
+    }
+    .audit-history-box {
+      background: #FAF8F2;
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: 4px;
+      padding: 12px 14px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .audit-entry {
+      font-size: 0.75rem;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--lw-border, #D9C9B2);
+    }
+    .audit-entry:last-child { border-bottom: none; }
+    .audit-entry-top {
+      display: flex;
+      justify-content: space-between;
+      color: var(--color-text-muted, #72826F);
+      font-size: 0.6875rem;
+      margin-bottom: 2px;
+    }
+
+    @media (max-width: 600px) {
+      .sg-modal-overlay {
+        padding: 12px 8px;
+      }
+      .sg-modal-header {
+        padding: 14px 16px;
+      }
+      .sg-modal-body {
+        padding: 16px 14px;
+        gap: 12px;
+      }
+      .sg-modal-footer {
+        padding: 12px 14px;
+        flex-direction: column;
+      }
+      .sg-modal-footer button {
+        width: 100%;
+        min-height: 44px;
+      }
+      .info-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .metrics-summary-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body class="dashboard-root" data-shell="admin">
+
+  <!-- Sidebar Navigation -->
+  <aside class="dashboard-sidebar" id="dashboardSidebar" aria-label="Sidebar Navigation">
+    <div class="sidebar-brand-header">
+      <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 28px; height: 28px;">
+        <polygon points="4,32 16,14 24,32" fill="#2E3A2F" />
+        <polygon points="12,32 23,6 34,32" fill="#C96F4F" />
+        <polygon points="23,6 23,24 16,32" fill="#2E3A2F" />
+        <polygon points="23,6 30,19 23,24" fill="#D9C9B2" />
+        <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
+      </svg>
+      <div class="sidebar-brand-name">Slope<span>Guard</span></div>
+      <span class="sidebar-brand-badge">STAFF</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span style="font-size: 0.6875rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700; padding: 0 14px; letter-spacing: 0.05em;">Staff Console</span>
+      
+      <a href="dashboard.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <span>Operations Console</span>
+      </a>
+
+      <a href="alerts.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+        <span>Alert Management</span>
+      </a>
+
+      <a href="assessments.html" class="sidebar-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+        <span>Assessment Review</span>
+      </a>
+
+      <a href="areas.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <span>Area Management</span>
+      </a>
+
+      <a href="data.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        <span>Data Ingestion</span>
+      </a>
+
+      <a href="users.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>User Accounts</span>
+      </a>
+
+      <a href="audit-logs.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>Audit Logs</span>
+      </a>
+
+      <div style="border-top: 1px solid var(--color-glass-border); margin: 8px 0; padding-top: 8px;">
+        <span style="font-size: 0.6875rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700; padding: 0 14px; letter-spacing: 0.05em;">User Portal</span>
+        <a href="../dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Main Dashboard</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user-card">
+        <div class="sidebar-user-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarName">NER Command Staff</div>
+          <div class="sidebar-user-role" id="sidebarRole">OFFICER • NER Command</div>
+        </div>
+      </div>
+      <button type="button" class="btn-sidebar-logout" id="sidebarLogout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="dashboard-main-wrapper">
+    <header class="dashboard-topbar">
+      <div class="topbar-left">
+        <button type="button" class="topbar-mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="topbar-breadcrumbs">
+          <span class="topbar-breadcrumbs-root">SlopeGuard Staff</span>
+          <span class="topbar-breadcrumbs-sep">/</span>
+          <span class="topbar-breadcrumbs-current">Assessment Review Queue</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="telemetry-freshness-indicator">
+          <span class="telemetry-pulse-dot"></span>
+          <span>Geotechnical Review Gate Active</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-body-container">
+      <!-- Heading Block -->
+      <section class="dashboard-heading-block">
+        <div class="heading-title-group">
+          <h1>Geotechnical Assessment Verification Queue</h1>
+          <p class="heading-subtitle">
+            Validate automated citizen location risk models, inspect mathematical factor-of-safety telemetry, and adjudicate verified hazard classifications for the North Eastern Region.
+          </p>
+        </div>
+      </section>
+
+      <!-- Tabs Navigation -->
+      <div class="admin-tabs-nav" role="tablist">
+        <button type="button" class="admin-tab-btn active" id="tabCitizenBtn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span>Citizen Location Risk Assessments</span>
+          <span class="admin-tab-badge" id="tabCitizenBadge">0 PENDING</span>
+        </button>
+        <button type="button" class="admin-tab-btn" id="tabSensorBtn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><polyline points="12 6 12 12 14 14" stroke-width="2"/></svg>
+          <span>Sensor Threshold Breaches</span>
+          <span class="admin-tab-badge" id="tabSensorBadge">2 PENDING</span>
+        </button>
+        <button type="button" class="admin-tab-btn" id="tabIncidentReportsBtn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span>Road Blockages & Landslide Incidents</span>
+          <span class="admin-tab-badge" id="tabIncidentReportsBadge" style="background: rgba(240,120,120,0.25); color: #F07878;">0 PENDING</span>
+        </button>
+      </div>
+
+      <!-- VIEW 1: CITIZEN LOCATION ASSESSMENTS -->
+      <div id="viewCitizenAssessments">
+        <!-- Summary Stats Grid -->
+        <div class="metrics-summary-grid">
+          <div class="summary-card">
+            <span class="summary-card-label">Total Submissions</span>
+            <span class="summary-card-value" id="statTotalSubmissions">0</span>
+            <span class="summary-card-meta">Registered citizen monitoring points</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card-label">Pending Staff Review</span>
+            <span class="summary-card-value" id="statPendingReview" style="color: #F6E08E;">0</span>
+            <span class="summary-card-meta">Awaiting geotechnical gate</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card-label">Elevated / Critical Risk</span>
+            <span class="summary-card-value" id="statElevatedRisk" style="color: var(--color-risk-severe, #F87171);">0</span>
+            <span class="summary-card-meta">Proximity to active slip corridors</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card-label">Decided / Confirmed</span>
+            <span class="summary-card-value" id="statDecided" style="color: #86EFAC;">0</span>
+            <span class="summary-card-meta">Confirmed or corrected by staff</span>
+          </div>
+        </div>
+
+        <!-- Panel Table -->
+        <section class="dashboard-panel-card">
+          <div class="panel-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <h2 class="panel-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                Registered Citizen Location Risk Pipeline (Model v2.4-convLSTM)
+              </h2>
+            </div>
+            <span class="sidebar-brand-badge" id="citizenTableBadge">0 RECORDS</span>
+          </div>
+
+          <!-- Status Filter Pills -->
+          <div class="filter-pills-bar" id="citizenFilterBar">
+            <button type="button" class="filter-pill active" data-status="all">All Submissions</button>
+            <button type="button" class="filter-pill" data-status="location provided">Location Provided</button>
+            <button type="button" class="filter-pill" data-status="location not provided">Location Not Provided</button>
+            <button type="button" class="filter-pill" data-status="assessment pending">Assessment Pending</button>
+            <button type="button" class="filter-pill" data-status="assessment completed">Assessment Completed</button>
+            <button type="button" class="filter-pill" data-status="review required">Review Required</button>
+            <button type="button" class="filter-pill" data-status="confirmed">Confirmed</button>
+            <button type="button" class="filter-pill" data-status="corrected">Corrected</button>
+          </div>
+
+          <div class="reports-table-wrap">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Citizen / Ref</th>
+                  <th>Captured Location & Accuracy</th>
+                  <th>AI Risk & Factor of Safety</th>
+                  <th>Environmental Telemetry</th>
+                  <th>Review Status</th>
+                  <th>Geotechnical Action</th>
+                </tr>
+              </thead>
+              <tbody id="citizenAssessmentsTbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW 2: SENSOR THRESHOLD BREACHES -->
+      <div id="viewSensorBreaches" style="display: none;">
+        <section class="dashboard-panel-card">
+          <div class="panel-header">
+            <h2 class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+              Pending Hardware Sensor Threshold Breaches
+            </h2>
+            <span class="sidebar-brand-badge" id="queueBadge">2 PENDING</span>
+          </div>
+
+          <div class="reports-table-wrap">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Detection Timestamp</th>
+                  <th>Monitored Corridor</th>
+                  <th>Computed Hazard</th>
+                  <th>Factor of Safety (FoS)</th>
+                  <th>Telemetry Trigger Evidence</th>
+                  <th>Review Action</th>
+                </tr>
+              </thead>
+              <tbody id="assessmentQueueTbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW 3: CITIZEN ROAD BLOCKAGES & LANDSLIDE INCIDENTS -->
+      <div id="viewIncidentReports" style="display: none;">
+        <!-- Summary Stats Grid -->
+        <div class="metrics-summary-grid">
+          <div class="summary-card">
+            <span class="summary-card-label">Total Citizen Reports</span>
+            <span class="summary-card-value" id="statIncidentsTotal">0</span>
+            <span class="summary-card-meta">Recorded slope & blockage submissions</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card-label">Pending Staff Review</span>
+            <span class="summary-card-value" id="statIncidentsPending" style="color: #8C5B12;">0</span>
+            <span class="summary-card-meta">Awaiting geotechnical gate</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card-label">Verified Hazard Zones</span>
+            <span class="summary-card-value" id="statIncidentsVerified" style="color: var(--lw-cta, #C96F4F);">0</span>
+            <span class="summary-card-meta">Confirmed slide debris or blockages</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card-label">Resolved / Cleared</span>
+            <span class="summary-card-value" id="statIncidentsResolved" style="color: #2E5A30;">0</span>
+            <span class="summary-card-meta">Debris removed & traffic restored</span>
+          </div>
+        </div>
+
+        <!-- Duplicate Detection Warning Alert -->
+        <div id="incidentDuplicateBanner" style="display: none; background: rgba(196, 136, 41, 0.12); border: 1px solid rgba(196, 136, 41, 0.4); border-radius: var(--radius-card, 6px); padding: 12px 18px; margin-bottom: 20px; font-size: 0.8125rem; color: #8C5B12;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <strong id="duplicateBannerTitle" style="color: #8C5B12;">Potential Duplicate Incidents Detected:</strong>
+          </div>
+          <p id="duplicateBannerDesc" style="margin: 4px 0 0 26px; color: var(--color-text-secondary, #4A5D48); font-size: 0.75rem;">
+            Two reports have near-identical geographic coordinates within 1.5 km. Review photos and timestamps to avoid redundant advisories.
+          </p>
+        </div>
+
+        <!-- Panel Table -->
+        <section class="dashboard-panel-card">
+          <div class="panel-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <h2 class="panel-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                Citizen Observation & Incident Verification Queue
+              </h2>
+            </div>
+            <span class="sidebar-brand-badge" id="incidentTableBadge">0 RECORDS</span>
+          </div>
+
+          <!-- Status Filter Pills -->
+          <div class="filter-pills-bar" id="incidentFilterBar">
+            <button type="button" class="filter-pill active" data-status="all">All Incidents</button>
+            <button type="button" class="filter-pill" data-status="pending verification">Pending Verification</button>
+            <button type="button" class="filter-pill" data-status="under review">Under Review</button>
+            <button type="button" class="filter-pill" data-status="verified">Verified</button>
+            <button type="button" class="filter-pill" data-status="additional info requested">Info Requested</button>
+            <button type="button" class="filter-pill" data-status="resolved">Resolved</button>
+            <button type="button" class="filter-pill" data-status="rejected">Rejected</button>
+          </div>
+
+          <div class="reports-table-wrap">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Incident Ref & Citizen</th>
+                  <th>Category & Passability</th>
+                  <th>Location & Road Coordinates</th>
+                  <th>Observation Timestamps</th>
+                  <th>Photo Evidence</th>
+                  <th>Verification Status</th>
+                  <th>Adjudication Action</th>
+                </tr>
+              </thead>
+              <tbody id="incidentReportsTbody">
+                <tr>
+                  <td colspan="7" style="text-align: center; padding: 36px; color: var(--color-text-muted);">
+                    Loading incident queue...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- GEOTECHNICAL REVIEW MODAL -->
+  <div class="sg-modal-overlay" id="citizenReviewModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="sg-modal-card">
+      <div class="sg-modal-header">
+        <h3 class="sg-modal-title" id="modalTitle">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Geotechnical Assessment Adjudication
+        </h3>
+        <button type="button" class="sg-modal-close-btn" id="btnCloseModal" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="sg-modal-body">
+        <!-- Location & Citizen Info -->
+        <div class="info-grid-2">
+          <div class="info-item">
+            <div class="info-item-label">Citizen Reference</div>
+            <div class="info-item-value" id="modalCitizenRef">--</div>
+            <div style="font-size: 0.725rem; color: var(--color-text-secondary);" id="modalCitizenEmail">--</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Assessment Identifier</div>
+            <div class="info-item-value" style="font-family: var(--lw-font-mono);" id="modalAssessmentId">--</div>
+            <div style="font-size: 0.725rem; color: var(--color-text-secondary);" id="modalTimestamp">--</div>
+          </div>
+        </div>
+
+        <!-- Coordinates & Map Link -->
+        <div style="background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); border-radius: 4px; padding: 12px 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div class="info-item-label">Captured Location (Browser GPS)</div>
+            <a href="#" id="modalMapLink" target="_blank" class="lw-btn lw-btn--sm lw-btn--outline" style="font-size: 0.725rem; padding: 2px 8px; text-decoration: none;">
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              Open on Risk Map
+            </a>
+          </div>
+          <div style="font-size: 0.875rem; font-weight: 700; color: var(--lw-cta, #C96F4F); margin-bottom: 4px;" id="modalPlaceName">--</div>
+          <div style="font-family: var(--lw-font-mono); font-size: 0.8125rem; color: var(--color-text-primary);" id="modalCoords">--</div>
+        </div>
+
+        <!-- AI Model Evaluation -->
+        <div class="info-grid-2">
+          <div class="info-item">
+            <div class="info-item-label">Preliminary Risk Estimate</div>
+            <div style="margin-top: 4px;" id="modalRiskBadgeWrap"></div>
+            <div style="font-size: 0.725rem; color: var(--color-text-muted); margin-top: 4px;" id="modalModelVersion">Model: v2.4-convLSTM</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Factor of Safety & Confidence</div>
+            <div class="info-item-value" id="modalFoS" style="font-family: var(--lw-font-mono);">--</div>
+            <div style="font-size: 0.725rem; color: var(--color-text-secondary); margin-top: 4px;" id="modalConfidence">Confidence: Moderate</div>
+          </div>
+        </div>
+
+        <!-- Environmental Sources & Limitations -->
+        <div style="font-size: 0.75rem; color: var(--color-text-secondary, #4A5D48); background: var(--lw-bg, #F8F6EE); padding: 10px 12px; border-radius: 4px; border: 1px solid var(--lw-border, #D9C9B2);">
+          <div style="margin-bottom: 4px;">
+            <strong style="color: var(--color-text-primary);">Supporting Data Sources:</strong>
+            <span id="modalSourcesList">--</span>
+          </div>
+          <div>
+            <strong style="color: var(--color-text-primary);">Limitations / Flags:</strong>
+            <span id="modalLimitationsList">None flagged</span>
+          </div>
+        </div>
+
+        <!-- Geotechnical Decision Controls -->
+        <div style="border-top: 1px solid rgba(48, 67, 45, 0.5); padding-top: 14px;">
+          <label style="display: block; font-size: 0.8125rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 6px;">
+            Review Status Action
+          </label>
+          <select id="modalReviewStatusSelect" class="form-input" style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px; font-family: inherit;">
+            <option value="Confirmed">Confirmed — Accept AI estimate as verified ground truth</option>
+            <option value="Corrected">Corrected — Override risk classification based on geotechnical evidence</option>
+            <option value="Flagged for Investigation">Flagged for Investigation — Dispatch field/drone reconnaissance</option>
+            <option value="Under Review">Under Review — Keep active in investigation pipeline</option>
+            <option value="Pending Review">Pending Review — Reset to pending state</option>
+          </select>
+        </div>
+
+        <!-- Correction Risk Level (Visible when status === Corrected) -->
+        <div id="modalCorrectionWrap" style="display: none; background: rgba(192, 132, 252, 0.08); border: 1px solid rgba(192, 132, 252, 0.25); border-radius: 4px; padding: 10px 12px;">
+          <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #D8B4FE; margin-bottom: 4px;">
+            Corrected Hazard Level
+          </label>
+          <select id="modalCorrectedRiskSelect" class="form-input" style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid #7E22CE; padding: 6px 10px; border-radius: 4px;">
+            <option value="critical">CRITICAL (Immediate Evacuation Precaution)</option>
+            <option value="high">HIGH (Severe Hazard Zone)</option>
+            <option value="moderate">MODERATE (Elevated Soil Moisture / Buffer)</option>
+            <option value="low">LOW (Stable Geological Envelope)</option>
+            <option value="unassessed">UNASSESSED (Insufficient InSAR/Piezometer Baselines)</option>
+          </select>
+        </div>
+
+        <!-- Reviewer Notes -->
+        <div>
+          <label style="display: block; font-size: 0.8125rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 6px;">
+            Geotechnical Review Notes & Rationale
+          </label>
+          <textarea id="modalReviewNotes" class="form-input" rows="3" placeholder="Enter geotechnical rationale, sensor correlation, or reason for correction..." style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px; font-family: inherit; font-size: 0.8125rem;"></textarea>
+        </div>
+
+        <!-- Audit Trail / History -->
+        <div>
+          <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; margin-bottom: 6px;">
+            Review History & Audit Trail
+          </label>
+          <div class="audit-history-box" id="modalAuditHistory">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <div class="sg-modal-footer">
+        <button type="button" class="lw-btn lw-btn--outline" id="btnCancelModal">Cancel</button>
+        <button type="button" class="lw-btn lw-btn--primary" id="btnSaveReview">Save Review Decision</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN INCIDENT REVIEW MODAL -->
+  <div class="sg-modal-overlay" id="adminIncidentReviewModal" role="dialog" aria-modal="true" aria-labelledby="incidentModalTitle">
+    <div class="sg-modal-card" style="max-width: 760px;">
+      <div class="sg-modal-header">
+        <h3 class="sg-modal-title" id="incidentModalTitle">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Adjudicate Citizen Road & Landslide Incident
+        </h3>
+        <button type="button" class="sg-modal-close-btn" id="btnCloseIncidentModal" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="sg-modal-body">
+        <!-- Incident Reference & Meta Grid -->
+        <div class="info-grid-2">
+          <div class="info-item">
+            <div class="info-item-label">Incident Reference</div>
+            <div class="info-item-value" id="incModalRef" style="color: var(--lw-cta, #C96F4F); font-family: var(--lw-font-mono); font-weight: 700;">--</div>
+            <div style="font-size: 0.725rem; color: var(--color-text-secondary);" id="incModalCitizen">Citizen: Anonymous</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Observation & Submission Timestamps</div>
+            <div class="info-item-value" id="incModalObservedTime" style="font-size: 0.75rem;">Observed: --</div>
+            <div style="font-size: 0.725rem; color: var(--color-text-secondary);" id="incModalSubmittedTime">Submitted: --</div>
+          </div>
+        </div>
+
+        <!-- Location & Map Link -->
+        <div style="background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); border-radius: 4px; padding: 12px 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div class="info-item-label">Geographic Location & Corridor</div>
+            <a href="#" id="incModalMapLink" target="_blank" class="lw-btn lw-btn--sm lw-btn--outline" style="font-size: 0.725rem; padding: 2px 8px; text-decoration: none;">
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              View on Risk Map
+            </a>
+          </div>
+          <div style="font-size: 0.875rem; font-weight: 700; color: var(--lw-cta, #C96F4F); margin-bottom: 4px;" id="incModalRoadLandmark">--</div>
+          <div style="font-family: var(--lw-font-mono); font-size: 0.8125rem; color: var(--color-text-primary);" id="incModalCoords">--</div>
+        </div>
+
+        <!-- Citizen Observation (Preserved Separately) -->
+        <div style="background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); border-radius: 4px; padding: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="info-item-label" style="color: var(--lw-text-secondary, #4A5D48); font-weight: 700;">Citizen's Original Observation (Preserved)</span>
+            <span class="status-badge" id="incModalCitizenPassabilityBadge">PASSABILITY: UNKNOWN</span>
+          </div>
+          <div style="font-weight: 700; color: var(--lw-text, #2E3A2F); margin-bottom: 6px;" id="incModalCitizenType">--</div>
+          <p style="font-size: 0.8125rem; color: var(--lw-text-secondary, #4A5D48); margin: 0 0 6px 0; line-height: 1.45;" id="incModalDescription">--</p>
+          <div style="font-size: 0.725rem; color: var(--color-text-muted);" id="incModalAdditionalInfo"></div>
+        </div>
+
+        <!-- Photo Evidence Gallery -->
+        <div>
+          <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; margin-bottom: 6px;">
+            Photo Evidence Uploads (<span id="incModalPhotoCount">0</span>)
+          </label>
+          <div id="incModalPhotosGrid" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <!-- Photos dynamically injected -->
+          </div>
+        </div>
+
+        <!-- Duplicate Proximity Alert -->
+        <div id="incModalDuplicateAlert" style="display: none; background: rgba(232, 209, 122, 0.15); border: 1px solid rgba(232, 209, 122, 0.4); border-radius: 4px; padding: 10px 12px; font-size: 0.75rem; color: #F6E08E;">
+          <strong>Geographic Cluster Notice:</strong> Another report was submitted within 1.5 km. Cross-examine photos and times before updating road advisory layers.
+        </div>
+
+        <!-- Geotechnical Adjudication Controls -->
+        <div style="border-top: 1px solid rgba(48, 67, 45, 0.5); padding-top: 14px; display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <label style="display: block; font-size: 0.8125rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 6px;">
+              Verification Status Action
+            </label>
+            <select id="incModalStatusSelect" class="form-input" style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px;">
+              <option value="Under Review">Under Review — Keep active in field investigation pipeline</option>
+              <option value="Verified">Verified — Geotechnical confirmation of hazard/blockage</option>
+              <option value="Additional Info Requested">Additional Info Requested — Inquire with citizen for more details</option>
+              <option value="Resolved">Resolved — Road cleared, hazard mitigated</option>
+              <option value="Rejected">Rejected — Inaccurate, duplicate, or unverified submission</option>
+              <option value="Pending Verification">Pending Verification — Reset to pending queue</option>
+            </select>
+          </div>
+
+          <!-- Verified Incident Type (Distinct from citizen's observation) -->
+          <div id="incModalVerifiedTypeWrap">
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--color-text-primary, #2E3A2F); margin-bottom: 4px;">
+              Geotechnically Confirmed Cause / Classification
+            </label>
+            <select id="incModalVerifiedTypeSelect" class="form-input" style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px;">
+              <option value="Road blocked by landslide debris">Road blocked by landslide debris</option>
+              <option value="Road covered by fallen rocks">Road covered by fallen rocks</option>
+              <option value="Road damaged by slope movement">Road damaged by slope movement</option>
+              <option value="Ground cracks or slope instability near a road">Ground cracks or slope instability near a road</option>
+              <option value="Small landslide observed">Small landslide observed</option>
+              <option value="Flooding or unusual water flow affecting a road">Flooding or unusual water flow affecting a road</option>
+              <option value="Non-landslide blockage (Tree/Debris/Construction)">Non-landslide blockage (Tree/Debris/Construction)</option>
+              <option value="Other relevant hazard">Other relevant hazard</option>
+            </select>
+          </div>
+
+          <!-- Confirmed Passability -->
+          <div id="incModalVerifiedPassabilityWrap">
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--color-text-primary, #2E3A2F); margin-bottom: 4px;">
+              Confirmed Road Passability Status
+            </label>
+            <select id="incModalVerifiedPassabilitySelect" class="form-input" style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px;">
+              <option value="completely blocked">Completely Blocked — Impassable for all traffic</option>
+              <option value="partially blocked">Partially Blocked — Single lane / cautious transit</option>
+              <option value="open">Open — Passable with cautionary driving</option>
+              <option value="unknown">Unknown — Ground survey required</option>
+            </select>
+          </div>
+
+          <!-- Review Reason / Notes -->
+          <div>
+            <label style="display: block; font-size: 0.8125rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 6px;">
+              Adjudication Reason & Rationale <span style="color: var(--color-risk-severe, #F87171);">*</span>
+            </label>
+            <textarea id="incModalReasonInput" class="form-input" rows="3" placeholder="Provide geotechnical evaluation rationale, patrol observations, or reason for rejection/info request..." style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px; font-family: inherit; font-size: 0.8125rem;"></textarea>
+          </div>
+
+          <!-- Authority Disclaimer -->
+          <div style="font-size: 0.725rem; color: var(--lw-text-secondary, #4A5D48); background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 12px; border-radius: 4px;">
+            <strong style="color: var(--lw-text, #2E3A2F);">Authority Notice:</strong> Verifying an incident publishes it to authenticated situational map layers for regional awareness. Official statutory road closures remain subject to State Highway Authority / Police orders.
+          </div>
+
+          <!-- Audit Trail History -->
+          <div>
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; margin-bottom: 6px;">
+              Audit History & Previous Decisions
+            </label>
+            <div class="audit-history-box" id="incModalAuditHistory">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sg-modal-footer">
+        <button type="button" class="lw-btn lw-btn--outline" id="btnCancelIncidentModal">Cancel</button>
+        <button type="button" class="lw-btn lw-btn--primary" id="btnSaveIncidentReview">Save Adjudication</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core Services -->
+  <script src="../js/core/config.js"></script>
+  <script src="../js/core/content.js"></script>
+  <script src="../js/core/format.js"></script>
+  <script src="../js/core/api.js"></script>
+  <script src="../js/core/auth.js"></script>
+  <script src="../js/core/ui.js"></script>
+  <script src="../js/core/guard.js"></script>
+  <script src="../js/services/regions-service.js"></script>
+  <script src="../js/services/incidents-service.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!window.LW.guard.requireRole(["officer", "admin"])) return;
+      const user = window.LW.auth.getUser() || { name: "Geotechnical Officer", role: "OFFICER", district: "NER Command" };
+
+      document.getElementById("sidebarName").textContent = user.name || "Command Staff";
+      document.getElementById("sidebarAvatar").textContent = (user.name || "A").charAt(0).toUpperCase();
+      document.getElementById("sidebarRole").textContent = `${(user.role || 'OFFICER').toUpperCase()} • ${user.district || 'NER'}`;
+
+      document.getElementById("sidebarLogout").onclick = async () => {
+        await window.LW.auth.logout();
+        window.location.replace("../login.html");
+      };
+
+      const format = window.LW.format || {};
+
+      // --- TABS SWITCHING ---
+      const tabCitizenBtn = document.getElementById("tabCitizenBtn");
+      const tabSensorBtn = document.getElementById("tabSensorBtn");
+      const tabIncidentReportsBtn = document.getElementById("tabIncidentReportsBtn");
+      const viewCitizenAssessments = document.getElementById("viewCitizenAssessments");
+      const viewSensorBreaches = document.getElementById("viewSensorBreaches");
+      const viewIncidentReports = document.getElementById("viewIncidentReports");
+
+      tabCitizenBtn.onclick = () => {
+        tabCitizenBtn.classList.add("active");
+        tabSensorBtn.classList.remove("active");
+        if (tabIncidentReportsBtn) tabIncidentReportsBtn.classList.remove("active");
+        viewCitizenAssessments.style.display = "block";
+        viewSensorBreaches.style.display = "none";
+        if (viewIncidentReports) viewIncidentReports.style.display = "none";
+      };
+
+      tabSensorBtn.onclick = () => {
+        tabSensorBtn.classList.add("active");
+        tabCitizenBtn.classList.remove("active");
+        if (tabIncidentReportsBtn) tabIncidentReportsBtn.classList.remove("active");
+        viewCitizenAssessments.style.display = "none";
+        viewSensorBreaches.style.display = "block";
+        if (viewIncidentReports) viewIncidentReports.style.display = "none";
+      };
+
+      if (tabIncidentReportsBtn) {
+        tabIncidentReportsBtn.onclick = () => {
+          tabIncidentReportsBtn.classList.add("active");
+          tabCitizenBtn.classList.remove("active");
+          tabSensorBtn.classList.remove("active");
+          viewCitizenAssessments.style.display = "none";
+          viewSensorBreaches.style.display = "none";
+          if (viewIncidentReports) viewIncidentReports.style.display = "block";
+          loadIncidentReports();
+        };
+      }
+
+      // --- CITIZEN ASSESSMENTS STATE & RENDERING ---
+      let currentCitizenFilter = "all";
+      let allCitizenAssessments = [];
+      let selectedAssessmentItem = null;
+
+      // Filter pills setup
+      document.querySelectorAll("#citizenFilterBar .filter-pill").forEach(pill => {
+        pill.onclick = () => {
+          document.querySelectorAll("#citizenFilterBar .filter-pill").forEach(p => p.classList.remove("active"));
+          pill.classList.add("active");
+          currentCitizenFilter = pill.dataset.status;
+          renderCitizenAssessments();
+        };
+      });
+
+      async function loadCitizenAssessments() {
+        try {
+          const res = await window.LW.api.get("/api/admin/citizen-assessments?status=all");
+          allCitizenAssessments = res.data || [];
+        } catch (err) {
+          // fallback to localStorage
+          try {
+            allCitizenAssessments = JSON.parse(localStorage.getItem("sg_citizen_assessments_queue") || "[]");
+          } catch (e) {
+            allCitizenAssessments = [];
+          }
+        }
+        updateSummaryStats();
+        renderCitizenAssessments();
+      }
+
+      function updateSummaryStats() {
+        const total = allCitizenAssessments.length;
+        const pending = allCitizenAssessments.filter(a => (a.assessment?.reviewStatus || "Pending Review").toLowerCase() === "pending review").length;
+        const elevated = allCitizenAssessments.filter(a => {
+          const r = a.assessment?.correctedRisk || a.assessment?.preliminaryRisk || "";
+          return r === "critical" || r === "high";
+        }).length;
+        const decided = allCitizenAssessments.filter(a => {
+          const s = (a.assessment?.reviewStatus || "").toLowerCase();
+          return s === "confirmed" || s === "corrected";
+        }).length;
+
+        document.getElementById("statTotalSubmissions").textContent = total;
+        document.getElementById("statPendingReview").textContent = pending;
+        document.getElementById("statElevatedRisk").textContent = elevated;
+        document.getElementById("statDecided").textContent = decided;
+
+        document.getElementById("tabCitizenBadge").textContent = `${pending} PENDING`;
+        document.getElementById("citizenTableBadge").textContent = `${total} RECORDS`;
+      }
+
+      function getStatusClass(status) {
+        const s = (status || "").toLowerCase().replace(/\s+/g, '_');
+        if (s.includes("pending")) return "status-pending";
+        if (s.includes("under")) return "status-under_review";
+        if (s.includes("confirmed") || s.includes("completed")) return "status-confirmed";
+        if (s.includes("corrected")) return "status-corrected";
+        if (s.includes("flagged") || s.includes("required")) return "status-flagged";
+        return "status-pending";
+      }
+
+      function renderCitizenAssessments() {
+        const tbody = document.getElementById("citizenAssessmentsTbody");
+        let list = allCitizenAssessments;
+
+        if (currentCitizenFilter !== "all") {
+          list = allCitizenAssessments.filter(a => {
+            const hasCoords = Boolean(a.capturedLocation && a.capturedLocation.latitude != null && !isNaN(a.capturedLocation.latitude));
+            const locStatus = (a.locationStatus || (hasCoords ? "Location Provided" : "Location Not Provided")).toLowerCase();
+            const revStatus = (a.assessment?.reviewStatus || "pending review").toLowerCase();
+            if (currentCitizenFilter === "location provided") return locStatus === "location provided";
+            if (currentCitizenFilter === "location not provided") return locStatus === "location not provided";
+            if (currentCitizenFilter === "assessment pending") return revStatus === "assessment pending" || (a.assessment?.preliminaryRisk === "Pending Location");
+            if (currentCitizenFilter === "assessment completed") return revStatus === "assessment completed";
+            if (currentCitizenFilter === "review required") return revStatus === "review required";
+            return revStatus === currentCitizenFilter;
+          });
+        }
+
+        if (list.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 36px; color: var(--color-text-muted);">
+                No citizen location assessments matching filter '${currentCitizenFilter}'.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = list.map(item => {
+          const loc = item.capturedLocation || null;
+          const asm = item.assessment || {};
+          const hasCoords = Boolean(loc && loc.latitude != null && !isNaN(loc.latitude));
+          const locStatus = item.locationStatus || (hasCoords ? "Location Provided" : "Location Not Provided");
+          const displayRisk = asm.correctedRisk || asm.preliminaryRisk || (hasCoords ? "unassessed" : "Pending Location");
+          const status = asm.reviewStatus || (hasCoords ? "Pending Review" : "Assessment Pending");
+          const statusCls = getStatusClass(status);
+          const mapUrl = hasCoords ? `../map.html?lat=${loc.latitude}&lng=${loc.longitude}&name=${encodeURIComponent(loc.resolvedPlaceName || 'Citizen Point')}` : '#';
+
+          return `
+            <tr>
+              <td>
+                <strong style="color: var(--color-text-primary); display: block;">${item.citizenName || 'Citizen Monitor'}</strong>
+                <span style="font-size: 0.725rem; color: var(--color-text-secondary);">${item.citizenEmail || '--'}</span>
+                <span style="font-size: 0.6875rem; font-family: var(--lw-font-mono); color: var(--color-text-muted); display: block; margin-top: 2px;">
+                  Ref: ${asm.assessmentId || item.id}
+                </span>
+              </td>
+              <td>
+                ${hasCoords ? `
+                  <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 3px;">
+                    <span class="status-badge status-confirmed" style="font-size: 0.625rem; padding: 1px 6px;">Location Provided</span>
+                  </div>
+                  <div style="font-weight: 600; color: var(--color-text-primary); margin-bottom: 2px;">
+                    ${loc.resolvedPlaceName || 'NER Monitoring Corridor'}
+                  </div>
+                  <div style="font-family: var(--lw-font-mono); font-size: 0.725rem; color: var(--color-primary-lime);">
+                    ${loc.latitude ? loc.latitude.toFixed(4) : '--'}°, ${loc.longitude ? loc.longitude.toFixed(4) : '--'}° (±${loc.accuracyMeters || 20}m)
+                  </div>
+                  <div style="font-size: 0.6875rem; color: var(--color-text-muted); margin-top: 2px;">
+                    ${format.relativeTime ? format.relativeTime(loc.capturedAt) : loc.capturedAt}
+                  </div>
+                ` : `
+                  <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 3px;">
+                    <span class="status-badge" style="background: rgba(163,179,160,0.15); color: #A3B3A0; border: 1px solid rgba(163,179,160,0.3); font-size: 0.625rem; padding: 1px 6px;">Location Not Provided</span>
+                  </div>
+                  <div style="font-weight: 600; color: var(--color-text-muted); margin-bottom: 2px;">
+                    Coordinates unassigned
+                  </div>
+                  <div style="font-size: 0.7rem; color: #F6E08E;">
+                    Awaiting citizen location submission
+                  </div>
+                `}
+              </td>
+              <td>
+                ${hasCoords ? `
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                    <span class="lw-risk lw-risk--${displayRisk.toLowerCase()}">
+                      <span class="lw-risk__shape"></span>
+                      ${displayRisk.toUpperCase()}
+                    </span>
+                    ${asm.correctedRisk ? '<span style="font-size: 0.625rem; color: #D8B4FE; font-weight: 700; text-transform: uppercase;">[CORRECTED]</span>' : ''}
+                  </div>
+                  <div style="font-family: var(--lw-font-mono); font-size: 0.75rem; color: var(--color-text-secondary);">
+                    FoS: ${asm.factorOfSafety || '--'}
+                  </div>
+                  <div style="font-size: 0.6875rem; color: var(--color-text-muted);">
+                    Model ${asm.modelVersion || 'v2.4-convLSTM'} • Conf: ${(asm.confidence || 'mod').toUpperCase()}
+                  </div>
+                ` : `
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                    <span class="lw-risk lw-risk--unassessed">
+                      <span class="lw-risk__shape"></span>
+                      PENDING LOCATION
+                    </span>
+                  </div>
+                  <div style="font-family: var(--lw-font-mono); font-size: 0.725rem; color: #F6E08E;">
+                    FoS: Pending Location
+                  </div>
+                  <div style="font-size: 0.6875rem; color: var(--color-text-muted); margin-top: 2px;">
+                    Missing location is unassessed — not low risk
+                  </div>
+                `}
+              </td>
+              <td style="font-size: 0.75rem; color: var(--color-text-secondary); max-width: 240px;">
+                ${hasCoords ? `
+                  <div style="color: var(--color-text-primary); font-weight: 600; margin-bottom: 2px;">
+                    ${asm.nearestCorridor || 'Regional NER Envelope'}
+                  </div>
+                  <div>Sources: ${(asm.availableSources || ['GPS Telemetry']).join(', ')}</div>
+                  ${asm.limitations && asm.limitations.length > 0 ? `<div style="color: #FCA5A5; font-size: 0.6875rem; margin-top: 2px;">Flag: ${asm.limitations[0]}</div>` : ''}
+                ` : `
+                  <div style="color: var(--color-text-muted); font-style: italic;">
+                    No spatial telemetry linked
+                  </div>
+                  <div style="color: #A3B3A0; font-size: 0.6875rem; margin-top: 2px;">
+                    Assessment Pending location update
+                  </div>
+                `}
+              </td>
+              <td>
+                <span class="status-badge ${statusCls}">
+                  ${status}
+                </span>
+                ${asm.reviewHistory && asm.reviewHistory.length > 1 ? `
+                  <div style="font-size: 0.6875rem; color: var(--color-text-muted); margin-top: 3px;">
+                    by ${asm.reviewHistory[asm.reviewHistory.length - 1].actor || 'Staff'}
+                  </div>
+                ` : ''}
+              </td>
+              <td>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <button type="button" class="lw-btn lw-btn--sm lw-btn--primary" data-action="review" data-id="${asm.assessmentId || item.id}">
+                    Review & Decide
+                  </button>
+                  ${hasCoords ? `
+                    <a href="${mapUrl}" target="_blank" class="lw-btn lw-btn--sm lw-btn--outline" style="text-decoration: none; text-align: center; font-size: 0.725rem;">
+                      View on Map
+                    </a>
+                  ` : `
+                    <span class="lw-btn lw-btn--sm lw-btn--outline" style="opacity: 0.4; cursor: not-allowed; text-align: center; font-size: 0.725rem; pointer-events: none;">
+                      No Map Coords
+                    </span>
+                  `}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        tbody.querySelectorAll('[data-action="review"]').forEach(btn => {
+          btn.onclick = () => {
+            const id = btn.dataset.id;
+            const target = allCitizenAssessments.find(a => a.assessment?.assessmentId === id || String(a.id) === id);
+            if (target) openReviewModal(target);
+          };
+        });
+      }
+
+      // --- MODAL CONTROLS & REVIEW SUBMISSION ---
+      const modal = document.getElementById("citizenReviewModal");
+      const btnCloseModal = document.getElementById("btnCloseModal");
+      const btnCancelModal = document.getElementById("btnCancelModal");
+      const btnSaveReview = document.getElementById("btnSaveReview");
+      const statusSelect = document.getElementById("modalReviewStatusSelect");
+      const correctionWrap = document.getElementById("modalCorrectionWrap");
+      const correctedRiskSelect = document.getElementById("modalCorrectedRiskSelect");
+      const reviewNotes = document.getElementById("modalReviewNotes");
+
+      function openReviewModal(item) {
+        selectedAssessmentItem = item;
+        const loc = item.capturedLocation || {};
+        const asm = item.assessment || {};
+
+        document.getElementById("modalCitizenRef").textContent = item.citizenName || "Citizen Monitor";
+        document.getElementById("modalCitizenEmail").textContent = item.citizenEmail || "--";
+        document.getElementById("modalAssessmentId").textContent = asm.assessmentId || item.id;
+        document.getElementById("modalTimestamp").textContent = new Date(loc.capturedAt || Date.now()).toLocaleString();
+
+        document.getElementById("modalPlaceName").textContent = loc.resolvedPlaceName || "North Eastern Region Corridor";
+        document.getElementById("modalCoords").textContent = `Lat: ${loc.latitude?.toFixed(5)}°, Lng: ${loc.longitude?.toFixed(5)}° • Accuracy: ±${loc.accuracyMeters || 20}m (Source: ${loc.source || 'browser_geolocation'})`;
+
+        const mapUrl = `../map.html?lat=${loc.latitude}&lng=${loc.longitude}&name=${encodeURIComponent(loc.resolvedPlaceName || 'Point')}`;
+        document.getElementById("modalMapLink").href = mapUrl;
+
+        const displayRisk = asm.correctedRisk || asm.preliminaryRisk || "unassessed";
+        document.getElementById("modalRiskBadgeWrap").innerHTML = `
+          <span class="lw-risk lw-risk--${displayRisk}">
+            <span class="lw-risk__shape"></span>
+            ${displayRisk.toUpperCase()}
+          </span>
+        `;
+        document.getElementById("modalModelVersion").textContent = `Model Engine: ${asm.modelVersion || 'v2.4-convLSTM'}`;
+        document.getElementById("modalFoS").textContent = asm.factorOfSafety || "--";
+        document.getElementById("modalConfidence").textContent = `Model Confidence: ${(asm.confidence || 'moderate').toUpperCase()}`;
+
+        document.getElementById("modalSourcesList").textContent = (asm.availableSources || ['GPS Telemetry']).join(', ');
+        document.getElementById("modalLimitationsList").textContent = asm.limitations && asm.limitations.length > 0 ? asm.limitations.join('; ') : "No data gaps flagged. Corridor baseline intact.";
+
+        statusSelect.value = asm.reviewStatus || "Pending Review";
+        correctionWrap.style.display = statusSelect.value === "Corrected" ? "block" : "none";
+        correctedRiskSelect.value = asm.correctedRisk || asm.preliminaryRisk || "moderate";
+        reviewNotes.value = "";
+
+        // Populate Audit History
+        const auditBox = document.getElementById("modalAuditHistory");
+        const history = asm.reviewHistory || [];
+        auditBox.innerHTML = history.map(h => `
+          <div class="audit-entry">
+            <div class="audit-entry-top">
+              <span><strong>${h.actor || 'System'}</strong> (${h.action})</span>
+              <span>${new Date(h.timestamp).toLocaleString()}</span>
+            </div>
+            <div style="color: var(--color-text-secondary);">${h.notes || 'No review notes entered.'}</div>
+            ${h.correction ? `<div style="color: #D8B4FE; font-weight: 600; margin-top: 2px;">${h.correction}</div>` : ''}
+          </div>
+        `).join("");
+
+        modal.style.display = "flex";
+      }
+
+      function closeModal() {
+        modal.style.display = "none";
+        selectedAssessmentItem = null;
+      }
+
+      btnCloseModal.onclick = closeModal;
+      btnCancelModal.onclick = closeModal;
+
+      statusSelect.onchange = () => {
+        correctionWrap.style.display = statusSelect.value === "Corrected" ? "block" : "none";
+      };
+
+      btnSaveReview.onclick = async () => {
+        if (!selectedAssessmentItem) return;
+        const newStatus = statusSelect.value;
+        const notes = reviewNotes.value.trim();
+        const correctedRisk = newStatus === "Corrected" ? correctedRiskSelect.value : null;
+
+        if (newStatus === "Corrected" && !notes) {
+          window.LW.ui?.toast("Please provide geotechnical rationale for overriding the risk classification.", "error");
+          reviewNotes.focus();
+          return;
+        }
+
+        btnSaveReview.disabled = true;
+        btnSaveReview.textContent = "Saving Decision...";
+
+        try {
+          const asmId = selectedAssessmentItem.assessment?.assessmentId || selectedAssessmentItem.id;
+          await window.LW.api.post(`/api/admin/citizen-assessments/${asmId}/review`, {
+            status: newStatus,
+            notes: notes || `Geotechnical status updated to '${newStatus}'.`,
+            correctedRisk: correctedRisk,
+            reviewer: `${user.name} (${(user.role || 'OFFICER').toUpperCase()})`
+          });
+
+          window.LW.ui?.toast(`Assessment ${asmId} updated to '${newStatus}'.`, "success");
+          closeModal();
+          await loadCitizenAssessments();
+        } catch (err) {
+          window.LW.ui?.toast(err.message || "Failed to update review status.", "error");
+        } finally {
+          btnSaveReview.disabled = false;
+          btnSaveReview.textContent = "Save Review Decision";
+        }
+      };
+
+      // --- SENSOR THRESHOLD BREACHES QUEUE ---
+      const STORAGE_KEY = "sg_assessment_queue";
+      const initialQueue = [
+        {
+          id: 201,
+          time: new Date(Date.now() - 3600000 * 3).toISOString(),
+          corridor: "Haflong Hill Corridor (Dima Hasao)",
+          hazard: "critical",
+          fos: "0.88 (Failure Imminent)",
+          evidence: "Rainfall: 248mm / 24h • Piezometer ARG-04: 58.2 kPa",
+          details: "Excessive pore pressure along shale interface indicates active slip surface development."
+        },
+        {
+          id: 202,
+          time: new Date(Date.now() - 3600000 * 6).toISOString(),
+          corridor: "Sohra Escarpment (East Khasi Hills)",
+          hazard: "high",
+          fos: "1.06 (Unstable Equilibrium)",
+          evidence: "Rainfall: 312mm / 24h • Displacement: 14.2mm",
+          details: "Sub-surface saturation breach coupled with Doppler radar projection of continuous rainfall."
+        }
+      ];
+
+      function getQueue() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : initialQueue;
+        } catch (e) {
+          return initialQueue;
+        }
+      }
+
+      function saveQueue(q) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(q));
+        renderSensorQueue();
+      }
+
+      function renderSensorQueue() {
+        const queue = getQueue();
+        const tbody = document.getElementById("assessmentQueueTbody");
+        const badge = document.getElementById("queueBadge");
+        const tabBadge = document.getElementById("tabSensorBadge");
+
+        badge.textContent = `${queue.length} PENDING`;
+        tabBadge.textContent = `${queue.length} PENDING`;
+
+        if (queue.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 36px; color: var(--color-text-muted);">
+                All automated hazard threshold breaches have been reviewed and verified.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = queue.map(item => `
+          <tr>
+            <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">
+              ${format.relativeTime ? format.relativeTime(item.time) : item.time}
+            </td>
+            <td><strong style="color: var(--color-text-primary);">${item.corridor}</strong></td>
+            <td>
+              <span class="lw-risk lw-risk--${item.hazard}">
+                <span class="lw-risk__shape"></span>
+                ${item.hazard.toUpperCase()}
+              </span>
+            </td>
+            <td style="font-family: var(--lw-font-mono); font-weight: 700; color: ${item.hazard === 'critical' ? 'var(--color-risk-severe)' : 'var(--color-text-primary)'};">
+              ${item.fos}
+            </td>
+            <td style="font-size: 0.75rem; color: var(--color-text-secondary);">${item.evidence}</td>
+            <td>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="lw-btn lw-btn--sm lw-btn--primary" data-action="approve" data-id="${item.id}">Approve Alert</button>
+                <button type="button" class="lw-btn lw-btn--sm lw-btn--outline" data-action="reject" data-id="${item.id}" style="color: var(--color-risk-severe);">Reject</button>
+              </div>
+            </td>
+          </tr>
+        `).join("");
+
+        tbody.querySelectorAll('[data-action="approve"]').forEach(b => {
+          b.onclick = () => {
+            const id = parseInt(b.dataset.id, 10);
+            const target = getQueue().find(x => x.id === id);
+            if (target) {
+              window.LW.ui?.confirm(
+                `Authorize Public Alert: ${target.corridor}`,
+                `Confirm that automated evidence (${target.evidence}) is geotechnical valid. Approving will queue this alert for immediate public transmission.`,
+                () => {
+                  const remaining = getQueue().filter(x => x.id !== id);
+                  saveQueue(remaining);
+                  window.LW.ui?.toast(`Assessment for '${target.corridor}' approved and elevated to alert workflow.`, "success");
+                }
+              );
+            }
+          };
+        });
+
+        tbody.querySelectorAll('[data-action="reject"]').forEach(b => {
+          b.onclick = () => {
+            const id = parseInt(b.dataset.id, 10);
+            window.LW.ui?.confirm(
+              "Reject Automated Breach Notice",
+              "Enter justification for rejection (e.g. sensor calibration artifact or transient electrical noise):",
+              () => {
+                const remaining = getQueue().filter(x => x.id !== id);
+                saveQueue(remaining);
+                window.LW.ui?.toast("Assessment flagged as rejected calibration artifact and logged to audit trail.", "info");
+              }
+            );
+          };
+        });
+      }
+
+      // ==========================================
+      // --- INCIDENTS PIPELINE CONTROLLER ---
+      // ==========================================
+      let currentIncidentFilter = "all";
+      let allIncidents = [];
+      let selectedIncident = null;
+
+      // Filter pills setup
+      document.querySelectorAll("#incidentFilterBar .filter-pill").forEach(pill => {
+        pill.onclick = () => {
+          document.querySelectorAll("#incidentFilterBar .filter-pill").forEach(p => p.classList.remove("active"));
+          pill.classList.add("active");
+          currentIncidentFilter = pill.dataset.status.toLowerCase();
+          renderIncidentReports();
+        };
+      });
+
+      // Calculate haversine distance in km
+      function calcHaversineDistanceKm(lat1, lon1, lat2, lon2) {
+        if (!lat1 || !lon1 || !lat2 || !lon2) return 9999;
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+      }
+
+      function detectDuplicates(incidents) {
+        const dupPairs = [];
+        for (let i = 0; i < incidents.length; i++) {
+          for (let j = i + 1; j < incidents.length; j++) {
+            const incA = incidents[i];
+            const incB = incidents[j];
+            if (incA.location?.latitude && incB.location?.latitude) {
+              const d = calcHaversineDistanceKm(
+                incA.location.latitude, incA.location.longitude,
+                incB.location.latitude, incB.location.longitude
+              );
+              if (d <= 1.5) {
+                dupPairs.push({ a: incA, b: incB, distance: d });
+              }
+            }
+          }
+        }
+        return dupPairs;
+      }
+
+      function getIncidentStatusClass(status) {
+        const s = (status || "").toLowerCase();
+        if (s.includes("verified")) return "status-verified";
+        if (s.includes("pending")) return "status-pending";
+        if (s.includes("review")) return "status-under_review";
+        if (s.includes("resolved")) return "status-resolved";
+        if (s.includes("rejected")) return "status-rejected";
+        if (s.includes("info")) return "status-info";
+        return "status-pending";
+      }
+
+      function getPassabilityBadgeHtml(passability) {
+        const p = (passability || "unknown").toLowerCase();
+        if (p === "completely blocked") {
+          return '<span style="background: rgba(248,113,113,0.2); color: #FCA5A5; border: 1px solid rgba(248,113,113,0.4); padding: 2px 6px; border-radius: 3px; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;">Completely Blocked</span>';
+        }
+        if (p === "partially blocked") {
+          return '<span style="background: rgba(251,146,60,0.2); color: #FDBA74; border: 1px solid rgba(251,146,60,0.4); padding: 2px 6px; border-radius: 3px; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;">Partially Blocked</span>';
+        }
+        if (p === "open") {
+          return '<span style="background: rgba(74,222,128,0.2); color: #86EFAC; border: 1px solid rgba(74,222,128,0.4); padding: 2px 6px; border-radius: 3px; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;">Passable / Open</span>';
+        }
+        return '<span style="background: rgba(148,163,184,0.15); color: #CBD5E1; border: 1px solid rgba(148,163,184,0.3); padding: 2px 6px; border-radius: 3px; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;">Unknown</span>';
+      }
+
+      async function loadIncidentReports() {
+        try {
+          if (window.LW.incidentsService) {
+            allIncidents = await window.LW.incidentsService.getAllIncidents();
+          } else {
+            const res = await window.LW.api.get("/api/incidents");
+            allIncidents = res.data || [];
+          }
+        } catch (err) {
+          console.warn("Failed to load incidents:", err);
+          allIncidents = [];
+        }
+
+        // Metrics
+        const total = allIncidents.length;
+        const pending = allIncidents.filter(i => (i.status || "").toLowerCase().includes("pending")).length;
+        const verified = allIncidents.filter(i => (i.status || "").toLowerCase() === "verified").length;
+        const resolved = allIncidents.filter(i => (i.status || "").toLowerCase() === "resolved").length;
+
+        const statTotal = document.getElementById("statIncidentsTotal");
+        const statPending = document.getElementById("statIncidentsPending");
+        const statVerified = document.getElementById("statIncidentsVerified");
+        const statResolved = document.getElementById("statIncidentsResolved");
+        const tabBadge = document.getElementById("tabIncidentReportsBadge");
+
+        if (statTotal) statTotal.textContent = total;
+        if (statPending) statPending.textContent = pending;
+        if (statVerified) statVerified.textContent = verified;
+        if (statResolved) statResolved.textContent = resolved;
+        if (tabBadge) tabBadge.textContent = `${pending} PENDING`;
+
+        // Check for duplicates
+        const dupPairs = detectDuplicates(allIncidents);
+        const dupBanner = document.getElementById("incidentDuplicateBanner");
+        const dupDesc = document.getElementById("duplicateBannerDesc");
+        if (dupBanner && dupDesc) {
+          if (dupPairs.length > 0) {
+            dupBanner.style.display = "block";
+            dupDesc.innerHTML = dupPairs.map(pair => 
+              `• <strong>${pair.a.id}</strong> and <strong>${pair.b.id}</strong> are within <strong>${pair.distance.toFixed(2)} km</strong> of each other near <em>${pair.a.location?.roadName || 'corridor'}</em>.`
+            ).join("<br>");
+          } else {
+            dupBanner.style.display = "none";
+          }
+        }
+
+        renderIncidentReports();
+      }
+
+      function renderIncidentReports() {
+        const tbody = document.getElementById("incidentReportsTbody");
+        if (!tbody) return;
+
+        let filtered = allIncidents;
+        if (currentIncidentFilter !== "all") {
+          filtered = allIncidents.filter(item => (item.status || "").toLowerCase() === currentIncidentFilter);
+        }
+
+        const tableBadge = document.getElementById("incidentTableBadge");
+        if (tableBadge) tableBadge.textContent = `${filtered.length} RECORDS`;
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 36px; color: var(--color-text-muted);">
+                No incidents found matching filter '${currentIncidentFilter}'.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(item => {
+          const statusClass = getIncidentStatusClass(item.status);
+          const passabilityBadge = getPassabilityBadgeHtml(item.roadPassability);
+          const photoThumbnails = (item.photos && item.photos.length > 0)
+            ? (() => {
+                const pUrl = item.photos[0].url || '';
+                const resolved = (pUrl.startsWith('http') || pUrl.startsWith('/')) ? pUrl : `../${pUrl.replace(/^(\.\.\/)+/, '')}`;
+                return `<div style="display:flex;gap:4px;align-items:center;">
+                  <img src="${resolved}" alt="Evidence" style="width:36px;height:36px;object-fit:cover;border-radius:3px;border:1px solid #30432D;" onerror="this.style.display='none'" />
+                  <span style="font-size:0.75rem;color:var(--color-text-secondary);font-weight:600;">${item.photos.length} photo${item.photos.length>1?'s':''}</span>
+                </div>`;
+              })()
+            : `<span style="font-size:0.75rem;color:var(--color-text-muted);">No photos</span>`;
+
+          const citizenDisplay = item.citizenName || item.citizenEmail || item.citizenId || "Citizen";
+          const obsTime = item.observedAt ? (format.relativeTime ? format.relativeTime(item.observedAt) : new Date(item.observedAt).toLocaleString()) : "--";
+          const subTime = item.submittedAt ? (format.relativeTime ? format.relativeTime(item.submittedAt) : new Date(item.submittedAt).toLocaleString()) : "--";
+
+          return `
+            <tr>
+              <td>
+                <div style="font-family: var(--lw-font-mono); font-weight: 700; color: var(--lw-cta, #C96F4F); font-size: 0.8125rem;">
+                  ${item.id}
+                </div>
+                <div style="font-size: 0.725rem; color: var(--color-text-secondary); margin-top: 2px;">
+                  ${citizenDisplay}
+                </div>
+              </td>
+              <td>
+                <div style="font-weight: 600; color: var(--color-text-primary); font-size: 0.8125rem;">
+                  ${item.incidentType}
+                </div>
+                <div style="margin-top: 4px;">
+                  ${passabilityBadge}
+                </div>
+              </td>
+              <td>
+                <div style="font-weight: 600; color: #FFF; font-size: 0.8125rem;">
+                  ${item.location?.roadName || item.location?.landmark || "Unnamed Road / Segment"}
+                </div>
+                <div style="font-family: var(--lw-font-mono); font-size: 0.725rem; color: var(--color-text-secondary); margin-top: 2px;">
+                  ${item.location?.latitude?.toFixed(4) || '--'}, ${item.location?.longitude?.toFixed(4) || '--'}
+                  <a href="../map.html?incident=${encodeURIComponent(item.id)}" target="_blank" style="color: var(--color-primary-lime); text-decoration: none; margin-left: 4px;">[Map]</a>
+                </div>
+              </td>
+              <td>
+                <div style="font-size: 0.75rem; color: var(--color-text-primary);">
+                  <strong>Obs:</strong> ${obsTime}
+                </div>
+                <div style="font-size: 0.725rem; color: var(--color-text-muted); margin-top: 2px;">
+                  <strong>Sub:</strong> ${subTime}
+                </div>
+              </td>
+              <td>
+                ${photoThumbnails}
+              </td>
+              <td>
+                <span class="status-badge ${statusClass}">${item.status || "Submitted"}</span>
+              </td>
+              <td>
+                <button type="button" class="lw-btn lw-btn--sm lw-btn--primary" data-incident-action="review" data-id="${item.id}">
+                  Adjudicate
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        tbody.querySelectorAll('[data-incident-action="review"]').forEach(btn => {
+          btn.onclick = () => {
+            const inc = allIncidents.find(i => i.id === btn.dataset.id);
+            if (inc) openIncidentReviewModal(inc);
+          };
+        });
+      }
+
+      function openIncidentReviewModal(incident) {
+        selectedIncident = incident;
+        const modal = document.getElementById("adminIncidentReviewModal");
+        if (!modal) return;
+
+        document.getElementById("incModalRef").textContent = incident.id;
+        document.getElementById("incModalCitizen").textContent = `Citizen: ${incident.citizenName || incident.citizenEmail || incident.citizenId || 'Anonymous'}`;
+        document.getElementById("incModalObservedTime").textContent = `Observed: ${incident.observedAt ? new Date(incident.observedAt).toLocaleString() : '--'}`;
+        document.getElementById("incModalSubmittedTime").textContent = `Submitted: ${incident.submittedAt ? new Date(incident.submittedAt).toLocaleString() : '--'}`;
+        document.getElementById("incModalRoadLandmark").textContent = incident.location?.roadName || incident.location?.landmark || "Unnamed Road / Segment";
+        document.getElementById("incModalCoords").textContent = `Lat: ${incident.location?.latitude?.toFixed(5) || '--'}, Lng: ${incident.location?.longitude?.toFixed(5) || '--'} (Accuracy: ±${incident.location?.accuracyMeters || 15}m)`;
+        
+        const mapLink = document.getElementById("incModalMapLink");
+        if (mapLink) {
+          mapLink.href = `../map.html?incident=${encodeURIComponent(incident.id)}`;
+        }
+
+        // Citizen's original observation
+        document.getElementById("incModalCitizenType").textContent = incident.incidentType;
+        document.getElementById("incModalCitizenPassabilityBadge").textContent = `ROAD PASSABILITY: ${(incident.roadPassability || 'UNKNOWN').toUpperCase()}`;
+        document.getElementById("incModalDescription").textContent = incident.description || "No written description provided.";
+        
+        const addInfoEl = document.getElementById("incModalAdditionalInfo");
+        if (addInfoEl) {
+          addInfoEl.textContent = incident.additionalInfo ? `Additional Citizen Notes: ${incident.additionalInfo}` : "";
+        }
+
+        // Photos Grid
+        const photosGrid = document.getElementById("incModalPhotosGrid");
+        const photoCount = document.getElementById("incModalPhotoCount");
+        if (photosGrid && photoCount) {
+          const photos = incident.photos || [];
+          photoCount.textContent = photos.length;
+          if (photos.length === 0) {
+            photosGrid.innerHTML = '<span style="font-size: 0.75rem; color: var(--color-text-muted);">No photograph attachments provided with this submission.</span>';
+          } else {
+            photosGrid.innerHTML = photos.map(p => {
+              const pUrl = p.url || '';
+              const cleanedUrl = (pUrl.startsWith('http') || pUrl.startsWith('/')) ? pUrl : ("../" + pUrl.replace(/^(\.\.\/)+/, ''));
+              return `
+                <a href="${cleanedUrl}" target="_blank" title="View Full Evidence Image" style="display: block; position: relative;">
+                  <img src="${cleanedUrl}" alt="Photo Evidence" style="width: 100px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #30432D; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+                </a>
+              `;
+            }).join("");
+          }
+        }
+
+        // Duplicate alert check for this specific incident
+        const dupAlert = document.getElementById("incModalDuplicateAlert");
+        if (dupAlert) {
+          const nearby = allIncidents.filter(other => 
+            other.id !== incident.id && 
+            calcHaversineDistanceKm(
+              incident.location?.latitude, incident.location?.longitude,
+              other.location?.latitude, other.location?.longitude
+            ) <= 1.5
+          );
+          if (nearby.length > 0) {
+            dupAlert.style.display = "block";
+            dupAlert.innerHTML = `<strong>Geographic Cluster Notice:</strong> ${nearby.length} other report(s) (e.g. ${nearby[0].id}) within 1.5 km. Review photos carefully to avoid duplicate advisories.`;
+          } else {
+            dupAlert.style.display = "none";
+          }
+        }
+
+        // Controls
+        const statusSelect = document.getElementById("incModalStatusSelect");
+        if (statusSelect) {
+          statusSelect.value = incident.status || "Under Review";
+        }
+
+        const typeSelect = document.getElementById("incModalVerifiedTypeSelect");
+        if (typeSelect) {
+          typeSelect.value = incident.verifiedIncidentType || incident.incidentType || "Road blocked by landslide debris";
+        }
+
+        const passSelect = document.getElementById("incModalVerifiedPassabilitySelect");
+        if (passSelect) {
+          passSelect.value = incident.verifiedPassability || incident.roadPassability || "unknown";
+        }
+
+        const reasonInput = document.getElementById("incModalReasonInput");
+        if (reasonInput) {
+          reasonInput.value = incident.reviewReason || "";
+        }
+
+        // Audit Trail
+        const auditEl = document.getElementById("incModalAuditHistory");
+        if (auditEl) {
+          const trail = incident.auditTrail || [];
+          if (trail.length === 0) {
+            auditEl.innerHTML = '<span style="font-size: 0.725rem; color: var(--color-text-muted);">Initial submission awaiting adjudication.</span>';
+          } else {
+            auditEl.innerHTML = trail.map(entry => `
+              <div class="audit-entry">
+                <div class="audit-entry-top">
+                  <span style="font-weight: 700; color: var(--color-text-primary);">${entry.action || 'REVIEW'}: ${entry.statusResult || ''}</span>
+                  <span style="color: var(--color-text-muted); font-family: var(--lw-font-mono);">${new Date(entry.timestamp).toLocaleString()}</span>
+                </div>
+                <div style="color: var(--color-primary-lime); font-size: 0.725rem; margin-top: 2px;">
+                  Staff: ${entry.actor || 'Administrator'}
+                </div>
+                ${entry.reason ? `<div style="color: var(--color-text-secondary); margin-top: 2px; font-style: italic;">"${entry.reason}"</div>` : ''}
+              </div>
+            `).join("");
+          }
+        }
+
+        modal.classList.add("active");
+        modal.style.display = "flex";
+      }
+
+      function closeIncidentReviewModal() {
+        const modal = document.getElementById("adminIncidentReviewModal");
+        if (modal) {
+          modal.classList.remove("active");
+          modal.style.display = "none";
+        }
+      }
+
+      const btnCloseIncidentModal = document.getElementById("btnCloseIncidentModal");
+      const btnCancelIncidentModal = document.getElementById("btnCancelIncidentModal");
+      if (btnCloseIncidentModal) btnCloseIncidentModal.onclick = closeIncidentReviewModal;
+      if (btnCancelIncidentModal) btnCancelIncidentModal.onclick = closeIncidentReviewModal;
+
+      const btnSaveIncidentReview = document.getElementById("btnSaveIncidentReview");
+      if (btnSaveIncidentReview) {
+        btnSaveIncidentReview.onclick = async () => {
+          if (!selectedIncident) return;
+
+          const status = document.getElementById("incModalStatusSelect").value;
+          const reason = document.getElementById("incModalReasonInput").value.trim();
+          const verifiedIncidentType = document.getElementById("incModalVerifiedTypeSelect").value;
+          const verifiedPassability = document.getElementById("incModalVerifiedPassabilitySelect").value;
+
+          if ((status === "Rejected" || status === "Additional Info Requested") && !reason) {
+            window.LW.ui?.toast("Please provide an adjudication reason/note before rejecting or requesting info.", "warning");
+            document.getElementById("incModalReasonInput").focus();
+            return;
+          }
+
+          try {
+            btnSaveIncidentReview.disabled = true;
+            btnSaveIncidentReview.textContent = "Saving Decision...";
+
+            const payload = {
+              action: "ADJUDICATE",
+              status: status,
+              reviewReason: reason,
+              verifiedIncidentType: verifiedIncidentType,
+              verifiedPassability: verifiedPassability
+            };
+
+            if (window.LW.incidentsService) {
+              await window.LW.incidentsService.reviewIncident(selectedIncident.id, payload);
+            } else {
+              await window.LW.api.post(`/api/admin/incidents/${encodeURIComponent(selectedIncident.id)}/review`, payload);
+            }
+
+            window.LW.ui?.toast(`Incident '${selectedIncident.id}' updated to '${status}'.`, "success");
+            closeIncidentReviewModal();
+            await loadIncidentReports();
+          } catch (err) {
+            console.error(err);
+            window.LW.ui?.toast(`Failed to save adjudication: ${err.message}`, "error");
+          } finally {
+            btnSaveIncidentReview.disabled = false;
+            btnSaveIncidentReview.textContent = "Save Adjudication";
+          }
+        };
+      }
+
+      const mobileToggle = document.getElementById("mobileToggle");
+      const sidebar = document.getElementById("dashboardSidebar");
+      if (mobileToggle && sidebar) {
+        mobileToggle.onclick = () => sidebar.classList.toggle("mobile-open");
+      }
+
+      // Initial Loads
+      loadCitizenAssessments();
+      renderSensorQueue();
+      loadIncidentReports();
+    });
+  </script>
+</body>
+</html>

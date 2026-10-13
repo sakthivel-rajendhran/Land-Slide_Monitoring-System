@@ -1,0 +1,28 @@
+{
+  "dataset_name": "SlopeGuard Historical Landslide Catalog \u2014 Northeast India Sample",
+  "dataset_version": "1.0.0-sample",
+  "generation_timestamp": "2026-10-13T10:04:51.037002+00:00",
+  "total_records": 20,
+  "file_path": "C:\\Users\\sakth\\OneDrive\\Desktop\\SlopeGuard\\ai-service\\data\\verified_historical\\historical_events_northeast_india.csv",
+  "sha256_checksum": "0ede96d1d99786f1a2d397d77e693b2c00bee84ca4f3f6c5f4498f05f7239f68",
+  "data_readiness_level": "DRL-3 (Curated Prototype Sample)",
+  "governance_status": "DATASET_INSUFFICIENT_FOR_OPERATIONAL_VALIDATION",
+  "target_column": "landslide_occurred",
+  "class_distribution": {
+    "non_landslide_count_0": 10,
+    "landslide_count_1": 10,
+    "imbalance_ratio_0_to_1": 1.0
+  },
+  "sources": [
+    "NASA Global Landslide Catalog (GLC) \u2014 Open Data",
+    "Open-Meteo Historical Weather API (ERA5 Reanalysis, CC BY 4.0)",
+    "Copernicus DEM GLO-30 Topographic Surface"
+  ],
+  "limitations": [
+    "Sample size (20 records) is insufficient for high-confidence operational deployment.",
+    "Historical reporting bias concentrated along arterial roads and populated settlements.",
+    "Atmospheric reanalysis (ERA5) has ~11km spatial resolution and may underestimate localized convective peaks.",
+    "Absence of field-verified negatives in dense montane forests requires stable-valley proxy sampling."
+  ],
+  "recommendation": "Model MUST remain in DEMO_NOT_VALIDATED status. Probability calibration must be deferred until comprehensive GSI/NRSC multi-monsoon inventory is procured."
+}

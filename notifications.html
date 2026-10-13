@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Alerts & Hazard Feed — SlopeGuard</title>
+  <meta name="description" content="Real-time and offline synchronized landslide hazard alerts, evacuation notices, and slope warnings.">
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C7F464'/><polygon points='4,32 16,14 24,32' fill='%23294B32'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/shells.css">
+
+  <!-- Immediate Authentication Guard -->
+  <script>
+    (function() {
+      function checkAuth() {
+        try {
+          var raw = sessionStorage.getItem("sg_user") || localStorage.getItem("sg_user");
+          var user = raw ? JSON.parse(raw) : null;
+          if (!user) {
+            var page = window.location.pathname.split('/').pop() || 'notifications.html';
+            var next = encodeURIComponent(page + window.location.search);
+            window.location.replace("login.html?next=" + next);
+          }
+        } catch (e) {
+          window.location.replace("login.html");
+        }
+      }
+      checkAuth();
+      window.addEventListener("pageshow", function(e) {
+        if (e.persisted) checkAuth();
+      });
+    })();
+  </script>
+
+  <style>
+    .notif-page-wrap {
+      max-width: 900px;
+      margin: 100px auto 60px;
+      padding: 0 20px;
+    }
+    .notif-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--lw-border);
+      padding-bottom: 20px;
+    }
+    .notif-header h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--lw-text);
+      margin: 0 0 6px 0;
+    }
+    .notif-filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .notif-card-item {
+      margin-bottom: 14px;
+      border-left: 4px solid var(--lw-border);
+      transition: all 0.2s ease;
+    }
+    .notif-card-item.severity-critical { border-left-color: var(--lw-risk-crit); }
+    .notif-card-item.severity-high { border-left-color: var(--lw-risk-high); }
+    .notif-card-item.severity-moderate { border-left-color: var(--lw-risk-mod); }
+    .notif-card-item.unread { background: rgba(201, 111, 79, 0.05); }
+
+    @media (max-width: 768px) {
+      .topbar-breadcrumbs {
+        display: none;
+      }
+      .notif-page-wrap {
+        padding: 16px 14px;
+      }
+      .notif-header h1 {
+        font-size: 1.35rem;
+      }
+      .notif-filter-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+        flex-wrap: nowrap;
+      }
+    }
+    @media (max-width: 520px) {
+      .topbar-right a:not(.lw-btn--primary) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body class="dashboard-root" data-shell="user">
+
+  <!-- Authenticated Header Topbar -->
+  <header class="dashboard-topbar" style="position: sticky; top: 0; z-index: 100;">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="map-brand-link" aria-label="SlopeGuard Dashboard" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
+        <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 26px; height: 26px;">
+          <polygon points="4,32 16,14 24,32" fill="#2E3A2F" />
+          <polygon points="12,32 23,6 34,32" fill="#C96F4F" />
+          <polygon points="23,6 23,24 16,32" fill="#2E3A2F" />
+          <polygon points="23,6 30,19 23,24" fill="#D9FF8F" />
+          <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
+        </svg>
+        <span class="brand-name" style="font-size: 1rem; font-weight: 800; color: var(--lw-text);">Slope<span style="color: var(--lw-cta);">Guard</span></span>
+        <span class="sidebar-brand-badge">NER</span>
+      </a>
+
+      <div class="topbar-breadcrumbs" style="margin-left: 16px;">
+        <span class="topbar-breadcrumbs-root">SlopeGuard NER</span>
+        <span class="topbar-breadcrumbs-sep">/</span>
+        <span class="topbar-breadcrumbs-current">Hazard Warning Center</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div id="lw-bell-slot"></div>
+      <a href="report-incident.html" class="lw-btn lw-btn--sm lw-btn--primary" style="text-decoration: none;">
+        + Report Incident
+      </a>
+      <a href="my-reports.html" class="lw-btn lw-btn--sm lw-btn--outline" style="text-decoration: none;">
+        My Reports
+      </a>
+      <a href="dashboard.html" class="lw-btn lw-btn--sm lw-btn--outline" style="text-decoration: none;">
+        &larr; Dashboard
+      </a>
+    </div>
+  </header>
+
+  <main id="mainContent" class="notif-page-wrap">
+    <div class="notif-header">
+      <div>
+        <h1>Landslide Hazard Warning Center</h1>
+        <p style="color: var(--lw-text-muted); font-size: 0.875rem; margin: 0;">
+          All active slope advisories, InSAR pore saturation alerts, and community warnings.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="lw-btn lw-btn--secondary lw-btn--sm" id="btnEnablePush">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          Enable Browser Push
+        </button>
+        <button type="button" class="lw-btn lw-btn--primary lw-btn--sm" id="btnManualSync">
+          Sync Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="notif-filter-tabs">
+      <button class="lw-btn lw-btn--ghost lw-btn--sm active" data-notif-tab="all">All Alerts</button>
+      <button class="lw-btn lw-btn--ghost lw-btn--sm" data-notif-tab="unread">Unread Only</button>
+      <button class="lw-btn lw-btn--ghost lw-btn--sm" data-notif-tab="critical">Critical / High</button>
+    </div>
+
+    <!-- Alerts Container -->
+    <div id="alertsContainer">
+      <div class="lw-state">
+        <div class="lw-skeleton" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+        <p class="lw-state__title">Synchronizing offline alerts database...</p>
+      </div>
+    </div>
+
+    <!-- Honesty & Legal Disclaimer -->
+    <div class="lw-card" style="margin-top: 40px; background: #FFFFFF; border: 1px solid var(--lw-border, #D9C9B2); font-size: 0.8125rem; color: var(--lw-text-secondary, #4A5D48); line-height: 1.5;">
+      <p style="margin: 0;" data-lw-disclaimer></p>
+    </div>
+  </main>
+
+  <!-- Core Services & Scripts -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/content.js"></script>
+  <script src="js/core/format.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/connectivity.js"></script>
+  <script src="js/core/api.js"></script>
+  <script src="js/core/ui.js"></script>
+  <script src="js/core/guard.js"></script>
+  <script src="js/core/shell.js"></script>
+  <script src="js/services/regions-service.js"></script>
+  <script src="js/services/notifications-store.js"></script>
+  <script src="js/services/sync.js"></script>
+  <script src="js/services/push.js"></script>
+  <script src="js/components/bell.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (!window.LW.guard.requireAuth()) return;
+      const container = document.getElementById("alertsContainer");
+      const pushBtn = document.getElementById("btnEnablePush");
+      const syncBtn = document.getElementById("btnManualSync");
+      const tabs = document.querySelectorAll("[data-notif-tab]");
+
+      let currentTab = "all";
+      let allAlerts = [];
+
+      async function loadAlerts() {
+        allAlerts = await window.LW.notifications.getLatest(50);
+        render();
+      }
+
+      function render() {
+        const format = window.LW.format || {};
+        let filtered = allAlerts;
+
+        if (currentTab === "unread") {
+          filtered = allAlerts.filter(a => !a.is_read);
+        } else if (currentTab === "critical") {
+          filtered = allAlerts.filter(a => a.severity === "critical" || a.severity === "high");
+        }
+
+        if (filtered.length === 0) {
+          container.innerHTML = `
+            <div class="lw-card" style="text-align: center; padding: 48px;">
+              <h3 class="lw-state__title">No active hazard warnings</h3>
+              <p class="lw-state__desc">No advisories matching the current filter. Telemetry is stable.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = filtered.map(a => `
+          <div class="lw-card notif-card-item severity-${a.severity || 'high'} ${!a.is_read ? 'unread' : ''}" data-id="${a.id}">
+            <div class="lw-card__header">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="lw-risk lw-risk--${a.severity || 'high'}">
+                  <span class="lw-risk__shape"></span>
+                  ${(a.severity || 'hazard').toUpperCase()}
+                </span>
+                <span class="lw-source lw-source--${a.source_type || 'reviewed'}">
+                  ${(a.source_type === 'official_advisory' ? 'Official Government Advisory' : 'Reviewed Platform Alert')}
+                </span>
+              </div>
+              <span class="lw-fresh">
+                ${format.dateTimeIST(a.published_at || a.received_at)}
+              </span>
+            </div>
+
+            <h3 style="font-size: 1.0625rem; font-weight: 700; color: var(--lw-text); margin: 0 0 6px 0;">${a.title}</h3>
+            <p style="font-size: 0.875rem; color: var(--lw-text-secondary); margin: 0 0 10px 0; line-height: 1.45;">${a.description}</p>
+
+            ${a.recommended_actions ? `
+              <div style="font-size: 0.8125rem; color: var(--lw-cta); background: rgba(199,244,100,0.06); padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; border: 1px solid rgba(199,244,100,0.15);">
+                <strong>Safety Instruction:</strong> ${a.recommended_actions}
+              </div>
+            ` : ""}
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--lw-border); padding-top: 10px;">
+              <span style="font-size: 0.75rem; color: var(--lw-text-muted);">
+                Sector: <strong>${a.region_name || 'Western Ghats Sector'}</strong>
+              </span>
+              <div style="display: flex; gap: 8px;">
+                ${a.official_link ? `
+                  <a href="${a.official_link}" target="_blank" rel="noopener" class="lw-btn lw-btn--ghost lw-btn--sm">Authority Bulletin &rarr;</a>
+                ` : ""}
+                <a href="map.html?region=${a.region_id || 101}" class="lw-btn lw-btn--outline lw-btn--sm">View on Map</a>
+                ${!a.is_read ? `
+                  <button type="button" class="lw-btn lw-btn--primary lw-btn--sm" data-action="mark-read" data-id="${a.id}">Mark as Read</button>
+                ` : ""}
+              </div>
+            </div>
+          </div>
+        `).join("");
+
+        container.querySelectorAll('[data-action="mark-read"]').forEach(btn => {
+          btn.onclick = async () => {
+            const id = parseInt(btn.dataset.id, 10);
+            await window.LW.notifications.markAsRead(id);
+            await loadAlerts();
+          };
+        });
+      }
+
+      tabs.forEach(tab => {
+        tab.onclick = () => {
+          tabs.forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          currentTab = tab.dataset.notifTab;
+          render();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        };
+      });
+
+      pushBtn.onclick = async () => {
+        await window.LW.push.enable();
+      };
+
+      syncBtn.onclick = async () => {
+        syncBtn.textContent = "Syncing...";
+        await window.LW.sync.trigger();
+        syncBtn.textContent = "Sync Now";
+        await loadAlerts();
+      };
+
+      document.addEventListener("lw:notifications-changed", loadAlerts);
+
+      // Trigger initial load and sync
+      await loadAlerts();
+      if (window.LW.sync) window.LW.sync.trigger();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline Mode — SlopeGuard NER</title>
+  <meta name="description" content="Network connection is currently unavailable. Viewing cached landslide monitoring records.">
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C96F4F'/><polygon points='4,32 16,14 24,32' fill='%232E3A2F'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/shells.css">
+
+  <style>
+    .offline-page-container {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 24px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .offline-icon-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(201, 111, 79, 0.1);
+      border: 1px solid var(--lw-border, #D9C9B2);
+      color: var(--lw-cta, #C96F4F);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .offline-title {
+      font-size: 1.875rem;
+      font-weight: 800;
+      color: var(--color-text-primary);
+      margin: 0 0 12px 0;
+    }
+    .offline-desc {
+      font-size: 0.9375rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .offline-warning-card {
+      background: var(--lw-surface, #FFFFFF);
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--radius-card, 6px);
+      padding: 18px 22px;
+      text-align: left;
+      font-size: 0.8125rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      margin-bottom: 28px;
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(46, 58, 47, 0.04);
+    }
+    .offline-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    @media (max-width: 480px) {
+      .offline-page-container {
+        padding: 30px 16px;
+      }
+      .offline-title {
+        font-size: 1.45rem;
+      }
+      .offline-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      .offline-actions .lw-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body class="public-body">
+
+  <header class="public-header">
+    <div class="nav-container">
+      <div class="brand-group">
+        <a href="dashboard.html" class="logo-link">
+          <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="4,32 16,14 24,32" fill="#2E3A2F" />
+            <polygon points="12,32 23,6 34,32" fill="#C96F4F" />
+            <polygon points="23,6 23,24 16,32" fill="#2E3A2F" />
+            <polygon points="23,6 30,19 23,24" fill="#D9C9B2" />
+            <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
+          </svg>
+          <span class="brand-text">Slope<span>Guard</span></span>
+        </a>
+      </div>
+      <div class="nav-actions">
+        <span class="lw-chip lw-chip--offline">OFFLINE STORAGE ACTIVE</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="offline-page-container">
+    <div class="offline-icon-box">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+      </svg>
+    </div>
+
+    <h1 class="offline-title">Network Connection Unavailable</h1>
+    <p class="offline-desc">
+      Your device is currently disconnected from cellular and broadband networks. SlopeGuard has engaged offline emergency mode, allowing you to access previously cached risk assessments and sectors.
+    </p>
+
+    <div class="offline-warning-card">
+      <strong style="color: var(--color-risk-moderate); display: block; margin-bottom: 6px;">
+        Safety Disclaimer: Data May Be Outdated
+      </strong>
+      Previously synchronized assessments reflect conditions at the time of your last connection (<span id="lastSyncTimeText">Checking cache timestamp...</span>). Rapid precipitation anomalies or new slope failures will not appear until network connectivity is restored.
+    </div>
+
+    <div class="offline-actions">
+      <button type="button" class="lw-btn lw-btn--primary" onclick="window.location.reload()">
+        Retry Connection
+      </button>
+      <a href="dashboard.html" class="lw-btn lw-btn--outline">
+        Open Cached Dashboard
+      </a>
+      <a href="map.html" class="lw-btn lw-btn--ghost" style="color: var(--lw-cta, #C96F4F);">
+        Offline Map &rarr;
+      </a>
+    </div>
+
+    <div style="margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--color-glass-border); width: 100%; font-size: 0.8125rem; color: var(--color-text-muted);">
+      <strong>Emergency Disaster Contacts (Voice / Landline):</strong><br/>
+      NDRF Control Room: <strong>1078</strong> • Assam SDMA: <strong>0361-2237011</strong> • Meghalaya SDMA: <strong>1070</strong>
+    </div>
+  </main>
+
+  <!-- Core Services -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/content.js"></script>
+  <script src="js/core/format.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/connectivity.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const syncEl = document.getElementById("lastSyncTimeText");
+      const format = window.LW.format || {};
+      try {
+        const stored = await window.LW.store?.get("meta", "last_sync");
+        if (stored && stored.timestamp) {
+          syncEl.textContent = format.dateTimeIST ? format.dateTimeIST(stored.timestamp) : stored.timestamp;
+        } else {
+          syncEl.textContent = "Recent Cached Session";
+        }
+      } catch (e) {
+        syncEl.textContent = "Recent Cached Session";
+      }
+
+      window.addEventListener("online", () => {
+        window.location.reload();
+      });
+    });
+  </script>
+</body>
+</html>

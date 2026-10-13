@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitored Area Registry — SlopeGuard NER</title>
+  <meta name="description" content="Manage monitored geographic sectors, sensor coordinates, and administrative activation states across the North Eastern Region.">
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C96F4F'/><polygon points='4,32 16,14 24,32' fill='%232E3A2F'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/shells.css">
+  <link rel="stylesheet" href="../css/pages/dashboard.css">
+
+  <!-- Immediate Authentication & Role Guard -->
+  <script>
+    (function() {
+      function checkAuth() {
+        try {
+          var raw = sessionStorage.getItem("sg_user") || localStorage.getItem("sg_user");
+          var user = raw ? JSON.parse(raw) : null;
+          if (!user) {
+            var page = window.location.pathname.split('/').pop() || 'areas.html';
+            var next = encodeURIComponent("admin/" + page + window.location.search);
+            window.location.replace("../login.html?next=" + next);
+            return;
+          }
+          var role = (user.role || "").toUpperCase();
+          if (role !== "ADMIN" && role !== "OFFICER") {
+            window.location.replace("../dashboard.html");
+          }
+        } catch (e) {
+          window.location.replace("../login.html");
+        }
+      }
+      checkAuth();
+      window.addEventListener("pageshow", function(e) {
+        if (e.persisted) checkAuth();
+      });
+    })();
+  </script>
+</head>
+<body class="dashboard-root" data-shell="admin">
+
+  <!-- Sidebar Navigation -->
+  <aside class="dashboard-sidebar" id="dashboardSidebar" aria-label="Sidebar Navigation">
+    <div class="sidebar-brand-header">
+      <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 28px; height: 28px;">
+        <polygon points="4,32 16,14 24,32" fill="#2E3A2F" />
+        <polygon points="12,32 23,6 34,32" fill="#C96F4F" />
+        <polygon points="23,6 23,24 16,32" fill="#2E3A2F" />
+        <polygon points="23,6 30,19 23,24" fill="#D9C9B2" />
+        <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
+      </svg>
+      <div class="sidebar-brand-name">Slope<span>Guard</span></div>
+      <span class="sidebar-brand-badge">STAFF</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span style="font-size: 0.6875rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700; padding: 0 14px; letter-spacing: 0.05em;">Staff Console</span>
+      
+      <a href="dashboard.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <span>Operations Console</span>
+      </a>
+
+      <a href="alerts.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+        <span>Alert Management</span>
+      </a>
+
+      <a href="assessments.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+        <span>Assessment Review</span>
+      </a>
+
+      <a href="areas.html" class="sidebar-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <span>Area Management</span>
+      </a>
+
+      <a href="data.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        <span>Data Ingestion</span>
+      </a>
+
+      <a href="users.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>User Accounts</span>
+      </a>
+
+      <a href="audit-logs.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>Audit Logs</span>
+      </a>
+
+      <div style="border-top: 1px solid var(--color-glass-border); margin: 8px 0; padding-top: 8px;">
+        <span style="font-size: 0.6875rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700; padding: 0 14px; letter-spacing: 0.05em;">User Portal</span>
+        <a href="../dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Main Dashboard</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user-card">
+        <div class="sidebar-user-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarName">NER Command Admin</div>
+          <div class="sidebar-user-role" id="sidebarRole">ADMIN • NER Command</div>
+        </div>
+      </div>
+      <button type="button" class="btn-sidebar-logout" id="sidebarLogout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="dashboard-main-wrapper">
+    <header class="dashboard-topbar">
+      <div class="topbar-left">
+        <button type="button" class="topbar-mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="topbar-breadcrumbs">
+          <span class="topbar-breadcrumbs-root">SlopeGuard Staff</span>
+          <span class="topbar-breadcrumbs-sep">/</span>
+          <span class="topbar-breadcrumbs-current">Monitored Area Registry</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="telemetry-freshness-indicator">
+          <span class="telemetry-pulse-dot"></span>
+          <span>Geographic Registry Synchronized</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-body-container">
+      <!-- Heading Block -->
+      <section class="dashboard-heading-block">
+        <div class="heading-title-group">
+          <h1>Monitored Area & Sector Management</h1>
+          <p class="heading-subtitle">
+            Configure geographic corridors, manage latitude/longitude boundaries, and control active surveillance states.
+          </p>
+        </div>
+        <div class="heading-actions-group">
+          <button type="button" class="btn-dashboard-primary" id="btnAddNewArea">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Register New Sector</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Areas Management Table Card -->
+      <section class="dashboard-panel-card">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            Active NER Monitored Sectors
+          </h2>
+
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="areaSearchInput" class="form-input" placeholder="Search sectors..." style="padding: 4px 10px; font-size: 0.8125rem; width: 200px;" />
+          </div>
+        </div>
+
+        <div class="reports-table-wrap">
+          <table class="dashboard-table">
+            <thead>
+              <tr>
+                <th>Sector Name</th>
+                <th>District & State</th>
+                <th>Coordinates (Lat / Lng)</th>
+                <th>Hazard Status</th>
+                <th>Monitoring State</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminAreasTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Core Services -->
+  <script src="../js/core/config.js"></script>
+  <script src="../js/core/content.js"></script>
+  <script src="../js/core/format.js"></script>
+  <script src="../js/core/api.js"></script>
+  <script src="../js/core/auth.js"></script>
+  <script src="../js/core/ui.js"></script>
+  <script src="../js/core/guard.js"></script>
+  <script src="../js/services/regions-service.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (!window.LW.guard.requireRole(["officer", "admin"])) return;
+      const user = window.LW.auth.getUser();
+
+      document.getElementById("sidebarName").textContent = user.name || "Command Staff";
+      document.getElementById("sidebarAvatar").textContent = (user.name || "A").charAt(0).toUpperCase();
+      document.getElementById("sidebarRole").textContent = `${(user.role || 'OFFICER').toUpperCase()} • ${user.district || 'NER'}`;
+
+      document.getElementById("sidebarLogout").onclick = async () => {
+        await window.LW.auth.logout();
+        window.location.replace("../login.html");
+      };
+
+      const STORAGE_KEY = "sg_admin_areas_list";
+      let regions = await window.LW.regionsService?.getAll().catch(() => []) || [];
+
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) regions = JSON.parse(stored);
+      } catch (e) {}
+
+      function saveRegions() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(regions));
+        render();
+      }
+
+      function render() {
+        const q = document.getElementById("areaSearchInput").value.toLowerCase().trim();
+        const filtered = regions.filter(r => !q || r.name.toLowerCase().includes(q) || r.district.toLowerCase().includes(q));
+        const tbody = document.getElementById("adminAreasTableBody");
+
+        tbody.innerHTML = filtered.map(r => `
+          <tr>
+            <td><strong style="color: var(--color-text-primary);">${r.name}</strong></td>
+            <td>${r.district}, ${r.state}</td>
+            <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">
+              ${r.lat ? r.lat.toFixed(4) : '--'}, ${r.lng ? r.lng.toFixed(4) : '--'}
+            </td>
+            <td>
+              <span class="lw-risk lw-risk--${r.risk_level || 'none'}">
+                <span class="lw-risk__shape"></span>
+                ${(r.risk_level || 'NONE').toUpperCase()}
+              </span>
+            </td>
+            <td>
+              <span class="lw-chip lw-chip--${r.is_inactive ? 'offline' : 'current'}">
+                ${r.is_inactive ? 'DEACTIVATED' : 'ACTIVE WATCH'}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="lw-btn lw-btn--sm lw-btn--outline" data-action="toggle-active" data-id="${r.id}">
+                  ${r.is_inactive ? 'Activate' : 'Deactivate'}
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join("");
+
+        tbody.querySelectorAll('[data-action="toggle-active"]').forEach(b => {
+          b.onclick = () => {
+            const id = parseInt(b.dataset.id, 10);
+            const target = regions.find(x => x.id === id);
+            if (target) {
+              target.is_inactive = !target.is_inactive;
+              saveRegions();
+              window.LW.ui?.toast(`Sector '${target.name}' state toggled to ${target.is_inactive ? 'Deactivated' : 'Active'}.`, "info");
+            }
+          };
+        });
+      }
+
+      document.getElementById("areaSearchInput").oninput = render;
+
+      document.getElementById("btnAddNewArea").onclick = () => {
+        window.LW.ui?.confirm(
+          "Register New Monitored Sector",
+          `
+            <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+              <div>
+                <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Sector Name</label>
+                <input type="text" id="modalAreaName" class="form-input" placeholder="e.g. Lumding Pass Slope" style="width: 100%;" />
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">District & State</label>
+                <input type="text" id="modalAreaDistrict" class="form-input" placeholder="e.g. Dima Hasao, Assam" style="width: 100%;" />
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>
+                  <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Latitude</label>
+                  <input type="number" step="0.0001" id="modalAreaLat" class="form-input" placeholder="25.18" style="width: 100%;" />
+                </div>
+                <div>
+                  <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Longitude</label>
+                  <input type="number" step="0.0001" id="modalAreaLng" class="form-input" placeholder="93.02" style="width: 100%;" />
+                </div>
+              </div>
+            </div>
+          `,
+          () => {
+            const name = document.getElementById("modalAreaName")?.value.trim() || "New Monitored Corridor";
+            const district = document.getElementById("modalAreaDistrict")?.value.trim() || "NER Region";
+            const lat = parseFloat(document.getElementById("modalAreaLat")?.value) || 25.18;
+            const lng = parseFloat(document.getElementById("modalAreaLng")?.value) || 93.02;
+
+            regions.unshift({
+              id: Date.now(),
+              name,
+              district,
+              state: "Assam",
+              lat,
+              lng,
+              risk_level: "low",
+              data_status: "current",
+              is_inactive: false
+            });
+            saveRegions();
+            window.LW.ui?.toast("New sector registered successfully.", "success");
+          }
+        );
+      };
+
+      const mobileToggle = document.getElementById("mobileToggle");
+      const sidebar = document.getElementById("dashboardSidebar");
+      if (mobileToggle && sidebar) {
+        mobileToggle.onclick = () => sidebar.classList.toggle("mobile-open");
+      }
+
+      render();
+    });
+  </script>
+</body>
+</html>

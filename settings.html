@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings & Officer Profile — SlopeGuard NER</title>
+  <meta name="description" content="Manage monitoring preferences, threshold alerts, security credentials, and offline cache storage.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C7F464'/><polygon points='4,32 16,14 24,32' fill='%23294B32'/></svg>">
+
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/shells.css">
+  <link rel="stylesheet" href="css/pages/dashboard.css">
+
+  <!-- Immediate Authentication Guard -->
+  <script>
+    (function() {
+      function checkAuth() {
+        try {
+          var raw = sessionStorage.getItem("sg_user") || localStorage.getItem("sg_user");
+          var user = raw ? JSON.parse(raw) : null;
+          if (!user) {
+            var page = window.location.pathname.split('/').pop() || 'settings.html';
+            var next = encodeURIComponent(page + window.location.search);
+            window.location.replace("login.html?next=" + next);
+          }
+        } catch (e) {
+          window.location.replace("login.html");
+        }
+      }
+      checkAuth();
+      window.addEventListener("pageshow", function(e) {
+        if (e.persisted) checkAuth();
+      });
+    })();
+  </script>
+</head>
+<body class="dashboard-root" data-shell="user">
+
+  <!-- =========================================================================
+       Left Sidebar Navigation
+       ========================================================================= -->
+  <aside class="dashboard-sidebar" id="dashboardSidebar" aria-label="Sidebar Navigation">
+    <div class="sidebar-brand-header">
+      <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 28px; height: 28px;">
+        <polygon points="4,32 16,14 24,32" fill="#2E3A2F" />
+        <polygon points="12,32 23,6 34,32" fill="#C96F4F" />
+        <polygon points="23,6 23,24 16,32" fill="#2E3A2F" />
+        <polygon points="23,6 30,19 23,24" fill="#D9C9B2" />
+        <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
+      </svg>
+      <div class="sidebar-brand-name">Slope<span>Guard</span></div>
+      <span class="sidebar-brand-badge">NER</span>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-nav-item" data-nav-id="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="dashboard.html?tab=map" class="sidebar-nav-item" data-nav-id="risk-map">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+          <line x1="8" y1="2" x2="8" y2="18"></line>
+          <line x1="16" y1="6" x2="16" y2="22"></line>
+        </svg>
+        <span>Risk Map Monitoring</span>
+      </a>
+
+      <a href="dashboard.html?tab=reports" class="sidebar-nav-item" data-nav-id="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>Reports</span>
+      </a>
+
+      <a href="dashboard.html?tab=locations" class="sidebar-nav-item" data-nav-id="locations">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span>Monitored Locations</span>
+      </a>
+
+      <a href="report-incident.html" class="sidebar-nav-item" data-nav-id="report-incident">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <span>Report Incident</span>
+      </a>
+
+      <a href="my-reports.html" class="sidebar-nav-item" data-nav-id="my-reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        <span>My Incident Reports</span>
+      </a>
+
+      <a href="dashboard.html?tab=profile" class="sidebar-nav-item" data-nav-id="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>Officer Profile</span>
+      </a>
+
+      <a href="settings.html" class="sidebar-nav-item active" data-nav-id="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Settings & Alerts</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Bottom / User Card -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user-card">
+        <div class="sidebar-user-avatar" id="sidebarUserAvatar">O</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">NER Field Officer</div>
+          <div class="sidebar-user-role" id="sidebarUserRole">OFFICER &bull; NER Command</div>
+        </div>
+      </div>
+      <button type="button" class="btn-sidebar-logout" id="sidebarLogoutBtn" data-action="logout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       Main Content Area
+       ========================================================================= -->
+  <div class="dashboard-main-wrapper">
+    <!-- Topbar -->
+    <header class="dashboard-topbar">
+      <div class="topbar-left">
+        <button type="button" class="topbar-mobile-toggle" id="topbarMobileToggle" aria-label="Toggle Navigation">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        <div class="topbar-breadcrumbs">
+          <span class="topbar-breadcrumbs-root">SlopeGuard NER</span>
+          <span class="topbar-breadcrumbs-sep">/</span>
+          <span class="topbar-breadcrumbs-current">Settings & Profile</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="telemetry-freshness-indicator">
+          <span class="telemetry-pulse-dot"></span>
+          <span>Security Protocol Active</span>
+        </div>
+        <div id="settingsBellSlot"></div>
+      </div>
+    </header>
+
+    <!-- Main Settings Body -->
+    <main class="dashboard-body-container" style="max-width: 960px;">
+      <!-- Heading Block -->
+      <section class="dashboard-heading-block">
+        <div class="heading-title-group">
+          <h1>Settings & Profile</h1>
+          <p class="heading-subtitle">
+            Configure monitoring notification thresholds, update personal profile credentials, and manage offline disaster cache storage.
+          </p>
+        </div>
+      </section>
+
+      <!-- 1. Profile Information Card -->
+      <section class="dashboard-panel-card">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Personal & Operational Profile
+          </h2>
+          <span class="sidebar-brand-badge" id="profileRoleBadge">OFFICER</span>
+        </div>
+
+        <form id="profileForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="form-group">
+            <label class="form-label" for="settingsNameInput">Full Name</label>
+            <div class="input-wrapper">
+              <input type="text" id="settingsNameInput" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="settingsEmailInput">Official Email Address (Read-Only)</label>
+            <div class="input-wrapper">
+              <input type="email" id="settingsEmailInput" class="form-input" disabled style="opacity: 0.65; cursor: not-allowed;" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="settingsDistrictInput">Assigned District / Jurisdiction</label>
+            <div class="input-wrapper">
+              <input type="text" id="settingsDistrictInput" class="form-input" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Authorized Role Level</label>
+            <div class="input-wrapper">
+              <input type="text" id="settingsRoleInput" class="form-input" disabled style="opacity: 0.65; cursor: not-allowed;" />
+            </div>
+          </div>
+
+          <!-- Current Monitoring Location (Optional / Update Anytime) -->
+          <div style="grid-column: 1 / -1; background: var(--lw-bg, #F8F6EE); padding: 16px 18px; border-radius: 4px; border: 1px solid var(--lw-border, #D9C9B2); margin-top: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+              <strong style="color: var(--color-text-primary); font-size: 0.875rem; display: flex; align-items: center; gap: 6px;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--lw-cta, #C96F4F);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Current Monitoring Location
+              </strong>
+              <span id="settingsLocationStatusBadge" class="lw-chip" style="font-size: 0.6875rem;">Location Not Provided</span>
+            </div>
+            
+            <p style="font-size: 0.8125rem; color: var(--color-text-secondary); margin: 0 0 10px 0; line-height: 1.45;">
+              Provide or update your monitoring coordinates to receive geographically relevant landslide risk assessment and early hazard alerts. (Location access is requested only when you click the button).
+            </p>
+
+            <div id="settingsLocationDisplay" style="font-family: var(--lw-font-mono, monospace); font-size: 0.8125rem; color: var(--lw-cta, #C96F4F); margin-bottom: 12px; display: none;">
+              <span id="settingsLocationText">--</span>
+            </div>
+
+            <button type="button" class="btn-location-capture" id="btnSettingsDetectLocation" style="max-width: 260px; padding: 7px 14px; font-size: 0.8125rem; background: rgba(201, 111, 79, 0.08); border: 1px solid var(--lw-cta, #C96F4F); color: var(--lw-cta, #C96F4F); border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
+              <span id="btnSettingsDetectLocationText">Use My Current Location</span>
+            </button>
+          </div>
+
+          <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+            <button type="submit" class="btn-dashboard-primary">Save Profile Changes</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 2. Notification Preferences & Push Alerts -->
+      <section class="dashboard-panel-card">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            Notification Preferences & Alert Thresholds
+          </h2>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div>
+            <label class="form-label" for="severitySelect">Minimum Alert Severity Level</label>
+            <p style="font-size: 0.8125rem; color: var(--color-text-muted); margin: 0 0 8px 0;">
+              Filter notifications delivered to your browser bell and notification inbox.
+            </p>
+            <select id="severitySelect" class="form-input" style="max-width: 380px;">
+              <option value="all">All Alerts & Bulletins (Moderate, High, Critical)</option>
+              <option value="high_plus" selected>Elevated & Above (High and Critical Hazards)</option>
+              <option value="critical_only">Critical Failures Only (Imminent Evacuations)</option>
+            </select>
+          </div>
+
+          <div style="background: var(--lw-bg, #F8F6EE); padding: 18px; border-radius: 4px; border: 1px solid var(--lw-border, #D9C9B2); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <strong style="font-size: 0.9375rem; color: var(--color-text-primary); display: block; margin-bottom: 4px;">Real-Time Browser Push Alerts</strong>
+              <span style="font-size: 0.8125rem; color: var(--color-text-secondary);" id="pushStatusText">
+                Receive instant emergency notices even when SlopeGuard tab is closed.
+              </span>
+            </div>
+            <button type="button" class="btn-dashboard-primary" id="btnTogglePush" style="font-size: 0.8125rem;">
+              Enable Push Notifications
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Offline Data & Synchronization (IndexedDB) -->
+      <section class="dashboard-panel-card">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Offline Emergency Data Storage (IndexedDB)
+          </h2>
+          <span class="system-status-badge" id="offlineStateBadge">SYNCHRONIZED</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <p style="font-size: 0.875rem; color: var(--color-text-secondary); margin: 0; line-height: 1.5;">
+            SlopeGuard automatically stores recent sector assessments, emergency telephone numbers, and published bulletins in browser storage for field offline access when cellular towers lose power during landslides.
+          </p>
+
+          <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+            <button type="button" class="lw-btn lw-btn--sm lw-btn--outline" id="btnSyncNow">
+              Sync Data Now
+            </button>
+            <button type="button" class="lw-btn lw-btn--sm lw-btn--danger" id="btnClearCache" style="color: var(--color-risk-severe); border-color: rgba(240, 120, 120, 0.4);">
+              Clear Local Cache
+            </button>
+          </div>
+
+          <div style="font-size: 0.6875rem; color: var(--color-text-muted); border-top: 1px solid var(--color-glass-border); padding-top: 10px;">
+            Safety Notice: Clearing local device cache removes cached offline maps and reports from this device. It does not delete or modify server-side database records.
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Security & Password Change -->
+      <section class="dashboard-panel-card">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Security & Authentication
+          </h2>
+        </div>
+
+        <form id="passwordForm" style="display: flex; flex-direction: column; gap: 16px; max-width: 480px;">
+          <div class="form-group">
+            <label class="form-label" for="oldPassword">Current Password</label>
+            <input type="password" id="oldPassword" class="form-input" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="newPassword">New Security Password</label>
+            <input type="password" id="newPassword" class="form-input" placeholder="Minimum 8 characters" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirmNewPassword">Confirm New Password</label>
+            <input type="password" id="confirmNewPassword" class="form-input" required />
+          </div>
+
+          <div style="display: flex; justify-content: flex-start;">
+            <button type="submit" class="btn-dashboard-primary">Update Password</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- Core Services -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/content.js"></script>
+  <script src="js/core/format.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/connectivity.js"></script>
+  <script src="js/core/api.js"></script>
+  <script src="js/core/auth.js"></script>
+  <script src="js/core/ui.js"></script>
+  <script src="js/core/guard.js"></script>
+  <script src="js/services/notifications-store.js"></script>
+  <script src="js/services/sync.js"></script>
+  <script src="js/services/push.js"></script>
+  <script src="js/components/bell.js"></script>
+  <script src="js/components/field-officer-nav.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Enforce Authentication
+      if (!window.LW.guard.requireAuth()) return;
+      const user = window.LW.auth.getUser();
+
+      // 2. Populate Shell & Form
+      const avatar = document.getElementById("sidebarUserAvatar");
+      const sName = document.getElementById("sidebarUserName");
+      const sRole = document.getElementById("sidebarUserRole");
+      const badge = document.getElementById("profileRoleBadge");
+
+      const nameInput = document.getElementById("settingsNameInput");
+      const emailInput = document.getElementById("settingsEmailInput");
+      const districtInput = document.getElementById("settingsDistrictInput");
+      const roleInput = document.getElementById("settingsRoleInput");
+
+      const initial = (user.name || "O").charAt(0).toUpperCase();
+      if (avatar) avatar.textContent = initial;
+      if (sName) sName.textContent = user.name || "Field Officer";
+      if (sRole) sRole.textContent = `${(user.role || 'OFFICER').toUpperCase()} • ${user.district || 'NER Command'}`;
+      if (badge) badge.textContent = (user.role || 'USER').toUpperCase();
+
+      if (nameInput) nameInput.value = user.name || "";
+      if (emailInput) emailInput.value = user.email || "";
+      if (districtInput) districtInput.value = user.district || "NER Command";
+      if (roleInput) roleInput.value = (user.role || "USER").toUpperCase();
+
+      // Populate & update location UI
+      const locBadge = document.getElementById("settingsLocationStatusBadge");
+      const locDisplay = document.getElementById("settingsLocationDisplay");
+      const locText = document.getElementById("settingsLocationText");
+      const btnDetectLoc = document.getElementById("btnSettingsDetectLocation");
+      const btnDetectLocText = document.getElementById("btnSettingsDetectLocationText");
+
+      function updateLocationUI() {
+        const hasCoords = Boolean(user.location && user.location.latitude != null && !isNaN(user.location.latitude));
+        if (hasCoords) {
+          locBadge.textContent = "Location Provided";
+          locBadge.className = "lw-chip lw-chip--current";
+          locBadge.style = "background: rgba(74, 222, 128, 0.15); color: #86EFAC; border: 1px solid rgba(74, 222, 128, 0.35);";
+          locDisplay.style.display = "block";
+          locText.style.color = "var(--color-primary-lime)";
+          locText.textContent = `Coordinates: ${Number(user.location.latitude).toFixed(4)}° N, ${Number(user.location.longitude).toFixed(4)}° E • ${user.location.resolvedPlaceName || user.district || 'Assigned Zone'} (±${user.location.accuracyMeters || 20}m)`;
+          if (btnDetectLocText) btnDetectLocText.textContent = "Update Monitoring Location";
+        } else {
+          locBadge.textContent = "Location Not Provided";
+          locBadge.className = "lw-chip";
+          locBadge.style = "background: rgba(163, 179, 160, 0.15); color: #A3B3A0; border: 1px solid rgba(163, 179, 160, 0.35);";
+          locDisplay.style.display = "block";
+          locText.style.color = "#F6E08E";
+          locText.textContent = "Status: Assessment Pending Location (Awaiting coordinates)";
+          if (btnDetectLocText) btnDetectLocText.textContent = "Use My Current Location";
+        }
+      }
+      updateLocationUI();
+
+      if (btnDetectLoc) {
+        btnDetectLoc.onclick = () => {
+          if (!navigator.geolocation) {
+            window.LW.ui?.toast("Geolocation is not supported by your browser.", "error");
+            return;
+          }
+
+          btnDetectLoc.disabled = true;
+          if (btnDetectLocText) btnDetectLocText.textContent = "Detecting location...";
+
+          navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+              btnDetectLoc.disabled = false;
+              if (btnDetectLocText) btnDetectLocText.textContent = "Update Monitoring Location";
+              const coords = pos.coords;
+              const captured = {
+                latitude: coords.latitude,
+                longitude: coords.longitude,
+                accuracyMeters: Math.round(coords.accuracy || 20),
+                capturedAt: new Date().toISOString(),
+                source: "browser_geolocation",
+                resolvedPlaceName: user.district ? `${user.district}, NER` : "North Eastern Region Corridor"
+              };
+
+              try {
+                const res = await window.LW.auth.updateLocation(captured);
+                user.location = captured;
+                user.locationStatus = "Location Provided";
+                if (res && res.assessment) user.assessment = res.assessment;
+                updateLocationUI();
+                window.LW.ui?.toast("Monitoring location updated successfully! AI risk assessment synthesized.", "success");
+              } catch (err) {
+                window.LW.ui?.toast(err.message || "Failed to update location.", "error");
+              }
+            },
+            (err) => {
+              btnDetectLoc.disabled = false;
+              if (btnDetectLocText) btnDetectLocText.textContent = "Use My Current Location";
+              const msg = err.code === 1 ? "Location permission denied. Please allow location access in your browser settings." : "Unable to retrieve GPS fix.";
+              window.LW.ui?.toast(msg, "error");
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+          );
+        };
+      }
+
+      // Check admin role
+      if (window.LW.auth.hasRole("admin", "officer")) {
+        const adminNav = document.getElementById("adminNavSection");
+        if (adminNav) adminNav.style.display = "block";
+      }
+
+      // Bell mount
+      const bellSlot = document.getElementById("settingsBellSlot");
+      if (bellSlot && window.LW.bell) {
+        window.LW.bell.mount(bellSlot);
+      }
+
+      // Sidebar logout
+      document.getElementById("sidebarLogoutBtn").onclick = async () => {
+        await window.LW.auth.logout();
+        window.location.replace("login.html");
+      };
+
+      // Profile save
+      document.getElementById("profileForm").onsubmit = (e) => {
+        e.preventDefault();
+        user.name = nameInput.value.trim();
+        user.district = districtInput.value.trim();
+        localStorage.setItem("sg_user", JSON.stringify(user));
+        window.LW.ui?.toast("Profile settings updated successfully.", "success");
+        if (sName) sName.textContent = user.name;
+      };
+
+      // Password update
+      document.getElementById("passwordForm").onsubmit = (e) => {
+        e.preventDefault();
+        const p1 = document.getElementById("newPassword").value;
+        const p2 = document.getElementById("confirmNewPassword").value;
+        if (p1 !== p2) {
+          window.LW.ui?.toast("New passwords do not match.", "error");
+          return;
+        }
+        window.LW.ui?.toast("Password changed successfully.", "success");
+        document.getElementById("passwordForm").reset();
+      };
+
+      // Push toggle
+      document.getElementById("btnTogglePush").onclick = async () => {
+        const ok = await window.LW.push?.enable();
+        if (ok) {
+          document.getElementById("pushStatusText").textContent = "Push notifications are currently active on this device.";
+        }
+      };
+
+      // Cache clear
+      document.getElementById("btnClearCache").onclick = () => {
+        window.LW.ui?.confirm(
+          "Clear Offline Storage?",
+          "Are you sure you want to clear locally cached offline emergency alerts and reports?",
+          () => {
+            window.LW.store?.clear("alerts");
+            window.LW.store?.clear("regions");
+            window.LW.ui?.toast("Offline cache cleared.", "info");
+          }
+        );
+      };
+
+      // Sync now
+      document.getElementById("btnSyncNow").onclick = async () => {
+        window.LW.ui?.toast("Synchronizing latest geological telemetry...", "info");
+        await window.LW.sync?.run();
+        window.LW.ui?.toast("Synchronization complete.", "success");
+      };
+
+      // Mobile toggle
+      const mobileToggle = document.getElementById("topbarMobileToggle");
+      const sidebar = document.getElementById("dashboardSidebar");
+      if (mobileToggle && sidebar) {
+        mobileToggle.onclick = () => sidebar.classList.toggle("mobile-open");
+      }
+    });
+  </script>
+</body>
+</html>

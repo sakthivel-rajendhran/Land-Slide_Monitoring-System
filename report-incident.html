@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Road Blockage or Landslide Incident — SlopeGuard</title>
+  <meta name="description" content="Report road blockages, fallen rocks, landslide debris, and slope movement with GPS location and photo evidence.">
+
+  <!-- Favicon & PWA Manifest -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C7F464'/><polygon points='4,32 16,14 24,32' fill='%23294B32'/></svg>">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#14251A">
+
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="css/leaflet.css">
+
+  <!-- Core Design System, Tokens, Components & Shells -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/shells.css">
+  <link rel="stylesheet" href="css/pages/dashboard.css">
+
+  <!-- Immediate Authentication Guard -->
+  <script>
+    (function() {
+      function checkAuth() {
+        try {
+          var raw = sessionStorage.getItem("sg_user") || localStorage.getItem("sg_user");
+          var user = raw ? JSON.parse(raw) : null;
+          if (!user) {
+            var page = window.location.pathname.split('/').pop() || 'report-incident.html';
+            var next = encodeURIComponent(page + window.location.search);
+            window.location.replace("login.html?next=" + next);
+          }
+        } catch (e) {
+          window.location.replace("login.html");
+        }
+      }
+      checkAuth();
+      window.addEventListener("pageshow", function(e) {
+        if (e.persisted) checkAuth();
+      });
+    })();
+  </script>
+
+  <style>
+    /* Dedicated Incident Reporting Styles */
+    .incident-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .incident-form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Emergency Safety Alert */
+    .emergency-safety-banner {
+      background: rgba(184, 75, 41, 0.1);
+      border: 1px solid rgba(184, 75, 41, 0.3);
+      border-radius: var(--lw-r-md, 8px);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      color: var(--lw-text, #46566A);
+    }
+    .emergency-safety-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      color: var(--lw-risk-crit, #B84B29);
+      margin-top: 2px;
+    }
+    .emergency-safety-title {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--lw-risk-crit-fg, #8F2B14);
+      margin: 0 0 4px 0;
+    }
+    .emergency-safety-desc {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      color: var(--lw-text-secondary, #445345);
+      margin: 0;
+    }
+
+    /* Form Card */
+    .report-card {
+      background: #FFFFFF;
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--lw-r-md, 8px);
+      padding: 24px;
+      box-shadow: var(--lw-shadow-sm);
+      margin-bottom: 24px;
+    }
+    .report-card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--lw-text, #46566A);
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--lw-border, #D9C9B2);
+      padding-bottom: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--lw-text, #46566A);
+      margin-bottom: 6px;
+    }
+    .form-label .req {
+      color: var(--lw-risk-crit, #B84B29);
+      margin-left: 3px;
+    }
+    .form-hint {
+      font-size: 0.75rem;
+      color: var(--lw-text-muted, #72826F);
+      margin-top: 4px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 14px;
+      background: #FFFFFF;
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--lw-r-sm, 6px);
+      color: var(--lw-text, #46566A);
+      font-size: 0.875rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--lw-cta, #C96F4F);
+      box-shadow: 0 0 0 2px rgba(201, 111, 79, 0.2);
+    }
+
+    /* Passability Grid Selection */
+    .passability-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .passability-card {
+      background: var(--lw-bg, #F8F6EE);
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--lw-r-sm, 6px);
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .passability-card:hover {
+      border-color: var(--lw-secondary, #6B7F5B);
+      background: #FFFFFF;
+    }
+    .passability-card.active {
+      border-color: var(--lw-cta, #C96F4F);
+      background: rgba(201, 111, 79, 0.1);
+    }
+    .passability-card-title {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--lw-text, #46566A);
+    }
+    .passability-card-desc {
+      font-size: 0.6875rem;
+      color: var(--lw-text-muted, #72826F);
+    }
+
+    /* Map Location Picker */
+    .location-picker-wrap {
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--lw-r-sm, 6px);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .location-picker-map {
+      height: 260px;
+      width: 100%;
+      background: var(--lw-bg, #F8F6EE);
+    }
+    .location-coords-badge {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--lw-bg, #F8F6EE);
+      border-top: 1px solid var(--lw-border, #D9C9B2);
+      font-size: 0.75rem;
+      color: var(--lw-text-secondary, #445345);
+    }
+    .coords-val {
+      font-family: inherit;
+      color: var(--lw-cta, #C96F4F);
+      font-weight: 700;
+    }
+
+    /* Photo Upload Area */
+    .photo-upload-zone {
+      border: 2px dashed var(--lw-border, #D9C9B2);
+      border-radius: var(--lw-r-sm, 6px);
+      padding: 24px;
+      text-align: center;
+      background: var(--lw-bg, #F8F6EE);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .photo-upload-zone:hover, .photo-upload-zone.dragover {
+      border-color: var(--lw-cta, #C96F4F);
+      background: rgba(201, 111, 79, 0.05);
+    }
+    .photo-previews-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .photo-preview-item {
+      position: relative;
+      background: #FFFFFF;
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--lw-r-sm, 6px);
+      overflow: hidden;
+      height: 120px;
+    }
+    .photo-preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-preview-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.7);
+      border: none;
+      color: #FFFFFF;
+      border-radius: 4px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .photo-preview-remove:hover {
+      background: #B84B29;
+      color: #FFFFFF;
+    }
+    .photo-preview-meta {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(46, 58, 47, 0.85);
+      padding: 3px 6px;
+      font-size: 0.65rem;
+      color: #F8F6EE;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Progress bar */
+    .upload-progress-container {
+      display: none;
+      margin-top: 12px;
+    }
+    .upload-progress-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(46, 58, 47, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .upload-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--lw-cta, #C96F4F);
+      transition: width 0.2s ease;
+    }
+
+    /* Success / Feedback Overlay */
+    .submission-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(46, 58, 47, 0.4);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .submission-modal-card {
+      background: #FFFFFF;
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--lw-r-md, 8px);
+      max-width: 520px;
+      width: 100%;
+      padding: 32px;
+      text-align: center;
+      box-shadow: var(--lw-shadow-lg);
+    }
+    @media (max-width: 640px) {
+      .report-card {
+        padding: 16px 14px;
+      }
+      .emergency-safety-banner {
+        padding: 14px;
+        gap: 12px;
+      }
+      .photo-upload-zone {
+        padding: 18px 12px;
+      }
+      .submission-modal-overlay {
+        padding: 12px 8px;
+      }
+      .submission-modal-card {
+        padding: 20px 14px;
+      }
+      .location-coords-badge {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      .passability-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+    }
+    @media (max-width: 380px) {
+      .passability-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="dashboard-root" data-shell="user">
+
+  <!-- Sidebar Navigation -->
+  <aside class="dashboard-sidebar" id="dashboardSidebar" aria-label="Sidebar Navigation">
+    <div class="sidebar-brand-header">
+      <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 28px; height: 28px;">
+        <polygon points="4,32 16,14 24,32" fill="#2E3A2F" />
+        <polygon points="12,32 23,6 34,32" fill="#C96F4F" />
+        <polygon points="23,6 23,24 16,32" fill="#2E3A2F" />
+        <polygon points="23,6 30,19 23,24" fill="#D9C9B2" />
+        <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
+      </svg>
+      <div class="sidebar-brand-name">Slope<span>Guard</span></div>
+      <span class="sidebar-brand-badge">NER</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-nav-item" data-nav-id="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="dashboard.html?tab=map" class="sidebar-nav-item" data-nav-id="risk-map">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+          <line x1="8" y1="2" x2="8" y2="18"></line>
+          <line x1="16" y1="6" x2="16" y2="22"></line>
+        </svg>
+        <span>Risk Map Monitoring</span>
+      </a>
+
+      <a href="dashboard.html?tab=reports" class="sidebar-nav-item" data-nav-id="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>Reports</span>
+      </a>
+
+      <a href="dashboard.html?tab=locations" class="sidebar-nav-item" data-nav-id="locations">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span>Monitored Locations</span>
+      </a>
+
+      <a href="report-incident.html" class="sidebar-nav-item active" data-nav-id="report-incident">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <span>Report Incident</span>
+      </a>
+
+      <a href="my-reports.html" class="sidebar-nav-item" data-nav-id="my-reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        <span>My Incident Reports</span>
+      </a>
+
+      <a href="dashboard.html?tab=profile" class="sidebar-nav-item" data-nav-id="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>Officer Profile</span>
+      </a>
+
+      <a href="settings.html" class="sidebar-nav-item" data-nav-id="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Settings & Alerts</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user-card">
+        <div class="sidebar-user-avatar" id="sidebarAvatar">O</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarName">NER Field Officer</div>
+          <div class="sidebar-user-role" id="sidebarRole">OFFICER &bull; NER Command</div>
+        </div>
+      </div>
+      <button type="button" class="btn-sidebar-logout" id="sidebarLogout" data-action="logout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="dashboard-main-wrapper">
+    <header class="dashboard-topbar">
+      <div class="topbar-left">
+        <button type="button" class="topbar-mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="topbar-breadcrumbs">
+          <span class="topbar-breadcrumbs-root">SlopeGuard Citizen Portal</span>
+          <span class="topbar-breadcrumbs-sep">/</span>
+          <span class="topbar-breadcrumbs-current">Report Road Blockage or Landslide</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div id="bellSlot"></div>
+        <a href="my-reports.html" class="lw-btn lw-btn--sm lw-btn--outline" style="text-decoration: none;">
+          View My Reports &rarr;
+        </a>
+      </div>
+    </header>
+
+    <main class="dashboard-body-container" id="mainContent" style="max-width: 1080px; margin: 0 auto; padding: 24px;">
+
+      <!-- SECTION 10: Prominent Emergency Safety Warning Banner -->
+      <div class="emergency-safety-banner" role="alert">
+        <svg class="emergency-safety-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <div>
+          <div class="emergency-safety-title">Emergency Safety Notice</div>
+          <p class="emergency-safety-desc">
+            <strong>If you are in immediate danger, move to a safer location when possible and contact local emergency authorities. Do not wait for your report to be reviewed.</strong> Do not approach an active landslide or enter a blocked road to take photographs. Do not enter active slide paths or approach unstable slopes to take photos. Your personal safety is the absolute priority.
+          </p>
+        </div>
+      </div>
+
+      <!-- Offline Sync Banner (Shown if browser is offline) -->
+      <div id="offlineNoticeBanner" style="display: none; background: rgba(232, 209, 122, 0.14); border: 1px solid rgba(232, 209, 122, 0.4); border-radius: var(--radius-card); padding: 12px 18px; margin-bottom: 20px; font-size: 0.8125rem; color: #F6E08E;">
+        <strong>Offline Mode Active:</strong> You are currently disconnected from the internet. You can still complete this report; it will be saved securely on your device and queued for automatic transmission once connection is restored.
+      </div>
+
+      <!-- Heading -->
+      <section class="dashboard-heading-block" style="margin-bottom: 24px;">
+        <div class="heading-title-group">
+          <h1>Citizen Road Blockage & Landslide Reporting</h1>
+          <p class="heading-subtitle">
+            Help protect mountainous communities and highway travelers by submitting photographic evidence and accurate GPS coordinates of road blockages, landslide debris, rockfalls, or slope fissures.
+          </p>
+        </div>
+      </section>
+
+      <!-- REPORTING FORM -->
+      <form id="incidentForm" novalidate>
+        <div class="incident-form-grid">
+
+          <!-- LEFT COLUMN: Hazard Type, Passability, Timestamps, Description -->
+          <div>
+            <!-- Card 1: Observation Details -->
+            <div class="report-card">
+              <h2 class="report-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                1. Observation Particulars
+              </h2>
+
+              <!-- Incident Type -->
+              <div class="form-group">
+                <label class="form-label" for="incidentType">Incident Category <span class="req">*</span></label>
+                <select class="form-select" id="incidentType" required>
+                  <option value="" disabled selected>Select observed hazard category...</option>
+                  <option value="Road blocked by landslide debris">1. Road blocked by landslide debris</option>
+                  <option value="Road covered by fallen rocks">2. Road covered by fallen rocks</option>
+                  <option value="Road damaged by slope movement">3. Road damaged by slope movement</option>
+                  <option value="Ground cracks or slope instability near a road">4. Ground cracks or slope instability near a road</option>
+                  <option value="Small landslide observed">5. Small landslide observed</option>
+                  <option value="Flooding or unusual water flow affecting a road">6. Flooding or unusual water flow affecting a road</option>
+                  <option value="Other relevant hazard">7. Other relevant hazard</option>
+                </select>
+                <div class="form-hint">Citizen observations are recorded separately from official geotechnical causation.</div>
+              </div>
+
+              <!-- Road Passability -->
+              <div class="form-group">
+                <label class="form-label">Road Passability Status</label>
+                <div class="passability-grid" id="passabilityGrid">
+                  <div class="passability-card" data-val="unknown">
+                    <span class="passability-card-title">Unknown</span>
+                    <span class="passability-card-desc">Not yet verified</span>
+                  </div>
+                  <div class="passability-card" data-val="open">
+                    <span class="passability-card-title" style="color: #8FD694;">Open</span>
+                    <span class="passability-card-desc">Slow traffic passable</span>
+                  </div>
+                  <div class="passability-card active" data-val="partially blocked">
+                    <span class="passability-card-title" style="color: #F1A46B;">Partially Blocked</span>
+                    <span class="passability-card-desc">Single lane / obstructed</span>
+                  </div>
+                  <div class="passability-card" data-val="completely blocked">
+                    <span class="passability-card-title" style="color: #F07878;">Completely Blocked</span>
+                    <span class="passability-card-desc">Impassable to all vehicles</span>
+                  </div>
+                </div>
+                <input type="hidden" id="roadPassability" value="partially blocked" />
+              </div>
+
+              <!-- Date and Time Observed -->
+              <div class="form-group">
+                <label class="form-label" for="observedAt">Date and Time Observed <span class="req">*</span></label>
+                <input type="datetime-local" class="form-input" id="observedAt" required />
+                <div class="form-hint">Recorded observation time is maintained separately from submission timestamp.</div>
+              </div>
+
+              <!-- Road Name or Nearby Landmark -->
+              <div class="form-group">
+                <label class="form-label" for="roadName">Road Name or Nearby Landmark (Optional)</label>
+                <input type="text" class="form-input" id="roadName" placeholder="e.g. NH-27 KM 41, near Jatinga Bridge" />
+              </div>
+
+              <!-- Description -->
+              <div class="form-group">
+                <label class="form-label" for="description">Description of Observation <span class="req">*</span></label>
+                <textarea class="form-textarea" id="description" rows="4" placeholder="Describe the debris size, width of blockage, slope movement, weather conditions, or any visible ground cracking..." required></textarea>
+                <div class="form-hint" id="charCountHint">Minimum 10 characters required.</div>
+              </div>
+
+              <!-- Additional Information -->
+              <div class="form-group">
+                <label class="form-label" for="additionalInfo">Additional Information (Optional)</label>
+                <textarea class="form-textarea" id="additionalInfo" rows="2" placeholder="e.g. Traffic queued for 2 km, fallen electric poles, water seepage from cut face..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Location Capture & Photo Evidence -->
+          <div>
+            <!-- Card 2: Location Capture -->
+            <div class="report-card">
+              <h2 class="report-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                2. Geographic Location <span class="req">*</span>
+              </h2>
+
+              <p style="font-size: 0.8125rem; color: var(--color-text-secondary); margin: 0 0 14px 0; line-height: 1.45;">
+                Accurate coordinates enable field teams and geotechnical AI models to evaluate proximate terrain factors.
+              </p>
+
+              <!-- Two Location Methods -->
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                <button type="button" class="btn-dashboard-primary" id="btnUseCurrentLocation" style="padding: 8px 14px; font-size: 0.8125rem;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                  <span>Use My Current Location</span>
+                </button>
+                <button type="button" class="lw-btn lw-btn--sm lw-btn--outline" id="btnMapPickerHelp">
+                  <span>Click Map to Adjust Coordinates</span>
+                </button>
+              </div>
+
+              <!-- Location Status Text -->
+              <div id="locationStatusMsg" style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 8px;">
+                Coordinates not selected. Click 'Use My Current Location' or pin directly on the map.
+              </div>
+
+              <!-- Interactive Leaflet Map Picker -->
+              <div class="location-picker-wrap">
+                <div id="locationPickerMap" class="location-picker-map"></div>
+                <div class="location-coords-badge">
+                  <div>
+                    <span>Selected: </span>
+                    <span class="coords-val" id="displayCoords">Lat: --, Lng: --</span>
+                  </div>
+                  <div>
+                    <span>Accuracy: </span>
+                    <span class="coords-val" id="locationAccuracyDisplay">--</span>
+                  </div>
+                </div>
+              </div>
+
+              <input type="hidden" id="latitude" name="latitude" />
+              <input type="hidden" id="longitude" name="longitude" />
+              <input type="hidden" id="locLat" />
+              <input type="hidden" id="locLng" />
+              <input type="hidden" id="locAccuracy" value="15" />
+              <input type="hidden" id="locSource" value="manual_map" />
+              <input type="hidden" id="locPlaceName" value="" />
+            </div>
+
+            <!-- Card 3: Photo Evidence Uploads -->
+            <div class="report-card">
+              <h2 class="report-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                3. Photo Evidence (Strongly Encouraged)
+              </h2>
+
+              <p style="font-size: 0.8125rem; color: var(--color-text-secondary); margin: 0 0 12px 0;">
+                Photographs help authorities assess blockage severity and verify slope stability without delay.
+              </p>
+
+              <!-- Upload Zone -->
+              <div class="photo-upload-zone" id="photoDropZone">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: var(--color-primary); margin-bottom: 8px;">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <div style="font-size: 0.875rem; font-weight: 700; color: #F8FAFC; margin-bottom: 4px;">
+                  Choose photo or take picture
+                </div>
+                <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 14px;">
+                  Supports JPEG, PNG, WEBP &bull; Max 10 MB per photo &bull; Up to 4 images
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                  <!-- Camera Capture Button -->
+                  <label class="btn-dashboard-primary" id="btnCameraCapture" style="padding: 7px 14px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    <span>Use Camera</span>
+                    <input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="display: none;" />
+                  </label>
+
+                  <!-- File Browser Button -->
+                  <label class="lw-btn lw-btn--sm lw-btn--outline" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg>
+                    <span>Select Files</span>
+                    <input type="file" id="photoFileInput" accept="image/jpeg,image/png,image/webp" multiple style="display: none;" />
+                  </label>
+                </div>
+              </div>
+
+              <!-- Upload Progress -->
+              <div class="upload-progress-container" id="uploadProgressWrap">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--color-primary); margin-bottom: 4px;">
+                  <span>Validating & Processing Image...</span>
+                  <span id="uploadProgressText">0%</span>
+                </div>
+                <div class="upload-progress-bar-wrap">
+                  <div class="upload-progress-bar" id="uploadProgressBar"></div>
+                </div>
+              </div>
+
+              <!-- Photo Previews Grid -->
+              <div class="photo-previews-grid" id="photoPreviewGrid"></div>
+            </div>
+
+            <!-- Submit Section -->
+            <div style="margin-top: 16px;">
+              <button type="submit" class="btn-dashboard-primary" id="btnSubmitReport" style="width: 100%; padding: 14px; font-size: 0.9375rem; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span id="btnSubmitText">Submit Incident Report</span>
+              </button>
+              <div style="font-size: 0.75rem; color: var(--color-text-muted); text-align: center; margin-top: 8px;">
+                Submissions are reviewed by geotechnical command staff. Duplicate prevention active.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </form>
+
+      <!-- SUCCESS CONFIRMATION MODAL -->
+      <div class="submission-modal-overlay" id="successModal">
+        <div class="submission-modal-card">
+          <div style="width: 56px; height: 56px; background: rgba(199, 244, 100, 0.2); border: 2px solid var(--color-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C7F464" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <h2 style="font-size: 1.35rem; color: var(--color-text-primary, #2E3A2F); margin: 0 0 8px 0; font-weight: 800;">Report Submitted Successfully</h2>
+          <p style="font-size: 0.875rem; color: var(--color-text-secondary, #4A5D48); margin: 0 0 20px 0; line-height: 1.5;" id="modalSuccessDesc">
+            Your road blockage observation has been recorded and submitted for authorized geotechnical verification.
+          </p>
+
+          <div style="background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); border-radius: 6px; padding: 14px; text-align: left; margin-bottom: 24px; font-size: 0.8125rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="color: var(--color-text-muted, #5E6F5C); font-weight: 500;">Incident Reference:</span>
+              <strong style="color: var(--color-primary-lime, #C96F4F); font-family: monospace; font-weight: 700;" id="modalIncidentRef">INC-NER-XXXX</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center;">
+              <span style="color: var(--color-text-muted, #5E6F5C); font-weight: 500;">Initial Status:</span>
+              <span style="color: #8C5B12; background: rgba(196, 136, 41, 0.12); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.75rem;">Pending Verification</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="color: var(--color-text-muted, #5E6F5C); font-weight: 500;">Observation Time:</span>
+              <span id="modalObservedTime" style="color: var(--color-text-primary, #2E3A2F); font-weight: 600;">--</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--color-text-muted, #5E6F5C); font-weight: 500;">Submission Timestamp:</span>
+              <span id="modalSubmittedTime" style="color: var(--color-text-primary, #2E3A2F); font-weight: 600;">--</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <a href="my-reports.html" class="btn-dashboard-primary" style="text-decoration: none; padding: 10px 18px; font-size: 0.8125rem;">
+              Track in My Reports
+            </a>
+            <a href="map.html" class="lw-btn lw-btn--sm lw-btn--outline" style="text-decoration: none; padding: 10px 18px; font-size: 0.8125rem;" id="modalViewOnMapBtn">
+              View on Risk Map
+            </a>
+            <button type="button" class="lw-btn lw-btn--sm lw-btn--outline" id="btnSubmitAnother" style="padding: 10px 18px; font-size: 0.8125rem;">
+              Submit Another Report
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Leaflet Scripts -->
+  <script src="js/leaflet.js"></script>
+
+  <!-- Core JavaScript Services -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/content.js"></script>
+  <script src="js/core/format.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/connectivity.js"></script>
+  <script src="js/core/api.js"></script>
+  <script src="js/core/ui.js"></script>
+  <script src="js/core/guard.js"></script>
+  <script src="js/core/shell.js"></script>
+  <script src="js/core/auth.js"></script>
+
+  <!-- Incidents & Notification Services -->
+  <script src="js/services/regions-service.js"></script>
+  <script src="js/services/incidents-service.js"></script>
+  <script src="js/services/notifications-store.js"></script>
+  <script src="js/services/sync.js"></script>
+  <script src="js/services/push.js"></script>
+  <script src="js/components/bell.js"></script>
+  <script src="js/components/map-markers.js"></script>
+  <script src="js/components/field-officer-nav.js"></script>
+
+  <!-- Page Logic Controller -->
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      // 1. User & Bell Initialization
+      const user = window.LW.authService?.getCurrentUser() || window.LW.auth?.getUser();
+      if (user) {
+        const nameEl = document.getElementById("sidebarName");
+        const roleEl = document.getElementById("sidebarRole");
+        const avatarEl = document.getElementById("sidebarAvatar");
+        if (nameEl) nameEl.textContent = user.name || user.fullName || "NER Field Officer";
+        if (roleEl) roleEl.innerHTML = `${(user.role || 'OFFICER').toUpperCase()} &bull; NER Command`;
+        if (avatarEl) avatarEl.textContent = (user.name || user.fullName || "O").charAt(0).toUpperCase();
+      }
+
+      const bellSlot = document.getElementById("bellSlot");
+      if (bellSlot && window.LW.bell) window.LW.bell.mount(bellSlot);
+
+      document.getElementById("sidebarLogout")?.addEventListener("click", () => {
+        window.LW.authService?.logout();
+      });
+
+      // Default observedAt to now (local timezone)
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById("observedAt").value = now.toISOString().slice(0, 16);
+
+      // Offline banner
+      function checkOfflineStatus() {
+        const banner = document.getElementById("offlineNoticeBanner");
+        if (banner) banner.style.display = navigator.onLine ? "none" : "block";
+      }
+      window.addEventListener("online", checkOfflineStatus);
+      window.addEventListener("offline", checkOfflineStatus);
+      checkOfflineStatus();
+
+      // 2. Passability Grid Selection
+      const passabilityCards = document.querySelectorAll(".passability-card");
+      const passabilityInput = document.getElementById("roadPassability");
+      passabilityCards.forEach(card => {
+        card.addEventListener("click", () => {
+          passabilityCards.forEach(c => c.classList.remove("active"));
+          card.classList.add("active");
+          passabilityInput.value = card.dataset.val;
+        });
+      });
+
+      // 3. Location Picker Map Setup
+      const mapEl = document.getElementById("locationPickerMap") || document.getElementById("incidentMapCanvas");
+      const displayCoords = document.getElementById("displayCoords");
+      const displayAccuracy = document.getElementById("locationAccuracyDisplay") || document.getElementById("displayAccuracy");
+      const locLat = document.getElementById("locLat");
+      const locLng = document.getElementById("locLng");
+      const latitudeInput = document.getElementById("latitude");
+      const longitudeInput = document.getElementById("longitude");
+      const locAccuracy = document.getElementById("locAccuracy");
+      const locSource = document.getElementById("locSource");
+      const locPlaceName = document.getElementById("locPlaceName");
+      const locationStatusMsg = document.getElementById("locationStatusMsg");
+
+      const defaultCenter = [25.18, 93.02]; // NER Corridor default
+      const pickerMap = L.map(mapEl, {
+        zoomControl: true,
+        attributionControl: false
+      }).setView(defaultCenter, 8);
+
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19
+      }).addTo(pickerMap);
+
+      let pinMarker = null;
+
+      function updateLocationCoordinates(lat, lng, accuracy = 15, source = "browser_geolocation", placeDesc = "") {
+        if (locLat) locLat.value = lat.toFixed(6);
+        if (locLng) locLng.value = lng.toFixed(6);
+        if (latitudeInput) latitudeInput.value = lat.toFixed(6);
+        if (longitudeInput) longitudeInput.value = lng.toFixed(6);
+        if (locAccuracy) locAccuracy.value = accuracy;
+        if (locSource) locSource.value = source;
+        if (placeDesc && locPlaceName) locPlaceName.value = placeDesc;
+
+        if (displayCoords) displayCoords.textContent = `Lat: ${lat.toFixed(5)}°, Lng: ${lng.toFixed(5)}°`;
+        if (displayAccuracy) displayAccuracy.textContent = `±${accuracy} m`;
+        if (locationStatusMsg) {
+          locationStatusMsg.textContent = `✓ Coordinates locked (${source === 'browser_geolocation' ? 'GPS Telemetry' : 'Manual Map Pin'})`;
+          locationStatusMsg.style.color = "var(--color-primary, #C7F464)";
+        }
+
+        if (pinMarker) {
+          pinMarker.setLatLng([lat, lng]);
+        } else {
+          pinMarker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap);
+          pinMarker.on("dragend", (e) => {
+            const pos = e.target.getLatLng();
+            updateLocationCoordinates(pos.lat, pos.lng, 20, "manual_map_drag");
+          });
+        }
+        pickerMap.setView([lat, lng], 13);
+      }
+
+      // Map Click to Drop Pin
+      pickerMap.on("click", (e) => {
+        updateLocationCoordinates(e.latlng.lat, e.latlng.lng, 20, "map_selection");
+      });
+
+      // Browser Geolocation Flow ("Use My Current Location")
+      const btnUseGps = document.getElementById("btnUseCurrentLocation") || document.getElementById("btnUseGpsLocation");
+      btnUseGps?.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          locationStatusMsg.textContent = "Geolocation is not supported by your browser.";
+          locationStatusMsg.style.color = "#F07878";
+          return;
+        }
+
+        locationStatusMsg.textContent = "Requesting browser location permission...";
+        locationStatusMsg.style.color = "#F6E08E";
+        btnUseGps.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            btnUseGps.disabled = false;
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const acc = Math.round(pos.coords.accuracy || 15);
+            updateLocationCoordinates(lat, lng, acc, "browser_geolocation", "GPS Fix");
+            window.LW.ui?.toast("GPS coordinates acquired successfully.", "success");
+          },
+          (err) => {
+            btnUseGps.disabled = false;
+            let errMsg = "Location permission denied. Please select location directly on the map.";
+            if (err.code === 2) errMsg = "Location unavailable. Please pin your observation location manually on the map.";
+            if (err.code === 3) errMsg = "Location request timed out. Please retry or click on the map.";
+            locationStatusMsg.textContent = errMsg;
+            locationStatusMsg.style.color = "#F07878";
+            window.LW.ui?.toast(errMsg, "error");
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      });
+
+      // 4. Photo Upload Handling
+      let selectedPhotos = [];
+      const photoPreviewsGrid = document.getElementById("photoPreviewGrid") || document.getElementById("photoPreviewsGrid");
+      const uploadProgressWrap = document.getElementById("uploadProgressWrap");
+      const uploadProgressBar = document.getElementById("uploadProgressBar");
+      const uploadProgressText = document.getElementById("uploadProgressText");
+
+      function renderPhotoPreviews() {
+        if (!photoPreviewsGrid) return;
+        photoPreviewsGrid.innerHTML = "";
+        selectedPhotos.forEach((photo, idx) => {
+          const item = document.createElement("div");
+          item.className = "photo-preview-item";
+          item.innerHTML = `
+            <img src="${photo.url}" class="photo-preview-img" alt="Photo Evidence ${idx + 1}" />
+            <button type="button" class="photo-preview-remove" title="Remove image" data-idx="${idx}">
+              &times;
+            </button>
+            <div class="photo-preview-meta">${photo.originalName || photo.filename}</div>
+          `;
+          photoPreviewsGrid.appendChild(item);
+        });
+
+        photoPreviewsGrid.querySelectorAll(".photo-preview-remove").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            const idx = parseInt(e.currentTarget.dataset.idx, 10);
+            selectedPhotos.splice(idx, 1);
+            renderPhotoPreviews();
+          });
+        });
+      }
+
+      async function handleFilesUpload(files) {
+        if (!files || files.length === 0) return;
+
+        if (selectedPhotos.length + files.length > 4) {
+          window.LW.ui?.toast("You can upload a maximum of 4 photos per incident report.", "warning");
+          return;
+        }
+
+        uploadProgressWrap.style.display = "block";
+        uploadProgressBar.style.width = "10%";
+        uploadProgressText.textContent = "10%";
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          try {
+            uploadProgressBar.style.width = "40%";
+            uploadProgressText.textContent = "40%";
+
+            const uploadedRef = await window.LW.incidentsService.processPhotoUpload(file, (pct) => {
+              uploadProgressBar.style.width = `${pct}%`;
+              uploadProgressText.textContent = `${pct}%`;
+            });
+
+            selectedPhotos.push(uploadedRef);
+            renderPhotoPreviews();
+            window.LW.ui?.toast(`Photo verified: ${file.name}`, "success");
+          } catch (err) {
+            console.error("Upload error:", err);
+            window.LW.ui?.toast(`Photo upload rejected: ${err.message}`, "error");
+          }
+        }
+
+        setTimeout(() => {
+          uploadProgressWrap.style.display = "none";
+          uploadProgressBar.style.width = "0%";
+        }, 500);
+      }
+
+      document.getElementById("cameraFileInput")?.addEventListener("change", (e) => {
+        handleFilesUpload(e.target.files);
+        e.target.value = "";
+      });
+      document.getElementById("photoFileInput")?.addEventListener("change", (e) => {
+        handleFilesUpload(e.target.files);
+        e.target.value = "";
+      });
+      document.getElementById("galleryFileInput")?.addEventListener("change", (e) => {
+        handleFilesUpload(e.target.files);
+        e.target.value = "";
+      });
+
+      // Drag & drop
+      const dropZone = document.getElementById("photoDropZone");
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+      });
+      dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+        if (e.dataTransfer.files) handleFilesUpload(e.dataTransfer.files);
+      });
+
+      // 5. Form Submission with Anti-Duplicate Protection
+      const form = document.getElementById("incidentForm");
+      const btnSubmit = document.getElementById("btnSubmitReport");
+      const btnSubmitText = document.getElementById("btnSubmitText");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const incidentType = document.getElementById("incidentType").value;
+        const description = document.getElementById("description").value.trim();
+        const observedAt = document.getElementById("observedAt").value;
+        const roadName = document.getElementById("roadName").value.trim();
+        const additionalInfo = document.getElementById("additionalInfo").value.trim();
+        const roadPassability = document.getElementById("roadPassability").value;
+
+        const latVal = parseFloat(locLat.value);
+        const lngVal = parseFloat(locLng.value);
+
+        if (!incidentType) {
+          window.LW.ui?.toast("Please select an incident hazard category.", "error");
+          document.getElementById("incidentType").focus();
+          return;
+        }
+
+        if (!description || description.length < 10) {
+          window.LW.ui?.toast("Please provide an incident description with at least 10 characters.", "error");
+          document.getElementById("description").focus();
+          return;
+        }
+
+        if (!observedAt) {
+          window.LW.ui?.toast("Please specify the date and time observed.", "error");
+          return;
+        }
+
+        if (isNaN(latVal) || isNaN(lngVal)) {
+          window.LW.ui?.toast("Geographic location is required. Please use GPS or click the map.", "error");
+          locationStatusMsg.textContent = "Please select coordinates on the map or use GPS before submitting.";
+          locationStatusMsg.style.color = "#F07878";
+          return;
+        }
+
+        // Anti-duplicate protection: disable button during request
+        btnSubmit.disabled = true;
+        btnSubmitText.textContent = "Submitting Report...";
+
+        try {
+          const payload = {
+            incidentType,
+            description,
+            observedAt,
+            location: {
+              latitude: latVal,
+              longitude: lngVal,
+              accuracy: Number(locAccuracy.value || 15),
+              source: locSource.value || "map_selection",
+              roadName: roadName,
+              landmark: roadName,
+              placeName: locPlaceName.value || roadName || "Corridor Slope"
+            },
+            roadPassability,
+            additionalInfo,
+            photos: selectedPhotos
+          };
+
+          const result = await window.LW.incidentsService.submitIncident(payload);
+
+          // Show confirmation modal
+          const incident = result.data || {};
+          document.getElementById("modalIncidentRef").textContent = incident.id || incident.localId || "INC-RECORDED";
+          document.getElementById("modalObservedTime").textContent = new Date(observedAt).toLocaleString();
+          document.getElementById("modalSubmittedTime").textContent = new Date().toLocaleString();
+
+          if (result.offline) {
+            document.getElementById("modalSuccessDesc").textContent = "Your report has been saved locally on this device in the offline outbox and will automatically submit once internet connection is restored.";
+          }
+
+          document.getElementById("modalViewOnMapBtn").href = `map.html?incident=${encodeURIComponent(incident.id || '')}`;
+          document.getElementById("successModal").style.display = "flex";
+
+          // Reset form
+          form.reset();
+          selectedPhotos = [];
+          renderPhotoPreviews();
+        } catch (err) {
+          console.error("Submission failed:", err);
+          window.LW.ui?.toast(err.message || "Failed to submit report. Please retry.", "error");
+        } finally {
+          btnSubmit.disabled = false;
+          btnSubmitText.textContent = "Submit Incident Report";
+        }
+      });
+
+      document.getElementById("btnSubmitAnother")?.addEventListener("click", () => {
+        document.getElementById("successModal").style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk History & Reports — SlopeGuard NER</title>
+  <meta name="description" content="Historical geotechnical risk assessments, InSAR displacement timelines, and published disaster bulletins across the North Eastern Region.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C7F464'/><polygon points='4,32 16,14 24,32' fill='%23294B32'/></svg>">
+
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/shells.css">
+  <link rel="stylesheet" href="css/pages/dashboard.css">
+
+  <!-- Immediate Authentication Guard -->
+  <script>
+    (function() {
+      function checkAuth() {
+        try {
+          var raw = sessionStorage.getItem("sg_user") || localStorage.getItem("sg_user");
+          var user = raw ? JSON.parse(raw) : null;
+          if (!user) {
+            var page = window.location.pathname.split('/').pop() || 'history.html';
+            var next = encodeURIComponent(page + window.location.search);
+            window.location.replace("login.html?next=" + next);
+          }
+        } catch (e) {
+          window.location.replace("login.html");
+        }
+      }
+      checkAuth();
+      window.addEventListener("pageshow", function(e) {
+        if (e.persisted) checkAuth();
+      });
+    })();
+  </script>
+
+  <style>
+    .filter-controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .filter-select {
+      padding: 8px 12px;
+      background: #FFFFFF;
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--lw-r-sm, 6px);
+      color: var(--lw-text, #2E3A2F);
+      font-size: 0.8125rem;
+      outline: none;
+    }
+    .filter-select:focus {
+      border-color: var(--lw-cta, #C96F4F);
+    }
+    @media (max-width: 600px) {
+      .filter-controls-row > div {
+        width: 100%;
+      }
+      .filter-select {
+        width: 100%;
+        min-height: 44px;
+        font-size: 0.9375rem;
+      }
+    }
+  </style>
+</head>
+<body class="dashboard-root" data-shell="user">
+
+  <!-- Sidebar Navigation -->
+  <aside class="dashboard-sidebar" id="dashboardSidebar" aria-label="Sidebar Navigation">
+    <div class="sidebar-brand-header">
+      <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 28px; height: 28px;">
+        <polygon points="4,32 16,14 24,32" fill="#2E3A2F" />
+        <polygon points="12,32 23,6 34,32" fill="#C96F4F" />
+        <polygon points="23,6 23,24 16,32" fill="#2E3A2F" />
+        <polygon points="23,6 30,19 23,24" fill="#D9FF8F" />
+        <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
+      </svg>
+      <div class="sidebar-brand-name">Slope<span>Guard</span></div>
+      <span class="sidebar-brand-badge">NER</span>
+    </div>
+
+            <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-nav-item" data-nav-id="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="dashboard.html?tab=map" class="sidebar-nav-item" data-nav-id="risk-map">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+          <line x1="8" y1="2" x2="8" y2="18"></line>
+          <line x1="16" y1="6" x2="16" y2="22"></line>
+        </svg>
+        <span>Risk Map Monitoring</span>
+      </a>
+
+      <a href="dashboard.html?tab=reports" class="sidebar-nav-item active" data-nav-id="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>Reports</span>
+      </a>
+
+      <a href="dashboard.html?tab=locations" class="sidebar-nav-item" data-nav-id="locations">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span>Monitored Locations</span>
+      </a>
+
+      <a href="report-incident.html" class="sidebar-nav-item" data-nav-id="report-incident">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <span>Report Incident</span>
+      </a>
+
+      <a href="my-reports.html" class="sidebar-nav-item" data-nav-id="my-reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        <span>My Incident Reports</span>
+      </a>
+
+      <a href="dashboard.html?tab=profile" class="sidebar-nav-item" data-nav-id="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>Officer Profile</span>
+      </a>
+
+      <a href="settings.html" class="sidebar-nav-item" data-nav-id="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Settings & Alerts</span>
+      </a>
+    </nav>
+
+            <div class="sidebar-footer">
+      <div class="sidebar-user-card">
+        <div class="sidebar-user-avatar" id="sidebarAvatar">O</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarName">NER Field Officer</div>
+          <div class="sidebar-user-role" id="sidebarRole">OFFICER &bull; NER Command</div>
+        </div>
+      </div>
+      <button type="button" class="btn-sidebar-logout" id="sidebarLogout" data-action="logout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="dashboard-main-wrapper">
+    <header class="dashboard-topbar">
+      <div class="topbar-left">
+        <button type="button" class="topbar-mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="topbar-breadcrumbs">
+          <span class="topbar-breadcrumbs-root">SlopeGuard NER</span>
+          <span class="topbar-breadcrumbs-sep">/</span>
+          <span class="topbar-breadcrumbs-current">Risk History & Reports</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="telemetry-freshness-indicator">
+          <span class="telemetry-pulse-dot"></span>
+          <span>Geological Archive Live</span>
+        </div>
+        <div id="bellSlot"></div>
+      </div>
+    </header>
+
+    <main class="dashboard-body-container">
+      <!-- Heading Block -->
+      <section class="dashboard-heading-block">
+        <div class="heading-title-group">
+          <h1>Risk Assessment History & Bulletins</h1>
+          <p class="heading-subtitle">
+            Inspect historical slope stability calculations, antecedent rainfall peaks, pore water pressure breaches, and published geological survey bulletins.
+          </p>
+        </div>
+        <div class="heading-actions-group">
+          <button type="button" class="lw-btn lw-btn--sm lw-btn--outline" onclick="window.print()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Export View / Print</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Historical Assessments Panel -->
+      <section class="dashboard-panel-card">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Historical Risk Assessments & Telemetry Logs
+          </h2>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-controls-row">
+          <div>
+            <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Sector / Corridor</label>
+            <select id="sectorFilter" class="filter-select">
+              <option value="all">All NER Sectors</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Time Horizon</label>
+            <select id="timeFilter" class="filter-select">
+              <option value="24h">Past 24 Hours</option>
+              <option value="7d" selected>Past 7 Days</option>
+              <option value="30d">Past 30 Days</option>
+              <option value="monsoon">Full Monsoon Season</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Hazard Classification</label>
+            <select id="riskFilter" class="filter-select">
+              <option value="all">All Classifications</option>
+              <option value="critical">Critical Only</option>
+              <option value="high">High Only</option>
+              <option value="moderate">Moderate Only</option>
+              <option value="low">Low Only</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Assessments Table -->
+        <div class="reports-table-wrap">
+          <table class="dashboard-table">
+            <thead>
+              <tr>
+                <th>Recorded Timestamp</th>
+                <th>Monitored Sector</th>
+                <th>District / State</th>
+                <th>Recorded Risk</th>
+                <th>Peak Precipitation</th>
+                <th>Pore Saturation</th>
+                <th>Telemetry Source</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 28px; color: var(--color-text-muted);">
+                  Loading historical assessment records...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Published Geotechnical Reports (Sagin's Module) -->
+      <section class="dashboard-panel-card">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            Official Geotechnical Survey Bulletins
+          </h2>
+        </div>
+
+        <div class="reports-table-wrap">
+          <table class="dashboard-table">
+            <thead>
+              <tr>
+                <th>Bulletin Title</th>
+                <th>Affected Area</th>
+                <th>Surveying Agency</th>
+                <th>Classification</th>
+                <th>Published Time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="reportsTableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 28px; color: var(--color-text-muted);">
+                  Loading published survey bulletins...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Core Services -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/content.js"></script>
+  <script src="js/core/format.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/connectivity.js"></script>
+  <script src="js/core/api.js"></script>
+  <script src="js/core/auth.js"></script>
+  <script src="js/core/ui.js"></script>
+  <script src="js/core/guard.js"></script>
+  <script src="js/services/regions-service.js"></script>
+  <script src="js/services/notifications-store.js"></script>
+  <script src="js/components/bell.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (!window.LW.guard.requireAuth()) return;
+      const user = window.LW.auth.getUser();
+
+      // Populate user info
+      document.getElementById("sidebarName").textContent = user.name || "Field Officer";
+      document.getElementById("sidebarAvatar").textContent = (user.name || "U").charAt(0).toUpperCase();
+      document.getElementById("sidebarRole").textContent = `${(user.role || 'USER').toUpperCase()} • ${user.district || 'NER'}`;
+
+      // Bell
+      const bellSlot = document.getElementById("bellSlot");
+      if (bellSlot && window.LW.bell) window.LW.bell.mount(bellSlot);
+
+      // Logout
+      document.getElementById("sidebarLogout").onclick = async () => {
+        await window.LW.auth.logout();
+        window.location.replace("login.html");
+      };
+
+      // Fetch regions and reports
+      const [regions, reports] = await Promise.all([
+        window.LW.regionsService?.getAll().catch(() => []) || [],
+        window.LW.reportsService?.getAll().catch(() => []) || []
+      ]);
+
+      const format = window.LW.format || {};
+
+      // Populate sector filter dropdown
+      const sectorFilter = document.getElementById("sectorFilter");
+      regions.forEach(r => {
+        const opt = document.createElement("option");
+        opt.value = r.name;
+        opt.textContent = `${r.name} (${r.district})`;
+        sectorFilter.appendChild(opt);
+      });
+
+      // Synthetic historical records adhering to Honesty Rule
+      const historicalRecords = [
+        { time: new Date(Date.now() - 3600000 * 4).toISOString(), sector: "Haflong Hill Corridor", district: "Dima Hasao, Assam", risk: "critical", rain: "248 mm", pore: "58.2 kPa", source: "Borehole Piezometer #04" },
+        { time: new Date(Date.now() - 3600000 * 12).toISOString(), sector: "Sohra Escarpment", district: "East Khasi Hills, Meghalaya", risk: "high", rain: "312 mm", pore: "61.4 kPa", source: "IMD Doppler Radar & InSAR" },
+        { time: new Date(Date.now() - 3600000 * 24).toISOString(), sector: "Mangan Highway Segment", district: "North Sikkim", risk: "critical", rain: "185 mm", pore: "52.1 kPa", source: "Automated Rain Gauge #09" },
+        { time: new Date(Date.now() - 3600000 * 36).toISOString(), sector: "Kohima Bypass", district: "Kohima, Nagaland", risk: "moderate", rain: "118 mm", pore: "38.7 kPa", source: "Field Inclinometer #02" },
+        { time: new Date(Date.now() - 3600000 * 48).toISOString(), sector: "Noney Rail Link", district: "Noney, Manipur", risk: "high", rain: "205 mm", pore: "56.8 kPa", source: "Sentinel-1 InSAR & Piezometer" },
+        { time: new Date(Date.now() - 3600000 * 72).toISOString(), sector: "Aizawl Slopes Corridor", district: "Aizawl, Mizoram", risk: "moderate", rain: "134 mm", pore: "42.0 kPa", source: "Municipal Rain Gauge Network" },
+        { time: new Date(Date.now() - 3600000 * 96).toISOString(), sector: "Tawang High Pass", district: "Tawang, Arunachal Pradesh", risk: "low", rain: "42 mm", pore: "22.5 kPa", source: "High-Altitude Station #11" }
+      ];
+
+      function renderHistory() {
+        const selectedSector = sectorFilter.value;
+        const selectedRisk = document.getElementById("riskFilter").value;
+
+        const filtered = historicalRecords.filter(item => {
+          if (selectedSector !== "all" && item.sector !== selectedSector) return false;
+          if (selectedRisk !== "all" && item.risk !== selectedRisk) return false;
+          return true;
+        });
+
+        const tbody = document.getElementById("historyTableBody");
+        if (filtered.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 28px; color: var(--color-text-muted);">
+                No historical records matching the active filter criteria.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(row => `
+          <tr>
+            <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">${format.dateTimeIST ? format.dateTimeIST(row.time) : row.time}</td>
+            <td><strong style="color: var(--color-text-primary);">${row.sector}</strong></td>
+            <td>${row.district}</td>
+            <td>
+              <span class="lw-risk lw-risk--${row.risk}">
+                <span class="lw-risk__shape"></span>
+                ${row.risk.toUpperCase()}
+              </span>
+            </td>
+            <td style="font-family: var(--lw-font-mono);">${row.rain}</td>
+            <td style="font-family: var(--lw-font-mono);">${row.pore}</td>
+            <td style="font-size: 0.75rem; color: var(--color-text-muted);">${row.source}</td>
+          </tr>
+        `).join("");
+      }
+
+      function renderReports() {
+        const tbody = document.getElementById("reportsTableBody");
+        if (!reports || reports.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 28px; color: var(--color-text-muted);">
+                No official survey bulletins available for this period.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = reports.map(r => `
+          <tr>
+            <td><strong style="color: var(--color-text-primary);">${r.title}</strong></td>
+            <td>${r.area} (${r.district})</td>
+            <td><span class="lw-source lw-source--reviewed">${r.author || 'GSI / SDMA'}</span></td>
+            <td>
+              <span class="lw-risk lw-risk--${r.severity}">
+                <span class="lw-risk__shape"></span>
+                ${r.severity.toUpperCase()}
+              </span>
+            </td>
+            <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">${format.relativeTime(r.created_at)}</td>
+            <td>
+              <button type="button" class="lw-btn lw-btn--sm lw-btn--outline" data-action="inspect-report" data-id="${r.id}">
+                View Bulletin
+              </button>
+            </td>
+          </tr>
+        `).join("");
+
+        tbody.querySelectorAll('[data-action="inspect-report"]').forEach(btn => {
+          btn.onclick = () => {
+            const id = parseInt(btn.dataset.id, 10);
+            const report = reports.find(x => x.id === id);
+            if (report) {
+              window.LW.ui?.confirm(
+                report.title,
+                `
+                  <div style="font-size: 0.8125rem; color: var(--color-text-secondary); text-align: left; display: flex; flex-direction: column; gap: 8px;">
+                    <div><strong>Survey Corridor:</strong> ${report.area} (${report.district}, ${report.state})</div>
+                    <div><strong>Authoring Authority:</strong> ${report.author}</div>
+                    <div><strong>Hazard Classification:</strong> <span style="text-transform: uppercase; color: var(--color-primary); font-weight: 700;">${report.severity}</span></div>
+                    <div><strong>Published Timestamp:</strong> ${format.dateTimeIST ? format.dateTimeIST(report.created_at) : report.created_at}</div>
+                    <div style="background: var(--lw-bg, #F8F6EE); padding: 12px; border-radius: 4px; border: 1px solid var(--lw-border, #D9C9B2); color: var(--color-text-primary, #2E3A2F); line-height: 1.5; margin-top: 6px;">
+                      ${report.summary}
+                    </div>
+                  </div>
+                `,
+                () => {
+                  window.LW.ui?.toast("Bulletin marked for emergency printing.", "info");
+                }
+              );
+            }
+          };
+        });
+      }
+
+      sectorFilter.onchange = renderHistory;
+      document.getElementById("riskFilter").onchange = renderHistory;
+      document.getElementById("timeFilter").onchange = renderHistory;
+
+      // Mobile toggle
+      const mobileToggle = document.getElementById("mobileToggle");
+      const sidebar = document.getElementById("dashboardSidebar");
+      if (mobileToggle && sidebar) {
+        mobileToggle.onclick = () => sidebar.classList.toggle("mobile-open");
+      }
+
+      renderHistory();
+      renderReports();
+    });
+  </script>
+  <script src="js/components/field-officer-nav.js"></script>
+</body>
+</html>

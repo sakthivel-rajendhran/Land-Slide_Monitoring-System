@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SlopeGuard — Living Component Styleguide</title>
+  <meta name="description" content="Visual design system, tokens, risk badges, chips, buttons, and layout containers for SlopeGuard NER.">
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C96F4F'/><polygon points='4,32 16,14 24,32' fill='%232E3A2F'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/shells.css">
+
+  <style>
+    .sg-container {
+      max-width: 1100px;
+      margin: 40px auto 80px;
+      padding: 0 24px;
+    }
+    .sg-header {
+      margin-bottom: 48px;
+      border-bottom: 1px solid var(--lw-border, #D9C9B2);
+      padding-bottom: 24px;
+    }
+    .sg-section {
+      margin-bottom: 56px;
+    }
+    .sg-section-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--color-text-primary);
+      margin: 0 0 8px 0;
+    }
+    .sg-section-desc {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin: 0 0 24px 0;
+    }
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .token-swatch {
+      background: var(--lw-surface, #FFFFFF);
+      border: 1px solid var(--lw-border, #D9C9B2);
+      border-radius: var(--radius-card, 6px);
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(46, 58, 47, 0.04);
+    }
+    .token-color-preview {
+      height: 64px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(46, 58, 47, 0.1);
+    }
+    .token-name {
+      font-weight: 700;
+      font-size: 0.8125rem;
+      color: var(--color-text-primary);
+      margin-bottom: 4px;
+    }
+    .token-value {
+      font-family: var(--lw-font-mono);
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+    .component-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      background: var(--lw-surface, #FFFFFF);
+      padding: 24px;
+      border-radius: 6px;
+      border: 1px solid var(--lw-border, #D9C9B2);
+      box-shadow: 0 2px 8px rgba(46, 58, 47, 0.04);
+    }
+  </style>
+</head>
+<body class="public-body">
+
+  <div class="sg-container">
+    <div class="sg-header">
+      <a href="dashboard.html" class="lw-btn lw-btn--sm lw-btn--outline" style="margin-bottom: 16px;">&larr; Back to Dashboard</a>
+      <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0 0 8px 0; color: var(--color-text-primary);">
+        SlopeGuard Living Styleguide
+      </h1>
+      <p style="color: var(--color-text-secondary); margin: 0; font-size: 1rem;">
+        Module 0 & 2 Shared Design System — Earthy Minimal Palette & Manrope Editorial Typography
+      </p>
+    </div>
+
+    <!-- 1. Color Palette Tokens -->
+    <section class="sg-section">
+      <h2 class="sg-section-title">Design Tokens (Colors)</h2>
+      <p class="sg-section-desc">Warm natural Earthy Minimal palette: Forest Green, Muted Sage, Warm Sand Beige, Terracotta, and Warm Ivory.</p>
+
+      <div class="token-grid">
+        <div class="token-swatch">
+          <div class="token-color-preview" style="background: #F8F6EE;"></div>
+          <div class="token-name">Warm Ivory (Background)</div>
+          <div class="token-value">#F8F6EE</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-color-preview" style="background: #2E3A2F;"></div>
+          <div class="token-name">Deep Forest Green (Primary)</div>
+          <div class="token-value">#2E3A2F</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-color-preview" style="background: #6B7F5B;"></div>
+          <div class="token-name">Muted Sage Green (Secondary)</div>
+          <div class="token-value">#6B7F5B</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-color-preview" style="background: #D9C9B2;"></div>
+          <div class="token-name">Warm Sand Beige (Tertiary/Border)</div>
+          <div class="token-value">#D9C9B2</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-color-preview" style="background: #C96F4F;"></div>
+          <div class="token-name">Terracotta (Accent / CTA)</div>
+          <div class="token-value">#C96F4F</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-color-preview" style="background: #FFFFFF;"></div>
+          <div class="token-name">Surface Card (Pure White)</div>
+          <div class="token-value">#FFFFFF</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-color-preview" style="background: #8C6A3C;"></div>
+          <div class="token-name">Risk Moderate (Amber Sand)</div>
+          <div class="token-value">#8C6A3C</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-color-preview" style="background: #3A5531;"></div>
+          <div class="token-name">Risk Low (Earth Green)</div>
+          <div class="token-value">#3A5531</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Risk Badges -->
+    <section class="sg-section">
+      <h2 class="sg-section-title">Hazard Risk Badges</h2>
+      <p class="sg-section-desc">Accessible classification indicators with distinct geometric shape markers.</p>
+
+      <div class="component-row">
+        <span class="lw-risk lw-risk--critical"><span class="lw-risk__shape"></span>CRITICAL</span>
+        <span class="lw-risk lw-risk--high"><span class="lw-risk__shape"></span>HIGH</span>
+        <span class="lw-risk lw-risk--moderate"><span class="lw-risk__shape"></span>MODERATE</span>
+        <span class="lw-risk lw-risk--low"><span class="lw-risk__shape"></span>LOW</span>
+        <span class="lw-risk lw-risk--none"><span class="lw-risk__shape"></span>NOT ASSESSED</span>
+      </div>
+    </section>
+
+    <!-- 3. Source & Data Quality Chips -->
+    <section class="sg-section">
+      <h2 class="sg-section-title">Source & Telemetry Status Chips</h2>
+      <p class="sg-section-desc">Distinguishing automated sensor feeds from verified bulletins and offline states.</p>
+
+      <div class="component-row">
+        <span class="lw-source lw-source--automated">AUTOMATED TELEMETRY</span>
+        <span class="lw-source lw-source--reviewed">STAFF REVIEWED</span>
+        <span class="lw-source lw-source--official">OFFICIAL ADVISORY</span>
+        <span class="lw-chip lw-chip--current">CURRENT / LIVE</span>
+        <span class="lw-chip lw-chip--stale">STALE FEED</span>
+        <span class="lw-chip lw-chip--offline">OFFLINE CACHED</span>
+      </div>
+    </section>
+
+    <!-- 4. Buttons & Interaction States -->
+    <section class="sg-section">
+      <h2 class="sg-section-title">Buttons & Action Elements</h2>
+      <p class="sg-section-desc">Solid lime primary, sharp rectangular borders, restrained hover elevations.</p>
+
+      <div class="component-row">
+        <button type="button" class="lw-btn lw-btn--primary">Primary Lime</button>
+        <button type="button" class="lw-btn lw-btn--outline">Outline Glass</button>
+        <button type="button" class="lw-btn lw-btn--ghost">Ghost Action &rarr;</button>
+        <button type="button" class="lw-btn lw-btn--sm lw-btn--primary">Small Button</button>
+        <button type="button" class="lw-btn lw-btn--sm lw-btn--danger" style="color: var(--color-risk-severe); border-color: rgba(240, 120, 120, 0.4);">Destructive Action</button>
+      </div>
+    </section>
+
+    <!-- 5. Form Inputs -->
+    <section class="sg-section">
+      <h2 class="sg-section-title">Form Controls & Input Fields</h2>
+      <p class="sg-section-desc">Clean dark input wrappers with lime focus outlines.</p>
+
+      <div class="component-row" style="flex-direction: column; align-items: stretch; max-width: 480px;">
+        <div class="form-group">
+          <label class="form-label">Sector Name</label>
+          <input type="text" class="form-input" placeholder="e.g. Haflong Hill Corridor" value="Haflong Hill Corridor" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hazard Level</label>
+          <select class="form-input">
+            <option>Critical (FoS < 1.0)</option>
+            <option>High (FoS 1.0 - 1.2)</option>
+            <option>Moderate (FoS 1.2 - 1.5)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer style="background: rgba(7, 11, 8, 0.95); border-top: 1px solid var(--color-glass-border); padding: 24px; text-align: center; font-size: 0.75rem; color: var(--color-text-muted);">
+    SlopeGuard Design System Styleguide — Prepared for Sakthivel, Ragul & Sagin.
+  </footer>
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alert Management Workflow — SlopeGuard NER</title>
+  <meta name="description" content="Manage the complete lifecycle of public hazard advisories: Draft, Review, Approve, Publish, and Withdraw.">
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C96F4F'/><polygon points='4,32 16,14 24,32' fill='%232E3A2F'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/shells.css">
+  <link rel="stylesheet" href="../css/pages/dashboard.css">
+
+  <!-- Immediate Authentication & Role Guard -->
+  <script>
+    (function() {
+      function checkAuth() {
+        try {
+          var raw = sessionStorage.getItem("sg_user") || localStorage.getItem("sg_user");
+          var user = raw ? JSON.parse(raw) : null;
+          if (!user) {
+            var page = window.location.pathname.split('/').pop() || 'alerts.html';
+            var next = encodeURIComponent("admin/" + page + window.location.search);
+            window.location.replace("../login.html?next=" + next);
+            return;
+          }
+          var role = (user.role || "").toUpperCase();
+          if (role !== "ADMIN" && role !== "OFFICER") {
+            window.location.replace("../dashboard.html");
+          }
+        } catch (e) {
+          window.location.replace("../login.html");
+        }
+      }
+      checkAuth();
+      window.addEventListener("pageshow", function(e) {
+        if (e.persisted) checkAuth();
+      });
+    })();
+  </script>
+</head>
+<body class="dashboard-root" data-shell="admin">
+
+  <!-- Sidebar Navigation -->
+  <aside class="dashboard-sidebar" id="dashboardSidebar" aria-label="Sidebar Navigation">
+    <div class="sidebar-brand-header">
+      <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 28px; height: 28px;">
+        <polygon points="4,32 16,14 24,32" fill="#2E3A2F" />
+        <polygon points="12,32 23,6 34,32" fill="#C96F4F" />
+        <polygon points="23,6 23,24 16,32" fill="#2E3A2F" />
+        <polygon points="23,6 30,19 23,24" fill="#D9C9B2" />
+        <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
+      </svg>
+      <div class="sidebar-brand-name">Slope<span>Guard</span></div>
+      <span class="sidebar-brand-badge">STAFF</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span style="font-size: 0.6875rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700; padding: 0 14px; letter-spacing: 0.05em;">Staff Console</span>
+      
+      <a href="dashboard.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <span>Operations Console</span>
+      </a>
+
+      <a href="alerts.html" class="sidebar-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+        <span>Alert Management</span>
+      </a>
+
+      <a href="assessments.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+        <span>Assessment Review</span>
+      </a>
+
+      <a href="areas.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <span>Area Management</span>
+      </a>
+
+      <a href="data.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        <span>Data Ingestion</span>
+      </a>
+
+      <a href="users.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>User Accounts</span>
+      </a>
+
+      <a href="audit-logs.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>Audit Logs</span>
+      </a>
+
+      <div style="border-top: 1px solid var(--color-glass-border); margin: 8px 0; padding-top: 8px;">
+        <span style="font-size: 0.6875rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700; padding: 0 14px; letter-spacing: 0.05em;">User Portal</span>
+        <a href="../dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Main Dashboard</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user-card">
+        <div class="sidebar-user-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarName">NER Command Admin</div>
+          <div class="sidebar-user-role" id="sidebarRole">ADMIN • NER Command</div>
+        </div>
+      </div>
+      <button type="button" class="btn-sidebar-logout" id="sidebarLogout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="dashboard-main-wrapper">
+    <header class="dashboard-topbar">
+      <div class="topbar-left">
+        <button type="button" class="topbar-mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="topbar-breadcrumbs">
+          <span class="topbar-breadcrumbs-root">SlopeGuard Staff</span>
+          <span class="topbar-breadcrumbs-sep">/</span>
+          <span class="topbar-breadcrumbs-current">Alert Management</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="telemetry-freshness-indicator">
+          <span class="telemetry-pulse-dot"></span>
+          <span>Publishing Gate Synchronized</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-body-container">
+      <!-- Heading Block -->
+      <section class="dashboard-heading-block">
+        <div class="heading-title-group">
+          <h1>Emergency Alert Lifecycle Workflow</h1>
+          <p class="heading-subtitle">
+            Draft, review, authorize, publish, and withdraw official public early warnings and emergency advisories.
+          </p>
+        </div>
+        <div class="heading-actions-group">
+          <button type="button" class="btn-dashboard-primary" id="btnOpenDraftModal">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Create Alert Draft</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Alert Workflow Table Card -->
+      <section class="dashboard-panel-card">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+            Advisory Queue & Workflow State
+          </h2>
+
+          <div style="display: flex; gap: 8px;">
+            <select id="stateFilterSelect" class="form-input" style="padding: 4px 10px; font-size: 0.8125rem;">
+              <option value="all">All States</option>
+              <option value="published">Published</option>
+              <option value="pending">Pending Review</option>
+              <option value="draft">Drafts</option>
+              <option value="withdrawn">Withdrawn</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="reports-table-wrap">
+          <table class="dashboard-table">
+            <thead>
+              <tr>
+                <th>Advisory Title</th>
+                <th>Affected Corridor</th>
+                <th>Severity</th>
+                <th>Workflow Status</th>
+                <th>Created / Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="alertsWorkflowTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Core Services -->
+  <script src="../js/core/config.js"></script>
+  <script src="../js/core/content.js"></script>
+  <script src="../js/core/format.js"></script>
+  <script src="../js/core/api.js"></script>
+  <script src="../js/core/auth.js"></script>
+  <script src="../js/core/ui.js"></script>
+  <script src="../js/core/guard.js"></script>
+  <script src="../js/services/regions-service.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (!window.LW.guard.requireRole(["officer", "admin"])) return;
+      const user = window.LW.auth.getUser();
+
+      document.getElementById("sidebarName").textContent = user.name || "Command Staff";
+      document.getElementById("sidebarAvatar").textContent = (user.name || "A").charAt(0).toUpperCase();
+      document.getElementById("sidebarRole").textContent = `${(user.role || 'OFFICER').toUpperCase()} • ${user.district || 'NER'}`;
+
+      document.getElementById("sidebarLogout").onclick = async () => {
+        await window.LW.auth.logout();
+        window.location.replace("../login.html");
+      };
+
+      const STORAGE_KEY = "sg_admin_alerts_workflow";
+      const initialAlerts = [
+        {
+          id: 101,
+          title: "Flash Flood & Slope Saturation Alert — Haflong Sector",
+          area: "Haflong Hill Corridor (Dima Hasao, Assam)",
+          severity: "critical",
+          status: "published",
+          category: "Geotechnical Failure",
+          updated_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+          summary: "Continuous torrential precipitation has breached critical threshold of 240mm. Immediate evacuation recommended along Lumding-Badarpur slope."
+        },
+        {
+          id: 102,
+          title: "Sohra Escarpment Excessive Pore Saturation",
+          area: "Sohra Escarpment (East Khasi Hills, Meghalaya)",
+          severity: "high",
+          status: "pending",
+          category: "Rainfall Threshold",
+          updated_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+          summary: "Piezometer array reports pore pressure of 61.4 kPa. Field verification underway."
+        },
+        {
+          id: 103,
+          title: "Mangan Highway Segment Surface Creep Warning",
+          area: "Mangan Highway Segment (North Sikkim)",
+          severity: "critical",
+          status: "draft",
+          category: "InSAR Deformation",
+          updated_at: new Date(Date.now() - 3600000 * 18).toISOString(),
+          summary: "Sentinel-1 InSAR identifies 16mm/month downslope displacement near Dikchu confluence."
+        }
+      ];
+
+      function getAlerts() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : initialAlerts;
+        } catch (e) {
+          return initialAlerts;
+        }
+      }
+
+      function saveAlerts(list) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        render();
+      }
+
+      async function loadAlertsList() {
+        try {
+          const res = await window.LW.api.get("/api/admin/alerts");
+          const items = res?.content || res?.data?.content || (Array.isArray(res) ? res : []);
+          if (items && items.length > 0) {
+            return items.map(a => ({
+              id: a.id,
+              rawId: a.id,
+              title: a.title,
+              area: a.affectedAreaName || a.monitoredAreaName || "NER Corridor",
+              severity: (a.severity || "HIGH").toLowerCase(),
+              status: (a.status || "DRAFT").toLowerCase(),
+              category: a.category || "Operational Notice",
+              updated_at: a.updatedAt || a.createdAt || new Date().toISOString(),
+              summary: a.summary || a.description || "Active slope hazard threshold notice."
+            }));
+          }
+        } catch (e) {}
+        return getAlerts();
+      }
+
+      async function render() {
+        const filter = document.getElementById("stateFilterSelect").value;
+        const all = await loadAlertsList();
+        const list = all.filter(a => filter === "all" || a.status === filter);
+        const tbody = document.getElementById("alertsWorkflowTableBody");
+        const format = window.LW.format || {};
+
+        tbody.innerHTML = list.map(a => `
+          <tr>
+            <td><strong style="color: var(--color-text-primary);">${a.title}</strong></td>
+            <td>${a.area}</td>
+            <td>
+              <span class="lw-risk lw-risk--${a.severity}">
+                <span class="lw-risk__shape"></span>
+                ${a.severity.toUpperCase()}
+              </span>
+            </td>
+            <td>
+              <span class="lw-chip lw-chip--${a.status === 'published' ? 'current' : (a.status === 'pending' || a.status === 'pending_review' ? 'review' : 'offline')}">
+                ${a.status.replace(/_/g, ' ').toUpperCase()}
+              </span>
+            </td>
+            <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">
+              ${format.relativeTime ? format.relativeTime(a.updated_at) : a.updated_at}
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" class="lw-btn lw-btn--sm lw-btn--outline" data-action="preview" data-id="${a.id}">Preview</button>
+                ${(a.status === 'pending' || a.status === 'pending_review' || a.status === 'approved') ? `
+                  <button type="button" class="lw-btn lw-btn--sm lw-btn--primary" data-action="publish" data-id="${a.id}">Publish</button>
+                  <button type="button" class="lw-btn lw-btn--sm lw-btn--danger" data-action="reject" data-id="${a.id}" style="color: var(--color-risk-severe);">Reject</button>
+                ` : ''}
+                ${a.status === 'draft' ? `
+                  <button type="button" class="lw-btn lw-btn--sm lw-btn--outline" data-action="submit-review" data-id="${a.id}">Submit Review</button>
+                ` : ''}
+                ${a.status === 'published' ? `
+                  <button type="button" class="lw-btn lw-btn--sm lw-btn--ghost" data-action="withdraw" data-id="${a.id}" style="color: var(--color-risk-severe);">Withdraw</button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `).join("");
+
+        tbody.querySelectorAll('[data-action="preview"]').forEach(b => {
+          b.onclick = async () => {
+            const allItems = await loadAlertsList();
+            const item = allItems.find(x => String(x.id) === String(b.dataset.id));
+            if (item) {
+              window.LW.ui?.confirm(
+                `Public Preview: ${item.title}`,
+
+              );
+            }
+          };
+        });
+
+        tbody.querySelectorAll('[data-action="publish"]').forEach(b => {
+          b.onclick = async () => {
+            const id = b.dataset.id;
+            try {
+              await window.LW.api.post(`/api/admin/alerts/${encodeURIComponent(id)}/publish`);
+            } catch (e) {
+              const list = getAlerts();
+              const target = list.find(x => String(x.id) === String(id));
+              if (target) {
+                target.status = "published";
+                target.updated_at = new Date().toISOString();
+                saveAlerts(list);
+              }
+            }
+            window.LW.ui?.toast(`Advisory '${id}' published to public feed.`, "success");
+            render();
+          };
+        });
+
+        tbody.querySelectorAll('[data-action="reject"]').forEach(b => {
+          b.onclick = async () => {
+            const id = b.dataset.id;
+            try {
+              await window.LW.api.post(`/api/admin/alerts/${encodeURIComponent(id)}/reject`, { reason: "Needs recalibration" });
+            } catch (e) {
+              const list = getAlerts();
+              const target = list.find(x => String(x.id) === String(id));
+              if (target) {
+                target.status = "draft";
+                target.updated_at = new Date().toISOString();
+                saveAlerts(list);
+              }
+            }
+            window.LW.ui?.toast(`Advisory returned to draft for revision.`, "info");
+            render();
+          };
+        });
+
+        tbody.querySelectorAll('[data-action="submit-review"]').forEach(b => {
+          b.onclick = async () => {
+            const id = b.dataset.id;
+            try {
+              await window.LW.api.post(`/api/admin/alerts/${encodeURIComponent(id)}/submit`);
+            } catch (e) {
+              const list = getAlerts();
+              const target = list.find(x => String(x.id) === String(id));
+              if (target) {
+                target.status = "pending";
+                target.updated_at = new Date().toISOString();
+                saveAlerts(list);
+              }
+            }
+            window.LW.ui?.toast(`Draft '${id}' submitted for supervisor review.`, "info");
+            render();
+          };
+        });
+
+        tbody.querySelectorAll('[data-action="withdraw"]').forEach(b => {
+          b.onclick = () => {
+            const id = b.dataset.id;
+            window.LW.ui?.confirm(
+              "Withdraw Public Advisory?",
+              "Are you sure you want to withdraw this emergency advisory? A withdrawal justification log will be registered.",
+              async () => {
+                try {
+                  await window.LW.api.post(`/api/admin/alerts/${encodeURIComponent(id)}/withdraw`, { reason: "Hazard risk subsided" });
+                } catch (e) {
+                  const list = getAlerts();
+                  const target = list.find(x => String(x.id) === String(id));
+                  if (target) {
+                    target.status = "withdrawn";
+                    target.updated_at = new Date().toISOString();
+                    saveAlerts(list);
+                  }
+                }
+                window.LW.ui?.toast(`Advisory withdrawn from public broadcast.`, "info");
+                render();
+              }
+            );
+          };
+        });
+      }
+
+      document.getElementById("stateFilterSelect").onchange = render;
+
+      document.getElementById("btnOpenDraftModal").onclick = () => {
+        window.LW.ui?.confirm(
+          "Draft New Emergency Advisory",
+          `
+            <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+              <div>
+                <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Advisory Title</label>
+                <input type="text" id="modalDraftTitle" class="form-input" placeholder="e.g. Debris Flow Warning along Corridor" style="width: 100%;" />
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Affected Sector</label>
+                <input type="text" id="modalDraftArea" class="form-input" placeholder="e.g. Noney Rail Link Segment, Manipur" style="width: 100%;" />
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Severity Level</label>
+                <select id="modalDraftSeverity" class="form-input" style="width: 100%;">
+                  <option value="critical">CRITICAL (Evacuation Imminent)</option>
+                  <option value="high">HIGH (Severe Hazard)</option>
+                  <option value="moderate">MODERATE (Elevated Soil Moisture)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Public Advisory Text</label>
+                <textarea id="modalDraftSummary" class="form-input" rows="3" placeholder="Enter instructions and geotechnical evidence..." style="width: 100%;"></textarea>
+              </div>
+            </div>
+          `,
+          () => {
+            const title = document.getElementById("modalDraftTitle")?.value.trim() || "Untitled Emergency Advisory";
+            const area = document.getElementById("modalDraftArea")?.value.trim() || "General NER Sector";
+            const severity = document.getElementById("modalDraftSeverity")?.value || "high";
+            const summary = document.getElementById("modalDraftSummary")?.value.trim() || "Hazard threshold breached.";
+
+            const list = getAlerts();
+            list.unshift({
+              id: Date.now(),
+              title,
+              area,
+              severity,
+              status: "draft",
+              category: "Operational Notice",
+              updated_at: new Date().toISOString(),
+              summary
+            });
+            saveAlerts(list);
+            window.LW.ui?.toast("New draft created.", "success");
+          }
+        );
+      };
+
+      const mobileToggle = document.getElementById("mobileToggle");
+      const sidebar = document.getElementById("dashboardSidebar");
+      if (mobileToggle && sidebar) {
+        mobileToggle.onclick = () => sidebar.classList.toggle("mobile-open");
+      }
+
+      render();
+    });
+  </script>
+</body>
+</html>
