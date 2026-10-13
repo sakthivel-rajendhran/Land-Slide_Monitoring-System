@@ -50,6 +50,9 @@ window.LW.auth = (function() {
     const prev = getStoredUser();
     sessionStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(STORAGE_KEY);
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem("sg_token");
+    }
     notify("logout", prev);
   }
 
@@ -70,9 +73,25 @@ window.LW.auth = (function() {
         remember
       });
 
-      if (res && res.data) {
-        setStoredUser(res.data, remember);
-        return res.data;
+      if (res && (res.token || res.data?.token || res.userId || res.data?.userId)) {
+        const u = res.token ? res : (res.data || res);
+        const normalizedUser = {
+          ...u,
+          id: u.userId || u.id,
+          userId: u.userId || u.id,
+          name: u.fullName || u.name,
+          fullName: u.fullName || u.name,
+          email: u.email,
+          role: (u.role || "CITIZEN").toLowerCase(),
+          roles: [ (u.role || "CITIZEN").toLowerCase() ],
+          district: u.district || "NER Central Command",
+          token: u.token || res.token
+        };
+        if (normalizedUser.token && typeof localStorage !== "undefined") {
+          localStorage.setItem("sg_token", normalizedUser.token);
+        }
+        setStoredUser(normalizedUser, remember);
+        return normalizedUser;
       }
 
       throw new Error("Invalid credentials or unauthorized station. Please verify your details.");
@@ -97,9 +116,25 @@ window.LW.auth = (function() {
         location
       });
 
-      if (res && res.data) {
-        setStoredUser(res.data, true);
-        return res.data;
+      if (res && (res.token || res.data?.token || res.userId || res.data?.userId || res.id)) {
+        const u = res.token ? res : (res.data || res);
+        const normalizedUser = {
+          ...u,
+          id: u.userId || u.id,
+          userId: u.userId || u.id,
+          name: u.fullName || u.name,
+          fullName: u.fullName || u.name,
+          email: u.email,
+          role: (u.role || "CITIZEN").toLowerCase(),
+          roles: [ (u.role || "CITIZEN").toLowerCase() ],
+          district: u.district || district,
+          token: u.token || res.token
+        };
+        if (normalizedUser.token && typeof localStorage !== "undefined") {
+          localStorage.setItem("sg_token", normalizedUser.token);
+        }
+        setStoredUser(normalizedUser, true);
+        return normalizedUser;
       }
 
       throw new Error("Registration failed.");

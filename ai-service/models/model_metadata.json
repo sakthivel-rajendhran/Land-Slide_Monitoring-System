@@ -1,0 +1,60 @@
+{
+  "model_version": "0.1.0-prototype",
+  "model_status": "DEMO_NOT_VALIDATED",
+  "training_timestamp": "2026-10-13T17:50:02.334216+00:00",
+  "algorithm": "RandomForestClassifier",
+  "hyperparameters": {
+    "n_estimators": 100,
+    "max_depth": 6,
+    "min_samples_split": 4,
+    "min_samples_leaf": 2,
+    "random_state": 42,
+    "class_weight": "balanced"
+  },
+  "training_dataset": {
+    "source_path": "C:\\Users\\sakth\\OneDrive\\Desktop\\SlopeGuard\\ai-service\\data\\synthetic_fixtures.csv",
+    "total_records": 50,
+    "is_synthetic": true,
+    "class_distribution": {
+      "non_landslide_count_0": 25,
+      "landslide_count_1": 25,
+      "imbalance_ratio_0_to_1": 1.0
+    },
+    "data_sources": [
+      "SYNTHETIC_TEST_FIXTURE_V1"
+    ]
+  },
+  "features": {
+    "numerical": [
+      "latitude",
+      "longitude",
+      "rainfall_24h_mm",
+      "slope_deg",
+      "rainfall_72h_mm",
+      "elevation_m",
+      "vegetation_ndvi",
+      "aspect_deg"
+    ],
+    "categorical": [
+      "lithology",
+      "soil_type"
+    ],
+    "transformed_names": [
+      "latitude",
+      "longitude",
+      "rainfall_24h_mm",
+      "slope_deg",
+      "rainfall_72h_mm",
+      "elevation_m",
+      "vegetation_ndvi",
+      "aspect_deg",
+      "lithology_Metamorphic",
+      "lithology_Sedimentary",
+      "lithology_Unconsolidated_Debris",
+      "soil_type_Clay_Loam",
+      "soil_type_Gravelly_Soil",
+      "soil_type_Sandy_Loam"
+    ]
+  },
+  "disclaimer": "EXPERIMENTAL PROTOTYPE: This AI-generated risk score is an uncalibrated mathematical estimate based on a demonstration pipeline. It is not an official disaster warning, evacuation trigger, or geotechnical certification of slope stability."
+}

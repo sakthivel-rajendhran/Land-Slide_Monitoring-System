@@ -274,9 +274,31 @@
         render();
       }
 
-      function render() {
+      async function loadAlertsList() {
+        try {
+          const res = await window.LW.api.get("/api/admin/alerts");
+          const items = res?.content || res?.data?.content || (Array.isArray(res) ? res : []);
+          if (items && items.length > 0) {
+            return items.map(a => ({
+              id: a.id,
+              rawId: a.id,
+              title: a.title,
+              area: a.affectedAreaName || a.monitoredAreaName || "NER Corridor",
+              severity: (a.severity || "HIGH").toLowerCase(),
+              status: (a.status || "DRAFT").toLowerCase(),
+              category: a.category || "Operational Notice",
+              updated_at: a.updatedAt || a.createdAt || new Date().toISOString(),
+              summary: a.summary || a.description || "Active slope hazard threshold notice."
+            }));
+          }
+        } catch (e) {}
+        return getAlerts();
+      }
+
+      async function render() {
         const filter = document.getElementById("stateFilterSelect").value;
-        const list = getAlerts().filter(a => filter === "all" || a.status === filter);
+        const all = await loadAlertsList();
+        const list = all.filter(a => filter === "all" || a.status === filter);
         const tbody = document.getElementById("alertsWorkflowTableBody");
         const format = window.LW.format || {};
 
@@ -291,8 +313,8 @@
               </span>
             </td>
             <td>
-              <span class="lw-chip lw-chip--${a.status === 'published' ? 'current' : (a.status === 'pending' ? 'review' : 'offline')}">
-                ${a.status.toUpperCase()}
+              <span class="lw-chip lw-chip--${a.status === 'published' ? 'current' : (a.status === 'pending' || a.status === 'pending_review' ? 'review' : 'offline')}">
+                ${a.status.replace(/_/g, ' ').toUpperCase()}
               </span>
             </td>
             <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">
@@ -301,7 +323,7 @@
             <td>
               <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                 <button type="button" class="lw-btn lw-btn--sm lw-btn--outline" data-action="preview" data-id="${a.id}">Preview</button>
-                ${a.status === 'pending' ? `
+                ${(a.status === 'pending' || a.status === 'pending_review' || a.status === 'approved') ? `
                   <button type="button" class="lw-btn lw-btn--sm lw-btn--primary" data-action="publish" data-id="${a.id}">Publish</button>
                   <button type="button" class="lw-btn lw-btn--sm lw-btn--danger" data-action="reject" data-id="${a.id}" style="color: var(--color-risk-severe);">Reject</button>
                 ` : ''}
@@ -317,8 +339,9 @@
         `).join("");
 
         tbody.querySelectorAll('[data-action="preview"]').forEach(b => {
-          b.onclick = () => {
-            const item = getAlerts().find(x => x.id === parseInt(b.dataset.id, 10));
+          b.onclick = async () => {
+            const allItems = await loadAlertsList();
+            const item = allItems.find(x => String(x.id) === String(b.dataset.id));
             if (item) {
               window.LW.ui?.confirm(
                 `Public Preview: ${item.title}`,
@@ -329,47 +352,84 @@
         });
 
         tbody.querySelectorAll('[data-action="publish"]').forEach(b => {
-          b.onclick = () => {
-            const list = getAlerts();
-            const target = list.find(x => x.id === parseInt(b.dataset.id, 10));
-            if (target) {
-              target.status = "published";
-              target.updated_at = new Date().toISOString();
-              saveAlerts(list);
-              window.LW.ui?.toast(`Advisory '${target.title}' published to public feed and push channels.`, "success");
+          b.onclick = async () => {
+            const id = b.dataset.id;
+            try {
+              await window.LW.api.post(`/api/admin/alerts/${encodeURIComponent(id)}/publish`);
+            } catch (e) {
+              const list = getAlerts();
+              const target = list.find(x => String(x.id) === String(id));
+              if (target) {
+                target.status = "published";
+                target.updated_at = new Date().toISOString();
+                saveAlerts(list);
+              }
             }
+            window.LW.ui?.toast(`Advisory '${id}' published to public feed.`, "success");
+            render();
+          };
+        });
+
+        tbody.querySelectorAll('[data-action="reject"]').forEach(b => {
+          b.onclick = async () => {
+            const id = b.dataset.id;
+            try {
+              await window.LW.api.post(`/api/admin/alerts/${encodeURIComponent(id)}/reject`, { reason: "Needs recalibration" });
+            } catch (e) {
+              const list = getAlerts();
+              const target = list.find(x => String(x.id) === String(id));
+              if (target) {
+                target.status = "draft";
+                target.updated_at = new Date().toISOString();
+                saveAlerts(list);
+              }
+            }
+            window.LW.ui?.toast(`Advisory returned to draft for revision.`, "info");
+            render();
           };
         });
 
         tbody.querySelectorAll('[data-action="submit-review"]').forEach(b => {
-          b.onclick = () => {
-            const list = getAlerts();
-            const target = list.find(x => x.id === parseInt(b.dataset.id, 10));
-            if (target) {
-              target.status = "pending";
-              target.updated_at = new Date().toISOString();
-              saveAlerts(list);
-              window.LW.ui?.toast(`Draft '${target.title}' submitted for supervisor review.`, "info");
+          b.onclick = async () => {
+            const id = b.dataset.id;
+            try {
+              await window.LW.api.post(`/api/admin/alerts/${encodeURIComponent(id)}/submit`);
+            } catch (e) {
+              const list = getAlerts();
+              const target = list.find(x => String(x.id) === String(id));
+              if (target) {
+                target.status = "pending";
+                target.updated_at = new Date().toISOString();
+                saveAlerts(list);
+              }
             }
+            window.LW.ui?.toast(`Draft '${id}' submitted for supervisor review.`, "info");
+            render();
           };
         });
 
         tbody.querySelectorAll('[data-action="withdraw"]').forEach(b => {
           b.onclick = () => {
-            const list = getAlerts();
-            const target = list.find(x => x.id === parseInt(b.dataset.id, 10));
-            if (target) {
-              window.LW.ui?.confirm(
-                "Withdraw Public Advisory?",
-                "Are you sure you want to withdraw this emergency advisory? A withdrawal justification log will be registered.",
-                () => {
-                  target.status = "withdrawn";
-                  target.updated_at = new Date().toISOString();
-                  saveAlerts(list);
-                  window.LW.ui?.toast(`Advisory withdrawn from public broadcast.`, "info");
+            const id = b.dataset.id;
+            window.LW.ui?.confirm(
+              "Withdraw Public Advisory?",
+              "Are you sure you want to withdraw this emergency advisory? A withdrawal justification log will be registered.",
+              async () => {
+                try {
+                  await window.LW.api.post(`/api/admin/alerts/${encodeURIComponent(id)}/withdraw`, { reason: "Hazard risk subsided" });
+                } catch (e) {
+                  const list = getAlerts();
+                  const target = list.find(x => String(x.id) === String(id));
+                  if (target) {
+                    target.status = "withdrawn";
+                    target.updated_at = new Date().toISOString();
+                    saveAlerts(list);
+                  }
                 }
-              );
-            }
+                window.LW.ui?.toast(`Advisory withdrawn from public broadcast.`, "info");
+                render();
+              }
+            );
           };
         });
       }

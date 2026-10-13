@@ -178,7 +178,7 @@
                 <th>Audit Justification</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="auditLogsTableBody">
               <tr>
                 <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">Today, 09:42 IST</td>
                 <td><strong>Field Officer Sharma</strong> (OFFICER)</td>
@@ -186,30 +186,6 @@
                 <td>Alert #101 (Haflong Corridor)</td>
                 <td><span class="system-status-badge">SUCCESS</span></td>
                 <td>Precipitation threshold breached 240mm. Validated via piezometer ARG-04.</td>
-              </tr>
-              <tr>
-                <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">Today, 08:15 IST</td>
-                <td><strong>System Pipeline</strong> (SYSTEM)</td>
-                <td>DATA_INGESTION</td>
-                <td>IMD Doppler NetCDF Stream</td>
-                <td><span class="system-status-badge">SUCCESS</span></td>
-                <td>Automatic 15-minute polling synchronization completed.</td>
-              </tr>
-              <tr>
-                <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">Yesterday, 16:20 IST</td>
-                <td><strong>Dr. P. Lyngdoh</strong> (OFFICER)</td>
-                <td>ASSESSMENT_REVIEW</td>
-                <td>Assessment #198 (Sohra Escarpment)</td>
-                <td><span class="system-status-badge">APPROVED</span></td>
-                <td>Confirmed elevated pore saturation 61.4 kPa against historical slip model.</td>
-              </tr>
-              <tr>
-                <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">Yesterday, 11:05 IST</td>
-                <td><strong>NER Command Admin</strong> (ADMIN)</td>
-                <td>USER_ROLE_UPDATE</td>
-                <td>Officer Sharma (OFFICER)</td>
-                <td><span class="system-status-badge">SUCCESS</span></td>
-                <td>Authorized emergency dispatch jurisdiction over Dima Hasao.</td>
               </tr>
             </tbody>
           </table>
@@ -221,13 +197,14 @@
   <!-- Core Services -->
   <script src="../js/core/config.js"></script>
   <script src="../js/core/content.js"></script>
+  <script src="../js/core/format.js"></script>
   <script src="../js/core/api.js"></script>
   <script src="../js/core/auth.js"></script>
   <script src="../js/core/ui.js"></script>
   <script src="../js/core/guard.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
       if (!window.LW.guard.requireRole(["officer", "admin"])) return;
       const user = window.LW.auth.getUser();
 
@@ -244,6 +221,32 @@
       const sidebar = document.getElementById("dashboardSidebar");
       if (mobileToggle && sidebar) {
         mobileToggle.onclick = () => sidebar.classList.toggle("mobile-open");
+      }
+
+      // Fetch live audit logs
+      const tbody = document.getElementById("auditLogsTableBody");
+      try {
+        const logs = await window.LW.api.get("/api/admin/audit-logs");
+        const list = Array.isArray(logs) ? logs : (Array.isArray(logs?.data) ? logs.data : []);
+        if (list && list.length > 0) {
+          tbody.innerHTML = list.map(l => {
+            const time = new Date(l.timestamp).toLocaleString();
+            const actor = l.actorUserId ? `User #${l.actorUserId}` : "System Pipeline";
+            const outcomeColor = l.outcome === "SUCCESS" ? "var(--color-primary, #C7F464)" : "#F07878";
+            return `
+              <tr>
+                <td style="font-family: var(--lw-font-mono); font-size: 0.75rem;">${time}</td>
+                <td><strong>${actor}</strong></td>
+                <td><code style="font-size: 0.75rem; background: rgba(0,0,0,0.25); padding: 2px 4px; border-radius: 3px;">${l.eventType || 'SYSTEM'}</code></td>
+                <td>Report #${l.relatedReportId || '--'}</td>
+                <td><span class="system-status-badge" style="color: ${outcomeColor};">${l.outcome}</span></td>
+                <td style="font-size: 0.8125rem;">${l.description || '--'}</td>
+              </tr>
+            `;
+          }).join("");
+        }
+      } catch (err) {
+        console.warn("Could not load live audit logs:", err);
       }
     });
   </script>

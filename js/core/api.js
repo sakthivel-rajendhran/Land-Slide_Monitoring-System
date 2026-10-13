@@ -27,10 +27,32 @@ window.LW.api = (function() {
     }
 
     const headers = {
-      "Content-Type": "application/json",
       "Accept": "application/json",
       ...options.headers
     };
+
+    // Only default Content-Type to JSON if body is not FormData
+    if (!(options.body instanceof FormData) && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    // Inject Bearer token if available
+    let token = null;
+    try {
+      const storedRaw = (typeof sessionStorage !== "undefined" && sessionStorage.getItem("sg_user")) ||
+                        (typeof localStorage !== "undefined" && localStorage.getItem("sg_user"));
+      if (storedRaw) {
+        const parsed = JSON.parse(storedRaw);
+        token = parsed.token || parsed.jwt;
+      }
+      if (!token && typeof localStorage !== "undefined") {
+        token = localStorage.getItem("sg_token");
+      }
+    } catch (e) {}
+
+    if (token && !headers["Authorization"]) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
 
     const csrf = getCsrfToken();
     if (csrf) {
@@ -61,7 +83,21 @@ window.LW.api = (function() {
         };
       }
 
-      return json; // Envelope { success: true, data: ..., message: ... }
+      // Seamless compatibility for direct DTOs / arrays vs envelope { success, data }
+      if (json && typeof json === "object" && !("data" in json)) {
+        try {
+          Object.defineProperty(json, "data", {
+            value: json,
+            writable: true,
+            configurable: true,
+            enumerable: false
+          });
+        } catch (e) {
+          json.data = json;
+        }
+      }
+
+      return json;
     } catch (err) {
       clearTimeout(timeoutId);
 
@@ -99,10 +135,25 @@ window.LW.api = (function() {
       return request(url, { method: "GET" });
     },
     post(path, body = {}) {
-      return request(path, { method: "POST", body: JSON.stringify(body) });
+      const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+      return request(path, {
+        method: "POST",
+        body: isForm ? body : JSON.stringify(body)
+      });
+    },
+    patch(path, body = {}) {
+      const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+      return request(path, {
+        method: "PATCH",
+        body: isForm ? body : JSON.stringify(body)
+      });
     },
     put(path, body = {}) {
-      return request(path, { method: "PUT", body: JSON.stringify(body) });
+      const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+      return request(path, {
+        method: "PUT",
+        body: isForm ? body : JSON.stringify(body)
+      });
     },
     delete(path) {
       return request(path, { method: "DELETE" });

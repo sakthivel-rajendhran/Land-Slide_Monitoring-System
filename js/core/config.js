@@ -7,8 +7,11 @@ window.LW = window.LW || {};
 
 window.LW.config = {
   appVersion: "1.0.0",
-  apiBase: "/api",
-  useMock: true, // Default to true for offline demo, turns off when live backend responds
+  // If hosted directly on backend port 8080 use relative /api, otherwise target live backend on http://localhost:8080/api
+  apiBase: (typeof window !== "undefined" && window.location && window.location.port === "8080")
+    ? "/api"
+    : "http://localhost:8080/api",
+  useMock: false, // Live persistence against Spring Boot & MySQL
 
   tileProvider: {
     url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",

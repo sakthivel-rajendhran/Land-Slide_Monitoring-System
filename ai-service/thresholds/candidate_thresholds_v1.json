@@ -1,0 +1,57 @@
+{
+  "threshold_set_id": "TH-NE-INDIA-V1-CANDIDATE",
+  "version": "1.0.0-candidate",
+  "created_timestamp": "2026-10-13T10:00:00Z",
+  "metric_name": "uncalibrated_hazard_score",
+  "unit": "dimensionless_index",
+  "valid_range": [0.0, 1.0],
+  "intended_geographic_scope": "Northeast India (Assam, Meghalaya, Sikkim, Nagaland, Arunachal Pradesh, Mizoram, Manipur, Tripura)",
+  "prediction_horizon": "Instantaneous hazard conditional on 24h and 72h antecedent hydrometeorological stress",
+  "review_status": "PENDING_EXPERT_REVIEW",
+  "approval_history": [],
+  "thresholds": [
+    {
+      "category": "LOW",
+      "range_min": 0.0,
+      "range_max": 0.30,
+      "action_protocol": "Routine baseline monitoring. Standard public vigilance.",
+      "intended_use": "Advisory context for general public and field maintenance crews."
+    },
+    {
+      "category": "MODERATE",
+      "range_min": 0.30,
+      "range_max": 0.60,
+      "action_protocol": "Advisory inspection of vulnerable cuttings, culverts, and toe drains.",
+      "intended_use": "District disaster management authorities and road maintenance patrols."
+    },
+    {
+      "category": "HIGH",
+      "range_min": 0.60,
+      "range_max": 0.80,
+      "action_protocol": "Heightened surveillance on critical slopes; pre-deployment of heavy equipment.",
+      "intended_use": "Emergency response coordination and localized traffic diversions."
+    },
+    {
+      "category": "SEVERE",
+      "range_min": 0.80,
+      "range_max": 1.0,
+      "action_protocol": "Critical geotechnical alert; technical field inspection required.",
+      "intended_use": "Internal technical coordination only. PROHIBITED from triggering automatic sirens or evacuations."
+    }
+  ],
+  "trade_off_analysis": {
+    "lower_threshold_effect": "Increases sensitivity (reduces missed events / false negatives) at the cost of higher false-alarm rate (FAR), which can cause warning fatigue.",
+    "higher_threshold_effect": "Increases precision (reduces false alarms) but increases risk of missed slope failures (false negatives), potentially compromising life safety.",
+    "current_compromise": "Provisional cutoffs chosen as conservative engineering demonstration baselines. Must not be deployed operationally without formal ROC/cost-matrix tuning."
+  },
+  "required_reviewer_qualifications": [
+    "Senior Geotechnical Engineer with >= 10 years experience in Himalayan slope stability",
+    "Engineering Geologist certified by Geological Survey of India (GSI) or equivalent body",
+    "State Disaster Management Authority (SDMA) Technical Advisor"
+  ],
+  "governance_directives": [
+    "Thresholds are experimental candidate values awaiting formal expert committee review.",
+    "Do NOT describe these thresholds as scientifically established or officially endorsed.",
+    "Do NOT trigger automatic public alerts or civil-protection evacuation notices from these thresholds."
+  ]
+}

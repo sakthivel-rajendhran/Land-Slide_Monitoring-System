@@ -1559,10 +1559,14 @@
           const statusClass = getIncidentStatusClass(item.status);
           const passabilityBadge = getPassabilityBadgeHtml(item.roadPassability);
           const photoThumbnails = (item.photos && item.photos.length > 0)
-            ? `<div style="display:flex;gap:4px;align-items:center;">
-                <img src="../${item.photos[0].url.replace(/^(\.\.\/)+/, '')}" alt="Evidence" style="width:36px;height:36px;object-fit:cover;border-radius:3px;border:1px solid #30432D;" onerror="this.style.display='none'" />
-                <span style="font-size:0.75rem;color:var(--color-text-secondary);font-weight:600;">${item.photos.length} photo${item.photos.length>1?'s':''}</span>
-               </div>`
+            ? (() => {
+                const pUrl = item.photos[0].url || '';
+                const resolved = (pUrl.startsWith('http') || pUrl.startsWith('/')) ? pUrl : `../${pUrl.replace(/^(\.\.\/)+/, '')}`;
+                return `<div style="display:flex;gap:4px;align-items:center;">
+                  <img src="${resolved}" alt="Evidence" style="width:36px;height:36px;object-fit:cover;border-radius:3px;border:1px solid #30432D;" onerror="this.style.display='none'" />
+                  <span style="font-size:0.75rem;color:var(--color-text-secondary);font-weight:600;">${item.photos.length} photo${item.photos.length>1?'s':''}</span>
+                </div>`;
+              })()
             : `<span style="font-size:0.75rem;color:var(--color-text-muted);">No photos</span>`;
 
           const citizenDisplay = item.citizenName || item.citizenEmail || item.citizenId || "Citizen";
@@ -1664,7 +1668,8 @@
             photosGrid.innerHTML = '<span style="font-size: 0.75rem; color: var(--color-text-muted);">No photograph attachments provided with this submission.</span>';
           } else {
             photosGrid.innerHTML = photos.map(p => {
-              const cleanedUrl = "../" + p.url.replace(/^(\.\.\/)+/, '');
+              const pUrl = p.url || '';
+              const cleanedUrl = (pUrl.startsWith('http') || pUrl.startsWith('/')) ? pUrl : ("../" + pUrl.replace(/^(\.\.\/)+/, ''));
               return `
                 <a href="${cleanedUrl}" target="_blank" title="View Full Evidence Image" style="display: block; position: relative;">
                   <img src="${cleanedUrl}" alt="Photo Evidence" style="width: 100px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #30432D; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
