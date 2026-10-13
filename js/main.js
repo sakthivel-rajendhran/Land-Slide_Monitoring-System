@@ -47,6 +47,7 @@ function initMobileMenu() {
     const isOpen = open !== undefined ? open : !navMenu.classList.contains('nav-open');
     if (isOpen) {
       navMenu.classList.add('nav-open');
+      toggleBtn.classList.add('is-active');
       toggleBtn.setAttribute('aria-expanded', 'true');
       toggleBtn.innerHTML = `
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -56,6 +57,7 @@ function initMobileMenu() {
       document.body.style.overflow = 'hidden';
     } else {
       navMenu.classList.remove('nav-open');
+      toggleBtn.classList.remove('is-active');
       toggleBtn.setAttribute('aria-expanded', 'false');
       toggleBtn.innerHTML = `
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -101,6 +103,11 @@ function initNavigationAndScrollTracking() {
   const allAnchorLinks = document.querySelectorAll('a[href^="#"]');
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  const trackedNavIds = Array.from(navLinks)
+    .map(link => (link.getAttribute('href') || '').replace('#', ''))
+    .filter(Boolean);
+  const navigableSections = trackedSections.filter(s => trackedNavIds.includes(s.id));
+
   if (!trackedSections.length || !navLinks.length) return;
 
   let isClickScrolling = false;
@@ -141,9 +148,9 @@ function initNavigationAndScrollTracking() {
       return;
     }
 
-    // 2. Bottom of document boundary: Final section is active
-    if (scrollY + viewportHeight >= docHeight - 60) {
-      const lastSection = trackedSections[trackedSections.length - 1];
+    // 2. Bottom of document boundary: Last navigable section is active
+    if (scrollY + viewportHeight >= docHeight - 50) {
+      const lastSection = navigableSections[navigableSections.length - 1];
       if (lastSection) {
         setActiveNavLink(lastSection.id);
       }
@@ -152,11 +159,11 @@ function initNavigationAndScrollTracking() {
 
     // 3. Middle sections: Determine which section is currently below the navbar
     const navHeight = header ? header.offsetHeight : 80;
-    const threshold = navHeight + 80;
+    const threshold = navHeight + 100;
 
     let currentSectionId = 'home';
-    for (let i = 0; i < trackedSections.length; i++) {
-      const section = trackedSections[i];
+    for (let i = 0; i < navigableSections.length; i++) {
+      const section = navigableSections[i];
       const rect = section.getBoundingClientRect();
       if (rect.top <= threshold && rect.bottom > navHeight) {
         currentSectionId = section.id;

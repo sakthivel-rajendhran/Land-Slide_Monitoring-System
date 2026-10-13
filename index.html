@@ -19,7 +19,10 @@
   <!-- Google Fonts: Manrope -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Pinyon+Script&family=Alex+Brush&display=swap" rel="stylesheet">
+  
+  <!-- Firlest Headline Webfont -->
+  <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/firlest">
   
   <!-- Core Design System & Styles (Cinematic Dark Forest-Green Glassmorphism) -->
   <link rel="stylesheet" href="css/style.css">
@@ -45,7 +48,7 @@
           <!-- Right Slope -->
           <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
         </svg>
-        <span class="brand-name">Slope<span>Guard</span></span>
+        <span class="brand-name">SLOPE<span>GUARD</span></span>
       </a>
 
       <!-- 2. Center: Dedicated Navigation Bar (Contains ONLY the 6 navigation items) -->
@@ -96,18 +99,10 @@
       </div>
 
       <div class="container hero-container">
-        <!-- Announcement Pill -->
-        <a href="#risk-intelligence" class="hero-announcement" aria-label="Explore SlopeGuard 2.0 Terrain Intelligence">
-          <span class="announcement-dot"></span>
-          <span class="announcement-tag">New</span>
-          <span>SlopeGuard 2.0 is now active</span>
-          <span class="announcement-arrow">›</span>
-        </a>
-
         <!-- Main Headline with Editorial Italic Serif -->
         <h1 class="hero-headline">
           Understand the terrain.<br>
-          <span class="hero-highlight-italic">Anticipate</span> the risk.
+          <span class="hero-highlight-italic handwritten-anticipate"><span class="handwritten-text">Anticipate</span><span class="handwritten-nib" aria-hidden="true"></span></span> the risk.
         </h1>
 
         <!-- Supporting Description -->
@@ -143,130 +138,6 @@
               </svg>
               <span>Interactive risk visualization</span>
             </div>
-          </div>
-        </div>
-
-        <!-- Three Glass Feature Cards (Original Visuals & Connectors) -->
-        <div class="hero-cards-section">
-          <div class="reference-cards-grid">
-            <!-- Card 1: Unify Terrain Data -->
-            <article class="glass-feature-card">
-              <div>
-                <div class="card-header-row">
-                  <div class="card-icon-badge">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                    </svg>
-                  </div>
-                  <h3 class="card-title">Unify your data</h3>
-                </div>
-                <p class="card-desc">
-                  Connect all your elevation, soil, and spatial sources into a single source of truth.
-                </p>
-              </div>
-
-              <!-- Graphic 1: Data Node Converging Architecture -->
-              <div class="card-visual-container">
-                <div class="data-nodes-visual">
-                  <div class="data-source-col">
-                    <div class="source-node-pill" title="Database Telemetry">
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
-                    </div>
-                    <div class="source-node-pill" title="Satellite Cloud Observations">
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
-                    </div>
-                    <div class="source-node-pill" title="Sensor Matrix Grid">
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                    </div>
-                    <div class="source-node-pill" title="Telemetry Code Integration">&lt;/&gt;</div>
-                  </div>
-
-                  <!-- Flowing Connector Lines SVG -->
-                  <svg class="source-connectors-svg" viewBox="0 0 110 130" fill="none">
-                    <path d="M 0 18 C 50 18, 55 65, 110 65" stroke="rgba(199, 244, 100, 0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
-                    <path d="M 0 48 C 45 48, 55 65, 110 65" stroke="rgba(199, 244, 100, 0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
-                    <path d="M 0 80 C 45 80, 55 65, 110 65" stroke="rgba(199, 244, 100, 0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
-                    <path d="M 0 110 C 50 110, 55 65, 110 65" stroke="rgba(199, 244, 100, 0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
-                  </svg>
-
-                  <div class="central-target-node" title="SlopeGuard Intelligence Hub">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2L3 9v11a2 2 0 002 2h14a2 2 0 002-2V9l-9-7zm0 4.5l5 3.88V18H7v-7.62l5-3.88z"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <!-- Card 2: Surface What Matters -->
-            <article class="glass-feature-card">
-              <div>
-                <div class="card-header-row">
-                  <div class="card-icon-badge">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                    </svg>
-                  </div>
-                  <h3 class="card-title">Surface what matters</h3>
-                </div>
-                <p class="card-desc">
-                  AI that cuts through environmental noise and highlights the insights that drive impact.
-                </p>
-              </div>
-
-              <!-- Graphic 2: AI Risk Wave Contour Chart -->
-              <div class="card-visual-container">
-                <div class="wave-chart-visual">
-                  <span class="chart-tag-badge">↑ 92% Risk Hotspot</span>
-                  <svg class="wave-chart-svg" viewBox="0 0 260 140" fill="none">
-                    <path d="M 10 130 Q 60 120 95 85 T 160 38 T 215 95 T 255 125 L 255 140 L 10 140 Z" fill="rgba(201, 111, 79, 0.12)" />
-                    <path d="M 10 125 Q 60 115 100 100 T 160 70 T 215 105 T 255 130" stroke="rgba(201, 111, 79, 0.35)" stroke-width="1.8" />
-                    <path d="M 10 120 Q 60 105 95 80 T 160 36 T 215 90 T 255 120" stroke="#C96F4F" stroke-width="2.5" />
-                    <circle cx="160" cy="36" r="4.5" fill="#C96F4F" />
-                    <circle cx="160" cy="36" r="8.5" stroke="#C96F4F" stroke-width="1.5" stroke-opacity="0.5" />
-                  </svg>
-                </div>
-              </div>
-            </article>
-
-            <!-- Card 3: Act With Confidence -->
-            <article class="glass-feature-card">
-              <div>
-                <div class="card-header-row">
-                  <div class="card-icon-badge">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                    </svg>
-                  </div>
-                  <h3 class="card-title">Act with confidence</h3>
-                </div>
-                <p class="card-desc">
-                  Built-in telemetry governance and threshold alerting so your team can move fast, without risk.
-                </p>
-              </div>
-
-              <!-- Graphic 3: Radar Sensor Target Rings -->
-              <div class="card-visual-container">
-                <div class="radar-target-visual">
-                  <svg class="radar-svg" viewBox="0 0 200 160" fill="none">
-                    <circle cx="100" cy="80" r="24" stroke="rgba(201, 111, 79, 0.25)" stroke-width="1" />
-                    <circle cx="100" cy="80" r="48" stroke="rgba(201, 111, 79, 0.2)" stroke-width="1" stroke-dasharray="3 3" />
-                    <circle cx="100" cy="80" r="70" stroke="rgba(201, 111, 79, 0.15)" stroke-width="1" />
-                    
-                    <line x1="25" y1="80" x2="175" y2="80" stroke="rgba(217, 201, 178, 0.4)" stroke-width="1" />
-                    <line x1="100" y1="10" x2="100" y2="150" stroke="rgba(217, 201, 178, 0.4)" stroke-width="1" />
-                    
-                    <circle cx="100" cy="80" r="14" fill="#FAF8F2" stroke="#C96F4F" stroke-width="1.5" />
-                    <path d="M 96 76 L 100 73 L 104 76 L 104 81 C 104 84 100 86 100 86 C 100 86 96 84 96 81 Z" fill="#C96F4F" />
-
-                    <circle cx="134" cy="46" r="3.5" fill="#C96F4F" />
-                    <circle cx="66" cy="114" r="3.5" fill="#C96F4F" />
-                    <circle cx="148" cy="80" r="3" fill="#D9C9B2" />
-                    <circle cx="52" cy="80" r="3" fill="#D9C9B2" />
-                  </svg>
-                </div>
-              </div>
-            </article>
           </div>
         </div>
       </div>
@@ -797,7 +668,7 @@
               <polygon points="23,6 30,19 23,24" fill="#D9C9B2" />
               <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
             </svg>
-            <span class="brand-name">Slope<span>Guard</span></span>
+            <span class="brand-name">SLOPE<span>GUARD</span></span>
           </a>
           <p class="footer-desc">
             SlopeGuard is an AI-assisted landslide risk monitoring and early warning system designed to support disaster risk reduction, hazard assessment, and community resilience in vulnerable mountainous regions.

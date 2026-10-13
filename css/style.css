@@ -6,9 +6,10 @@
 /* --- Exact Master Earthy Minimal Tokens --- */
 :root {
   /* Master Earthy Color Palette */
-  --color-primary: #2E3A2F;               /* Deep forest green */
-  --color-forest-green: #2E3A2F;
-  --color-deep-forest: #242E25;
+  --color-primary: #46566A;               /* Slate blue primary replacing old dark green */
+  --color-slate-blue: #46566A;
+  --color-forest-green: #2E3A2F;          /* Preserved for logo wordmark */
+  --color-deep-forest: #364455;
   --color-secondary: #6B7F5B;             /* Muted sage green */
   --color-sage: #6B7F5B;
   --color-tertiary: #D9C9B2;              /* Warm sand beige */
@@ -22,26 +23,26 @@
   --color-primary-lime: #C96F4F;          /* Terracotta replaces old lime accent */
   --color-light-lime: #D9C9B2;            /* Warm sand beige */
   --color-hover-lime: #B85E3E;
-  --color-primary-hover: #1E271F;
+  --color-primary-hover: #364455;
   --color-active-lime: #A64E30;
-  --color-primary-active: #151D16;
+  --color-primary-active: #2A3644;
   --color-primary-text: #FFFFFF;
   --color-secondary-lime: #6B7F5B;
   --color-natural-green: #6B7F5B;
-  --color-soft-green-surface: #F0ECE1;
+  --color-soft-green-surface: #F8F6EE;
 
   /* Background colours */
   --color-bg-main: #F8F6EE;               /* Warm ivory main page background */
   --color-background: #F8F6EE;
-  --color-bg-secondary: #F0ECE1;          /* Secondary soft sand surface */
-  --color-background-secondary: #F0ECE1;
+  --color-bg-secondary: #F8F6EE;          /* Warm ivory for large background sections */
+  --color-background-secondary: #F8F6EE;
   --color-bg-elevated: #FFFFFF;           /* Card & elevated surface */
   --color-surface-card: #FFFFFF;
-  --color-surface-card-warm: #FAF8F2;
+  --color-surface-card-warm: #FFFFFF;
 
   /* Text colours */
-  --color-text-primary: #2E3A2F;          /* Deep forest green primary text */
-  --color-text-secondary: #5C6E5C;        /* Muted sage secondary text */
+  --color-text-primary: #46566A;          /* Slate blue primary text & headings */
+  --color-text-secondary: #6B7F5B;        /* Sage green secondary text */
   --color-text-muted: #7E8D7B;            /* Understated tertiary text */
   --color-text-disabled: #A6B0A4;
 
@@ -69,6 +70,7 @@
   /* Typography — Manrope Modern Editorial Sans */
   --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-serif: 'Newsreader', Georgia, serif;
+  --font-captain: 'American Captain', Impact, 'Arial Black', sans-serif;
 
   /* Spacing Scale */
   --space-xs: 0.25rem;
@@ -227,44 +229,61 @@ button {
 
 @supports not (backdrop-filter: blur(10px)) {
   .nav-container,
-  .brand-logo,
   .nav-bar {
     background: #FFFFFF;
   }
 }
 
 .site-header.scrolled .nav-container,
-.site-header.scrolled .brand-logo,
 .site-header.scrolled .nav-bar {
   background: #FFFFFF;
   border-color: var(--color-glass-border);
   box-shadow: 0 6px 20px rgba(46, 58, 47, 0.08);
 }
 
-/* 1. Left: SlopeGuard Branding (Standalone frosted glass badge) */
+/* --- SlopeGuard Brand Typography (Squlier Munchis) --- */
+@font-face {
+  font-family: 'Squlier Munchis';
+  src: local('Squlier Munchis'), local('Squiler Munchis'),
+       url('../assets/fonts/SqulierMunchis.woff2') format('woff2'),
+       url('../assets/fonts/SqulierMunchis.woff') format('woff'),
+       url('../assets/fonts/SqulierMunchis.ttf') format('truetype'),
+       url('../assets/fonts/SqulierMunchis.otf') format('opentype'),
+       url('../assets/fonts/SquilerMunchis.woff2') format('woff2'),
+       url('../assets/fonts/SquilerMunchis.woff') format('woff'),
+       url('../assets/fonts/SquilerMunchis.ttf') format('truetype'),
+       url('../assets/fonts/SquilerMunchis.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 1. Left: SlopeGuard Branding (Directly on header background, zero container box) */
 .brand-logo {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
   text-decoration: none;
   cursor: pointer;
   z-index: 1001;
-  min-height: 46px;
-  padding: 0.5rem 1.15rem;
-  border-radius: var(--radius-navbar);
-  background: var(--color-glass-surface);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--color-glass-border);
-  box-shadow: var(--glass-shadow);
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0;
+  margin: 0;
   pointer-events: auto;
-  transition: all var(--transition-fast);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
   flex-shrink: 0;
 }
 
 .brand-logo:hover {
-  background: #FFFFFF;
-  border-color: var(--color-highlight-border);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  opacity: 0.88;
   transform: translateY(-1px);
 }
 
@@ -304,22 +323,24 @@ button {
 }
 
 .brand-name {
-  font-size: 1.05rem;
+  font-family: 'Squlier Munchis', 'Squiler Munchis', var(--font-sans);
+  font-size: 1.2rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--color-text-primary);
-  display: flex;
+  color: var(--color-primary);
+  display: inline-flex;
   align-items: center;
+  line-height: 1;
 }
 
 .brand-name span {
-  color: var(--color-primary-lime);
-  margin-left: 1px;
+  color: var(--color-accent);
+  margin-left: 0;
 }
 
-section[id] {
-  scroll-margin-top: calc(var(--nav-height) + 1.25rem);
+section[id], footer[id] {
+  scroll-margin-top: calc(var(--nav-height) + 1.75rem);
 }
 
 /* Navigation Links (Center Pill Cluster) */
@@ -333,12 +354,14 @@ section[id] {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-text-secondary);
-  padding: 0.45rem 0;
+  padding: 0.45rem 0.25rem;
   position: relative;
   min-height: 44px;
   display: flex;
   align-items: center;
-  transition: color var(--transition-fast);
+  border-radius: var(--radius-button);
+  transition: color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nav-link::after {
@@ -346,29 +369,59 @@ section[id] {
   position: absolute;
   bottom: 6px;
   left: 50%;
-  transform: translateX(-50%);
-  width: 14px;
-  height: 2px;
-  border-radius: 1px;
-  background-color: var(--color-primary-lime);
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  width: 20px;
+  height: 2.5px;
+  border-radius: 2px;
+  background-color: var(--color-accent);
   opacity: 0;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.22s ease;
 }
 
-.nav-link:hover,
+.nav-link:hover {
+  color: var(--color-text-primary);
+}
+
+.nav-link:hover::after {
+  opacity: 0.45;
+  transform: translateX(-50%) scaleX(0.7);
+  background-color: var(--color-primary);
+}
+
+.nav-link:active {
+  transform: scale(0.96);
+  transition: transform 0.08s ease;
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
 .nav-link.active,
 .nav-link.is-active,
 .nav-link[aria-current="location"],
 .nav-link[aria-current="page"] {
   color: var(--color-text-primary);
+  font-weight: 700;
 }
 
-.nav-link:hover::after,
 .nav-link.active::after,
 .nav-link.is-active::after,
 .nav-link[aria-current="location"]::after,
 .nav-link[aria-current="page"]::after {
   opacity: 1;
+  transform: translateX(-50%) scaleX(1);
+  background-color: var(--color-accent);
+}
+
+.nav-link.active:hover::after,
+.nav-link.is-active:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scaleX(1.1);
 }
 
 /* Right Nav Actions (Log in + Get Started) */
@@ -389,7 +442,11 @@ section[id] {
   color: var(--color-text-primary);
   background: transparent;
   border: 1px solid var(--color-glass-border);
-  transition: all var(--transition-fast);
+  transition: background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s ease;
   min-height: 40px;
 }
 
@@ -397,6 +454,17 @@ section[id] {
   color: var(--color-text-primary);
   background: var(--color-bg-secondary);
   border-color: var(--color-secondary);
+  transform: translateY(-1px);
+}
+
+.btn-nav-login:active {
+  transform: scale(0.97);
+  transition: transform 0.08s ease;
+}
+
+.btn-nav-login:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 /* Master Primary Button Styles (Terracotta Accent #C96F4F, Sharp Rectangular Geometry) */
@@ -418,7 +486,10 @@ button[type="submit"]:not(.btn-secondary):not(.btn-google) {
   box-shadow: var(--btn-shadow);
   cursor: pointer;
   text-decoration: none;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s ease;
 }
 
 .btn-primary:hover, 
@@ -436,14 +507,15 @@ button[type="submit"]:not(.btn-secondary):not(.btn-google):hover {
 button[type="submit"]:not(.btn-secondary):not(.btn-google):active {
   background-color: var(--color-active-lime);
   border-color: var(--color-active-lime);
-  transform: translateY(0);
+  transform: scale(0.97);
   box-shadow: var(--btn-shadow-active);
+  transition: transform 0.08s ease;
 }
 
 .btn-primary:focus-visible, 
 .nav-cta-btn:focus-visible,
 button[type="submit"]:not(.btn-secondary):not(.btn-google):focus-visible {
-  outline: 2px solid var(--color-primary-lime);
+  outline: 2px solid var(--color-accent);
   outline-offset: 3px;
 }
 
@@ -510,18 +582,34 @@ button[type="submit"]:disabled {
   min-height: 40px;
   min-width: 40px;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mobile-toggle:hover {
   background: var(--color-bg-secondary);
   border-color: var(--color-highlight-border);
 }
+
+.mobile-toggle:active {
+  transform: scale(0.94);
+  transition: transform 0.08s ease;
+}
+
+.mobile-toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .mobile-toggle svg {
   width: 20px;
   height: 20px;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-toggle.is-active svg {
+  transform: rotate(90deg);
 }
 
 /* ==========================================================================
@@ -529,9 +617,8 @@ button[type="submit"]:disabled {
    ========================================================================== */
 .hero-section {
   position: relative;
-  min-height: 100vh;
-  padding-top: calc(var(--nav-height) + 4.5rem);
-  padding-bottom: 5rem;
+  padding-top: calc(var(--nav-height) + 3.5rem);
+  padding-bottom: 3.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -584,75 +671,144 @@ button[type="submit"]:disabled {
   align-items: center;
 }
 
-/* Announcement Tag */
-.hero-announcement {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.38rem 1rem;
-  border-radius: var(--radius-badge);
-  background: #FFFFFF;
-  border: 1px solid var(--color-glass-border);
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 10px rgba(46, 58, 47, 0.05);
-  transition: all var(--transition-fast);
+/* --- Firlest Hero Headline Typography --- */
+@font-face {
+  font-family: 'Firlest';
+  font-style: normal;
+  font-weight: 400 800;
+  src: local('Firlest'),
+       url('../assets/fonts/Firlest-Regular.woff') format('woff'),
+       url('https://fonts.cdnfonts.com/s/118497/Firlest-Regular.woff') format('woff');
+  font-display: swap;
 }
 
-.hero-announcement:hover {
-  border-color: var(--color-highlight-border);
-  color: var(--color-text-primary);
-  background: #FAF8F2;
+/* --- Elegant Calligraphy Typography (for "Anticipate") --- */
+@font-face {
+  font-family: 'Pinyon Script';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Pinyon Script'), local('PinyonScript-Regular'),
+       url('../assets/fonts/PinyonScript-Regular.ttf') format('truetype'),
+       url('https://fonts.gstatic.com/s/pinyonscript/v24/6xKpdSJbL9-e9LuoeQiDRQR8aOI.ttf') format('truetype');
+  font-display: swap;
 }
 
-.announcement-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: var(--color-accent);
+@font-face {
+  font-family: 'Alex Brush';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Alex Brush'), local('AlexBrush-Regular'),
+       url('../assets/fonts/AlexBrush-Regular.ttf') format('truetype'),
+       url('https://fonts.gstatic.com/s/alexbrush/v23/SZc83FzrJKuqFbwMKk6EtUI.ttf') format('truetype');
+  font-display: swap;
 }
 
-.announcement-tag {
-  color: var(--color-accent);
-  font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  border-radius: 2px;
-}
-
-.announcement-arrow {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
-  transition: transform var(--transition-fast);
-}
-
-.hero-announcement:hover .announcement-arrow {
-  transform: translateX(3px);
-  color: var(--color-accent);
+/* --- American Captain Section Heading Typography --- */
+@font-face {
+  font-family: 'American Captain';
+  font-style: normal;
+  font-weight: 400 700;
+  src: local('American Captain'),
+       url('../assets/fonts/AmericanCaptain.woff') format('woff'),
+       url('https://fonts.cdnfonts.com/s/13747/American%20Captain.woff') format('woff');
+  font-display: swap;
 }
 
 /* Main Editorial Headline */
 .hero-headline {
+  font-family: 'Firlest', var(--font-serif), Georgia, serif;
   font-size: clamp(2.75rem, 6vw, 4.5rem);
-  font-weight: 800;
-  line-height: 1.12;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   color: var(--color-text-primary);
   margin-bottom: 1.5rem;
   max-width: 880px;
 }
 
-/* Terracotta Selective Emphasis ("Anticipate") */
+/* Terracotta Calligraphy Selective Emphasis ("Anticipate" only) */
 .hero-highlight-italic {
-  font-family: inherit;
+  font-family: 'Pinyon Script', 'Alex Brush', cursive;
   font-style: normal;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--color-accent);
-  padding: 0 0.05em;
+  font-size: 1.25em;
+  line-height: 0.85;
+  display: inline-block;
+  vertical-align: -0.06em;
+  letter-spacing: 0.02em;
+  padding: 0 0.12em 0 0.04em;
   text-shadow: none;
+}
+
+/* Animated Handwriting Effect for "Anticipate" */
+.handwritten-anticipate {
+  display: inline-block;
+  position: relative;
+  overflow: visible;
+  vertical-align: baseline;
+}
+
+.handwritten-text {
+  display: inline-block;
+  color: inherit;
+  animation: writeAnticipate 2s cubic-bezier(0.42, 0.02, 0.35, 1) 0.35s both;
+  will-change: clip-path, opacity;
+}
+
+.handwritten-nib {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--color-accent, #C96F4F);
+  box-shadow: 0 0 6px rgba(201, 111, 79, 0.85);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: writeNib 2s cubic-bezier(0.42, 0.02, 0.35, 1) 0.35s forwards;
+  will-change: left, opacity;
+}
+
+@keyframes writeAnticipate {
+  0% {
+    clip-path: polygon(-5% -35%, -5% -35%, -15% 135%, -15% 135%);
+    -webkit-clip-path: polygon(-5% -35%, -5% -35%, -15% 135%, -15% 135%);
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  98% {
+    clip-path: polygon(-5% -35%, 112% -35%, 104% 135%, -15% 135%);
+    -webkit-clip-path: polygon(-5% -35%, 112% -35%, 104% 135%, -15% 135%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: none;
+    -webkit-clip-path: none;
+    opacity: 1;
+  }
+}
+
+@keyframes writeNib {
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+  3% {
+    opacity: 0.9;
+  }
+  96% {
+    left: 100%;
+    opacity: 0.9;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
 }
 
 /* Subtitle */
@@ -671,7 +827,7 @@ button[type="submit"]:disabled {
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
-  margin-bottom: 4.5rem;
+  margin-bottom: 0;
 }
 
 .btn-hero-primary {
@@ -1071,10 +1227,11 @@ button[type="submit"]:disabled {
 }
 
 .section-title {
-  font-size: clamp(2rem, 3.8vw, 3rem);
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.025em;
+  font-family: var(--font-captain), 'American Captain', Impact, 'Arial Black', sans-serif;
+  font-size: clamp(2.35rem, 4.4vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
   color: var(--color-text-primary);
   margin-bottom: 1rem;
 }
@@ -1265,7 +1422,7 @@ button[type="submit"]:disabled {
 .sector-pin-label {
   font-size: 0.725rem;
   font-weight: 700;
-  color: var(--color-text-primary, #2E3A2F);
+  color: var(--color-text-primary, #46566A);
   white-space: nowrap;
 }
 .sector-pin-marker.active .sector-pin-label {
@@ -2359,8 +2516,11 @@ button[type="submit"]:disabled {
   }
 
   .brand-logo {
-    padding: 0.45rem 0.85rem;
-    min-height: 42px;
+    padding: 0;
+    min-height: auto;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   .mobile-toggle {
@@ -2376,11 +2536,12 @@ button[type="submit"]:disabled {
     background: #FFFFFF;
     border: 1px solid var(--color-glass-border);
     border-radius: var(--radius-panel);
-    padding: 1.5rem;
+    padding: 1.25rem;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-10px);
-    transition: opacity var(--transition-normal), transform var(--transition-normal);
+    transform: translateY(-8px);
+    transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 999;
     box-shadow: 0 8px 30px rgba(46, 58, 47, 0.12);
   }
@@ -2395,7 +2556,7 @@ button[type="submit"]:disabled {
   .nav-links {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
+    gap: 0.5rem;
     width: 100%;
   }
 
@@ -2404,11 +2565,30 @@ button[type="submit"]:disabled {
     padding: 0.75rem 1rem;
     border-radius: var(--radius-button);
     justify-content: flex-start;
+    border-left: 3px solid transparent;
+    transition: background-color 0.2s ease,
+                color 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.15s ease;
   }
 
-  .nav-link:hover, .nav-link.active {
-    background: rgba(217, 201, 178, 0.25);
+  .nav-link:hover {
+    background: rgba(107, 127, 91, 0.08);
     color: var(--color-text-primary);
+  }
+
+  .nav-link:active {
+    transform: scale(0.98);
+  }
+
+  .nav-link.active,
+  .nav-link.is-active,
+  .nav-link[aria-current="location"],
+  .nav-link[aria-current="page"] {
+    background: rgba(201, 111, 79, 0.08);
+    color: var(--color-accent);
+    border-left-color: var(--color-accent);
+    font-weight: 700;
   }
 
   .nav-link::after {
@@ -2430,7 +2610,10 @@ button[type="submit"]:disabled {
 
   .brand-logo {
     gap: 0.5rem;
-    padding: 0.4rem 0.65rem;
+    padding: 0;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   .brand-name {
@@ -2505,5 +2688,33 @@ button[type="submit"]:disabled {
 
   .map-canvas-frame {
     height: 350px;
+  }
+}
+
+/* ==========================================================================
+   Accessibility — Prefers Reduced Motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .handwritten-text {
+    animation: none !important;
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+    opacity: 1 !important;
+  }
+
+  .handwritten-nib {
+    display: none !important;
+    animation: none !important;
   }
 }

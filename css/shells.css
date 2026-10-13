@@ -55,7 +55,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
   border: 1px solid var(--lw-border);
   color: var(--lw-text-secondary);
   cursor: pointer;
@@ -90,7 +90,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #FAF8F2;
+  border: 2px solid var(--lw-bg, #F8F6EE);
   line-height: 1;
 }
 
@@ -125,7 +125,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
 }
 
 .lw-bell-dropdown__title {
@@ -191,7 +191,7 @@
   padding: 10px 16px;
   border-top: 1px solid var(--lw-border);
   text-align: center;
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
 }
 
 .lw-bell-dropdown__footer a {

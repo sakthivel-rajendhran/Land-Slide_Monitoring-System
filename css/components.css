@@ -22,6 +22,11 @@
   white-space: nowrap;
 }
 
+.lw-btn:active {
+  transform: scale(0.98);
+  transition: transform 0.08s ease;
+}
+
 .lw-btn:focus-visible {
   outline: 2px solid var(--lw-focus);
   outline-offset: 2px;
@@ -53,7 +58,7 @@
 }
 
 .lw-btn--secondary:hover {
-  background-color: #FAF8F2;
+  background-color: var(--lw-bg, #F8F6EE);
   border-color: var(--lw-text-secondary);
   color: var(--lw-text);
 }
@@ -240,7 +245,7 @@
   flex-direction: column;
   gap: var(--lw-s1);
   padding: var(--lw-s3);
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
   border: 1px solid var(--lw-border);
   border-radius: var(--lw-r-sm);
 }
@@ -495,7 +500,7 @@
   justify-content: space-between;
   position: sticky;
   top: 0;
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
   z-index: 2;
 }
 
@@ -667,7 +672,7 @@
 }
 
 .lw-table th {
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
   padding: 12px 14px;
   font-weight: 700;
   font-size: 0.75rem;

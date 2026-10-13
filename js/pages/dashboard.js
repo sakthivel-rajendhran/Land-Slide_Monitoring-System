@@ -478,9 +478,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const breadcrumbCurrent = document.getElementById("topbarBreadcrumbCurrent");
     if (breadcrumbCurrent) {
       const tabNames = {
-        overview: "Overview",
-        map: "Risk Map",
-        reports: "Monitoring Reports",
+        overview: "Dashboard",
+        map: "Risk Map Monitoring",
+        reports: "Reports",
         locations: "Monitored Locations",
         profile: "Officer Profile",
         settings: "Settings & Alerts"
