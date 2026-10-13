@@ -73,6 +73,9 @@ public class DefaultRiskAssessmentService implements RiskAssessmentService {
         response.setDisclaimer(DISCLAIMER_TEXT);
         response.setModelVersion("0.1.0-prototype");
         response.setModelStatus("DEMO_NOT_VALIDATED");
+        response.setOutputType("UNCALIBRATED_HAZARD_SCORE");
+        response.setCalibrationStatus("CALIBRATION_DEFERRED");
+        response.setThresholdReviewStatus("PENDING_EXPERT_REVIEW");
 
         Map<String, Object> locationMap = new HashMap<>();
         locationMap.put("requested_latitude", request.getLatitude());
@@ -302,6 +305,16 @@ public class DefaultRiskAssessmentService implements RiskAssessmentService {
             response.setRiskCategory(aiResponse.getRiskCategory());
             response.setIsProvisionalCategory(aiResponse.getIsProvisionalCategory());
             response.setTopContributingFeatures(aiResponse.getTopContributingFeatures());
+
+            if (aiResponse.getOutputType() != null) {
+                response.setOutputType(aiResponse.getOutputType());
+            }
+            if (aiResponse.getCalibrationStatus() != null) {
+                response.setCalibrationStatus(aiResponse.getCalibrationStatus());
+            }
+            if (aiResponse.getThresholdReviewStatus() != null) {
+                response.setThresholdReviewStatus(aiResponse.getThresholdReviewStatus());
+            }
 
             if (aiResponse.getWarnings() != null) {
                 warnings.addAll(aiResponse.getWarnings());

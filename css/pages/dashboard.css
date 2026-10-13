@@ -22,7 +22,7 @@
   display: flex;
   min-height: 100vh;
   background-color: var(--lw-bg, #F8F6EE);
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   font-family: var(--font-sans, 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif);
   overflow-x: hidden;
   margin: 0;
@@ -32,7 +32,7 @@
 /* --- Left Sidebar (Fixed 280-312px) --- */
 .dashboard-sidebar {
   width: var(--sidebar-width);
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
   border-right: 1px solid var(--lw-border, #D9C9B2);
   display: flex;
   flex-direction: column;
@@ -51,7 +51,7 @@
   gap: 12px;
   padding: 0 24px;
   border-bottom: 1px solid var(--lw-border, #D9C9B2);
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
   flex-shrink: 0;
 }
 
@@ -59,7 +59,7 @@
   font-size: 1.125rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
 }
 
 .sidebar-brand-name span {
@@ -101,8 +101,12 @@
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
-  transition: all var(--transition-fast, 0.15s ease);
+  transition: background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid transparent;
+  border-left: 3px solid transparent;
   cursor: pointer;
   background: none;
   width: 100%;
@@ -115,23 +119,37 @@
   height: 18px;
   flex-shrink: 0;
   color: var(--lw-text-muted, #72826F);
-  transition: color 0.15s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .sidebar-nav-item:hover {
   background: rgba(107, 127, 91, 0.08);
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   border-color: rgba(217, 201, 178, 0.6);
+  border-left-color: var(--lw-text-secondary, #6B7F5B);
 }
 
 .sidebar-nav-item:hover svg {
   color: var(--lw-cta, #C96F4F);
+  transform: translateX(1px);
+}
+
+.sidebar-nav-item:active {
+  transform: scale(0.98);
+  transition: transform 0.08s ease;
+}
+
+.sidebar-nav-item:focus-visible {
+  outline: 2px solid var(--lw-cta, #C96F4F);
+  outline-offset: 2px;
 }
 
 .sidebar-nav-item.active {
   background: rgba(201, 111, 79, 0.1);
   color: var(--lw-cta, #C96F4F);
   border-color: rgba(201, 111, 79, 0.3);
+  border-left-color: var(--lw-cta, #C96F4F);
+  font-weight: 700;
 }
 
 .sidebar-nav-item.active svg {
@@ -142,7 +160,7 @@
 .sidebar-footer {
   padding: 16px;
   border-top: 1px solid var(--lw-border, #D9C9B2);
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -160,7 +178,7 @@
   width: 36px;
   height: 36px;
   border-radius: 6px;
-  background: var(--lw-primary, #2E3A2F);
+  background: var(--lw-primary, #46566A);
   color: #F8F6EE;
   font-weight: 800;
   font-size: 0.875rem;
@@ -179,7 +197,7 @@
 .sidebar-user-name {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -254,7 +272,7 @@
   display: none;
   background: none;
   border: none;
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   cursor: pointer;
   padding: 6px;
 }
@@ -276,7 +294,7 @@
 }
 
 .topbar-breadcrumbs-current {
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   font-weight: 700;
 }
 
@@ -324,7 +342,7 @@
   background: #FFFFFF;
   border: 1px solid var(--lw-border, #D9C9B2);
   border-radius: 6px;
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   font-size: 0.8125rem;
   font-family: inherit;
   outline: none;
@@ -383,7 +401,7 @@
 .heading-title-group h1 {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   margin: 0 0 6px 0;
   letter-spacing: -0.02em;
 }
@@ -502,7 +520,7 @@
   font-family: var(--font-sans, 'Manrope', sans-serif);
   font-size: 1.875rem;
   font-weight: 800;
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   line-height: 1.1;
   margin-bottom: 6px;
 }
@@ -541,7 +559,7 @@
 .panel-title {
   font-size: 1.0625rem;
   font-weight: 700;
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   margin: 0;
   display: flex;
   align-items: center;
@@ -640,7 +658,7 @@
   font-family: var(--font-sans, 'Manrope', sans-serif);
   font-weight: 700;
   font-size: 0.8125rem;
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   white-space: nowrap;
   flex-shrink: 0;
   text-align: right;
@@ -649,7 +667,7 @@
 .risk-dist-track {
   width: 100%;
   height: 8px;
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
   border-radius: 4px;
   overflow: hidden;
   border: 1px solid var(--lw-border, #D9C9B2);
@@ -707,7 +725,7 @@
   border-radius: 6px;
   overflow: hidden;
   border: 1px solid var(--lw-border, #D9C9B2);
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
 }
 
 #dashboardFullRiskMapCanvas {
@@ -734,7 +752,7 @@
 .dashboard-full-map-wrap .map-legend-wrap h4 {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
   margin: 0 0 10px 0;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -778,7 +796,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
   border: 1px solid var(--lw-border, #D9C9B2);
   border-radius: 6px;
   font-size: 0.8125rem;
@@ -829,7 +847,7 @@
   letter-spacing: 0.04em;
   color: var(--lw-text-secondary, #445345);
   border-bottom: 1px solid var(--lw-border, #D9C9B2);
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
   white-space: nowrap;
 }
 
@@ -841,7 +859,7 @@
 
 .dashboard-table tr:hover td {
   background: rgba(107, 127, 91, 0.06);
-  color: var(--lw-text, #2E3A2F);
+  color: var(--lw-text, #46566A);
 }
 
 /* Tabs Views */
@@ -853,6 +871,18 @@
   flex-direction: column;
   gap: 28px;
   width: 100%;
+  animation: tabViewEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tabViewEnter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ==========================================================================

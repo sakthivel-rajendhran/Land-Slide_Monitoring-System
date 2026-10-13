@@ -103,6 +103,83 @@ window.LW.incidentsService = (function() {
     }
   }
 
+  // Mapping between UI display text and backend enum IncidentCategory
+  const CATEGORY_MAP = {
+    "Road blocked by landslide debris": "DEBRIS_FLOW",
+    "Road covered by fallen rocks": "ROCKFALL",
+    "Road damaged by slope movement": "ROAD_SUBSIDENCE",
+    "Ground cracks or slope instability near a road": "SLOPE_CRACK",
+    "Small landslide observed": "MUD_SLIDE",
+    "Flooding or unusual water flow affecting a road": "EROSION",
+    "Other relevant hazard": "OTHER",
+    "ROCKFALL": "ROCKFALL",
+    "MUD_SLIDE": "MUD_SLIDE",
+    "DEBRIS_FLOW": "DEBRIS_FLOW",
+    "ROAD_SUBSIDENCE": "ROAD_SUBSIDENCE",
+    "SLOPE_CRACK": "SLOPE_CRACK",
+    "EROSION": "EROSION",
+    "OTHER": "OTHER"
+  };
+
+  const ENUM_TO_LABEL = {
+    "DEBRIS_FLOW": "Road blocked by landslide debris",
+    "ROCKFALL": "Road covered by fallen rocks",
+    "ROAD_SUBSIDENCE": "Road damaged by slope movement",
+    "SLOPE_CRACK": "Ground cracks or slope instability near a road",
+    "MUD_SLIDE": "Small landslide observed",
+    "EROSION": "Flooding or unusual water flow affecting a road",
+    "OTHER": "Other relevant hazard"
+  };
+
+  function toBackendCategory(cat) {
+    if (!cat) return "OTHER";
+    return CATEGORY_MAP[cat] || "OTHER";
+  }
+
+  function toDisplayCategory(cat) {
+    if (!cat) return "Observation";
+    return ENUM_TO_LABEL[cat] || cat;
+  }
+
+  function normalizeReport(item) {
+    if (!item) return null;
+    const cat = item.incidentCategory || item.category || "OTHER";
+    const locDesc = item.locationDescription || "";
+    const apiBase = window.LW.config?.apiBase || "/api";
+    const isLive = !window.LW.config?.useMock;
+    return {
+      id: item.id ? String(item.id) : (item.localId || "INC-" + Date.now()),
+      rawId: item.id,
+      incidentType: toDisplayCategory(cat),
+      incidentCategory: cat,
+      category: cat,
+      description: item.description || "",
+      observedAt: item.observationTimestamp || item.reportedTimestamp || item.observedAt || new Date().toISOString(),
+      submittedAt: item.reportedTimestamp || item.submittedAt || new Date().toISOString(),
+      status: item.status || "PENDING",
+      reporterName: item.reporterName || "Citizen Reporter",
+      reviewReason: item.reviewNotes || item.reviewReason || "",
+      roadPassability: item.roadPassability || (item.environmentalObservations?.toLowerCase().includes("passability:") ? item.environmentalObservations.split(":")[1].trim() : "unknown"),
+      verifiedPassability: item.verifiedPassability || item.roadPassability || "unknown",
+      location: {
+        latitude: Number(item.latitude || (item.location && item.location.latitude) || 0),
+        longitude: Number(item.longitude || (item.location && item.location.longitude) || 0),
+        roadName: locDesc,
+        placeName: locDesc || "Regional Slope",
+        accuracy: item.accuracy || 15
+      },
+      photos: (item.photos || []).map(p => {
+        const photoUrl = p.id && item.id ? `${apiBase}/reports/${item.id}/photos/${p.id}` : (p.url || p.previewUrl);
+        return {
+          id: p.id,
+          filename: p.originalFilename || p.filename || "evidence.jpg",
+          url: photoUrl,
+          previewUrl: photoUrl
+        };
+      })
+    };
+  }
+
   /**
    * Store image securely in IndexedDB or storage reference without bloating main DB records with Base64
    */
@@ -146,15 +223,15 @@ window.LW.incidentsService = (function() {
 
     onProgress(100);
 
-    // Return sanitized reference object (does NOT store large base64 in the incident report object!)
     return {
       id: photoId,
       filename: safeFilename,
       originalName: file.name.replace(/[^a-zA-Z0-9._-]/g, "_"),
       mimeType: file.type,
       size: file.size,
-      url: dataUrl, // Local object reference
+      url: dataUrl,
       previewUrl: dataUrl,
+      file: file, // Keep native File reference for multipart uploads
       uploadedAt: new Date().toISOString()
     };
   }
@@ -231,29 +308,23 @@ window.LW.incidentsService = (function() {
       throw new Error("You must be signed in to submit an incident report.");
     }
 
-    // Build payload
+    // Build Spring Boot ReportCreateRequest payload
+    const backendCat = toBackendCategory(reportData.incidentType);
+    const locDesc = (reportData.location.roadName || reportData.location.placeName || reportData.location.landmark || "Regional Slope Corridor").trim();
+
     const payload = {
-      incidentType: reportData.incidentType.trim(),
-      category: reportData.incidentType.trim(),
+      incidentCategory: backendCat,
       description: reportData.description.trim(),
-      observedAt: new Date(reportData.observedAt).toISOString(),
-      location: {
-        latitude: lat,
-        longitude: lng,
-        accuracy: Number(reportData.location.accuracy || 15),
-        source: reportData.location.source || "browser_geolocation",
-        placeName: reportData.location.placeName || "Unspecified Sector",
-        roadName: (reportData.location.roadName || "").trim(),
-        landmark: (reportData.location.landmark || "").trim()
-      },
-      roadPassability: reportData.roadPassability || "unknown",
-      additionalInfo: (reportData.additionalInfo || "").trim(),
-      photos: reportData.photos || []
+      latitude: lat,
+      longitude: lng,
+      locationDescription: locDesc.length >= 3 ? locDesc.substring(0, 255) : "Regional Slope",
+      observationTimestamp: reportData.observedAt ? new Date(reportData.observedAt).toISOString().slice(0, 19) : null,
+      environmentalObservations: reportData.roadPassability ? `Passability: ${reportData.roadPassability}` : null
     };
 
     // 3. Check connectivity & submit
     if (!navigator.onLine) {
-      const offlineSaved = await saveOfflineReport(payload);
+      const offlineSaved = await saveOfflineReport({ ...payload, photos: reportData.photos || [] });
       return {
         success: true,
         offline: true,
@@ -263,11 +334,32 @@ window.LW.incidentsService = (function() {
     }
 
     try {
-      const res = await window.LW.api.post("/api/incidents", payload);
-      return res;
+      const created = await window.LW.api.post("/api/reports", payload);
+      const createdReport = created.data || created;
+
+      // Upload attached photos if available
+      if (createdReport && createdReport.id && reportData.photos && reportData.photos.length > 0) {
+        for (const p of reportData.photos) {
+          if (p.file) {
+            try {
+              const formData = new FormData();
+              formData.append("file", p.file);
+              await window.LW.api.post(`/api/reports/${createdReport.id}/photos`, formData);
+            } catch (uploadErr) {
+              console.warn("[incidentsService] Photo attachment warning:", uploadErr);
+            }
+          }
+        }
+      }
+
+      return {
+        success: true,
+        data: normalizeReport(createdReport),
+        message: "Report submitted successfully."
+      };
     } catch (err) {
       if (err.offline || !navigator.onLine) {
-        const offlineSaved = await saveOfflineReport(payload);
+        const offlineSaved = await saveOfflineReport({ ...payload, photos: reportData.photos || [] });
         return {
           success: true,
           offline: true,
@@ -283,8 +375,22 @@ window.LW.incidentsService = (function() {
    * Fetch all incident reports (public map view or admin queue)
    */
   async function getAllIncidents(filters = {}) {
-    const res = await window.LW.api.get("/api/incidents", filters);
-    return res.data || [];
+    const isPrivileged = window.LW.auth?.hasRole("admin", "officer");
+    try {
+      const endpoint = isPrivileged ? "/api/admin/reports" : "/api/reports";
+      const res = await window.LW.api.get(endpoint, filters);
+      const items = Array.isArray(res) ? res : (Array.isArray(res.data) ? res.data : []);
+      return items.map(normalizeReport);
+    } catch (err) {
+      if (isPrivileged) {
+        try {
+          const res = await window.LW.api.get("/api/reports");
+          const items = Array.isArray(res) ? res : (Array.isArray(res.data) ? res.data : []);
+          return items.map(normalizeReport);
+        } catch (e) {}
+      }
+      return [];
+    }
   }
 
   /**
@@ -294,23 +400,48 @@ window.LW.incidentsService = (function() {
     const currentUser = window.LW.auth?.getUser() || window.LW.authService?.getCurrentUser();
     if (!currentUser) return [];
 
-    const res = await window.LW.api.get("/api/citizen/incidents", { citizenId: currentUser.id });
-    return res.data || [];
+    try {
+      const res = await window.LW.api.get("/api/reports/mine");
+      const items = Array.isArray(res) ? res : (Array.isArray(res.data) ? res.data : []);
+      return items.map(normalizeReport);
+    } catch (err) {
+      console.warn("[incidentsService] getMyIncidents error:", err);
+      return [];
+    }
   }
 
   /**
    * Fetch single incident report by reference ID
    */
   async function getIncidentById(id) {
-    const res = await window.LW.api.get(`/api/incidents/${encodeURIComponent(id)}`);
-    return res.data;
+    const isPrivileged = window.LW.auth?.hasRole("admin", "officer");
+    const endpoint = isPrivileged ? `/api/admin/reports/${encodeURIComponent(id)}` : `/api/reports/${encodeURIComponent(id)}`;
+    const res = await window.LW.api.get(endpoint);
+    return normalizeReport(res.data || res);
   }
 
   /**
    * Submit an administrative review adjudication
    */
   async function reviewIncident(id, reviewPayload) {
-    const res = await window.LW.api.post(`/api/admin/incidents/${encodeURIComponent(id)}/review`, reviewPayload);
+    const statusMap = {
+      "verified": "VERIFIED",
+      "rejected": "REJECTED",
+      "under review": "UNDER_REVIEW",
+      "additional info requested": "ADDITIONAL_INFO_REQUESTED",
+      "resolved": "RESOLVED",
+      "pending": "PENDING"
+    };
+
+    const rawStatus = (reviewPayload.status || "").toLowerCase();
+    const mappedStatus = statusMap[rawStatus] || (reviewPayload.status ? reviewPayload.status.toUpperCase() : "VERIFIED");
+
+    const payload = {
+      status: mappedStatus,
+      reviewNotes: reviewPayload.reviewReason || reviewPayload.reviewNotes || reviewPayload.notes || "Reviewed by Geotechnical Officer"
+    };
+
+    const res = await window.LW.api.patch(`/api/admin/reports/${encodeURIComponent(id)}/status`, payload);
     return res;
   }
 
@@ -332,7 +463,7 @@ window.LW.incidentsService = (function() {
 
     for (const item of outbox) {
       try {
-        await window.LW.api.post("/api/incidents", item);
+        await submitIncident(item);
         successful++;
       } catch (err) {
         console.warn("[incidentsService] Failed to sync offline item:", err);
@@ -360,6 +491,7 @@ window.LW.incidentsService = (function() {
     getIncidentById,
     reviewIncident,
     syncOfflineReports,
-    saveOfflineReport
+    saveOfflineReport,
+    normalizeReport
   };
 })();

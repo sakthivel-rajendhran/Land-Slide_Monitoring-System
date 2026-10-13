@@ -128,6 +128,10 @@ public class AiPredictionIntegrationTest {
         mockStatus.setModelStatus("DEMO_NOT_VALIDATED");
         mockStatus.setArtifactLoaded(true);
         mockStatus.setTrainingDatasetType("SYNTHETIC_FIXTURES");
+        mockStatus.setOutputType("UNCALIBRATED_HAZARD_SCORE");
+        mockStatus.setCalibrationStatus("CALIBRATION_DEFERRED");
+        mockStatus.setThresholdSetVersion("1.0.0-candidate");
+        mockStatus.setThresholdReviewStatus("PENDING_EXPERT_REVIEW");
         mockStatus.setDisclaimer("EXPERIMENTAL PROTOTYPE");
 
         when(aiServiceClient.getModelStatus()).thenReturn(mockStatus);
@@ -136,6 +140,10 @@ public class AiPredictionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.service_status").value("ready"))
                 .andExpect(jsonPath("$.model_status").value("DEMO_NOT_VALIDATED"))
+                .andExpect(jsonPath("$.output_type").value("UNCALIBRATED_HAZARD_SCORE"))
+                .andExpect(jsonPath("$.calibration_status").value("CALIBRATION_DEFERRED"))
+                .andExpect(jsonPath("$.threshold_set_version").value("1.0.0-candidate"))
+                .andExpect(jsonPath("$.threshold_review_status").value("PENDING_EXPERT_REVIEW"))
                 .andExpect(jsonPath("$.artifact_loaded").value(true));
     }
 

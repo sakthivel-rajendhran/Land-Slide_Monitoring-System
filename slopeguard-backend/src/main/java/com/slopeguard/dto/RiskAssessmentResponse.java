@@ -62,9 +62,42 @@ public class RiskAssessmentResponse {
     @JsonProperty("distinction_notice")
     private String distinctionNotice;
 
+    @JsonProperty("output_type")
+    private String outputType = "UNCALIBRATED_HAZARD_SCORE";
+
+    @JsonProperty("calibration_status")
+    private String calibrationStatus = "CALIBRATION_DEFERRED";
+
+    @JsonProperty("threshold_review_status")
+    private String thresholdReviewStatus = "PENDING_EXPERT_REVIEW";
+
     private List<String> warnings = new ArrayList<>();
     private List<String> limitations = new ArrayList<>();
     private String disclaimer;
+
+    public String getOutputType() {
+        return outputType;
+    }
+
+    public void setOutputType(String outputType) {
+        this.outputType = outputType;
+    }
+
+    public String getCalibrationStatus() {
+        return calibrationStatus;
+    }
+
+    public void setCalibrationStatus(String calibrationStatus) {
+        this.calibrationStatus = calibrationStatus;
+    }
+
+    public String getThresholdReviewStatus() {
+        return thresholdReviewStatus;
+    }
+
+    public void setThresholdReviewStatus(String thresholdReviewStatus) {
+        this.thresholdReviewStatus = thresholdReviewStatus;
+    }
 
     public RiskAssessmentResponse() {
     }

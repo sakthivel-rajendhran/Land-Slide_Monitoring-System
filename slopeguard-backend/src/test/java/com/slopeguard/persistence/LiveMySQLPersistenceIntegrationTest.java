@@ -70,6 +70,7 @@ public class LiveMySQLPersistenceIntegrationTest {
     private static final int MYSQL_PORT = 3306;
 
     private static final String[] MYSQL_PROPERTIES = {
+            "server.port=0",
             "spring.datasource.url=jdbc:mysql://localhost:3306/slopeguard?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
             "spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver",
             "spring.datasource.username=root",

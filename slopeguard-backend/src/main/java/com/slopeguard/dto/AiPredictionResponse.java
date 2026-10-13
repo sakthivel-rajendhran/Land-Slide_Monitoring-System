@@ -23,6 +23,15 @@ public class AiPredictionResponse {
     @JsonProperty("model_status")
     private String modelStatus;
 
+    @JsonProperty("output_type")
+    private String outputType = "UNCALIBRATED_HAZARD_SCORE";
+
+    @JsonProperty("calibration_status")
+    private String calibrationStatus = "CALIBRATION_DEFERRED";
+
+    @JsonProperty("threshold_review_status")
+    private String thresholdReviewStatus = "PENDING_EXPERT_REVIEW";
+
     private String timestamp;
 
     private Map<String, Double> location = new HashMap<>();
@@ -154,5 +163,29 @@ public class AiPredictionResponse {
 
     public void setDisclaimer(String disclaimer) {
         this.disclaimer = disclaimer;
+    }
+
+    public String getOutputType() {
+        return outputType;
+    }
+
+    public void setOutputType(String outputType) {
+        this.outputType = outputType;
+    }
+
+    public String getCalibrationStatus() {
+        return calibrationStatus;
+    }
+
+    public void setCalibrationStatus(String calibrationStatus) {
+        this.calibrationStatus = calibrationStatus;
+    }
+
+    public String getThresholdReviewStatus() {
+        return thresholdReviewStatus;
+    }
+
+    public void setThresholdReviewStatus(String thresholdReviewStatus) {
+        this.thresholdReviewStatus = thresholdReviewStatus;
     }
 }

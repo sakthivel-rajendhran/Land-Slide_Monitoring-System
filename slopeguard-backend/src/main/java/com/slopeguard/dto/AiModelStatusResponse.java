@@ -29,10 +29,76 @@ public class AiModelStatusResponse {
     @JsonProperty("evaluation_summary")
     private Map<String, Object> evaluationSummary;
 
+    @JsonProperty("output_type")
+    private String outputType = "UNCALIBRATED_HAZARD_SCORE";
+
+    @JsonProperty("calibration_status")
+    private String calibrationStatus = "CALIBRATION_DEFERRED";
+
+    @JsonProperty("threshold_set_version")
+    private String thresholdSetVersion = "1.0.0-candidate";
+
+    @JsonProperty("threshold_review_status")
+    private String thresholdReviewStatus = "PENDING_EXPERT_REVIEW";
+
+    @JsonProperty("data_readiness_status")
+    private String dataReadinessStatus = "DATASET_INSUFFICIENT_FOR_OPERATIONAL_VALIDATION";
+
+    @JsonProperty("uncertainty_notice")
+    private String uncertaintyNotice;
+
     private String disclaimer;
     private String timestamp;
 
     public AiModelStatusResponse() {
+    }
+
+    public String getOutputType() {
+        return outputType;
+    }
+
+    public void setOutputType(String outputType) {
+        this.outputType = outputType;
+    }
+
+    public String getCalibrationStatus() {
+        return calibrationStatus;
+    }
+
+    public void setCalibrationStatus(String calibrationStatus) {
+        this.calibrationStatus = calibrationStatus;
+    }
+
+    public String getThresholdSetVersion() {
+        return thresholdSetVersion;
+    }
+
+    public void setThresholdSetVersion(String thresholdSetVersion) {
+        this.thresholdSetVersion = thresholdSetVersion;
+    }
+
+    public String getThresholdReviewStatus() {
+        return thresholdReviewStatus;
+    }
+
+    public void setThresholdReviewStatus(String thresholdReviewStatus) {
+        this.thresholdReviewStatus = thresholdReviewStatus;
+    }
+
+    public String getDataReadinessStatus() {
+        return dataReadinessStatus;
+    }
+
+    public void setDataReadinessStatus(String dataReadinessStatus) {
+        this.dataReadinessStatus = dataReadinessStatus;
+    }
+
+    public String getUncertaintyNotice() {
+        return uncertaintyNotice;
+    }
+
+    public void setUncertaintyNotice(String uncertaintyNotice) {
+        this.uncertaintyNotice = uncertaintyNotice;
     }
 
     public String getServiceStatus() {

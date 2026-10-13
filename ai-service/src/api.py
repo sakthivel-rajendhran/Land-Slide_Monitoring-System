@@ -13,7 +13,13 @@ from src.config import (
     MODEL_STATUS_DEMO,
     METADATA_ARTIFACT_PATH,
     EVALUATION_REPORT_PATH,
+    CANDIDATE_THRESHOLDS_PATH,
     DISCLAIMER_TEXT,
+    OUTPUT_TYPE,
+    CALIBRATION_STATUS,
+    THRESHOLD_SET_VERSION,
+    THRESHOLD_REVIEW_STATUS,
+    DATA_READINESS_STATUS,
 )
 from src.schema import (
     HealthResponse,
@@ -131,11 +137,39 @@ async def model_status():
         service_status="ready" if predictor.is_loaded else "model_artifact_missing",
         model_version=MODEL_VERSION,
         model_status=predictor.model_status,
+        output_type=OUTPUT_TYPE,
+        calibration_status=CALIBRATION_STATUS,
+        threshold_set_version=THRESHOLD_SET_VERSION,
+        threshold_review_status=THRESHOLD_REVIEW_STATUS,
+        data_readiness_status=DATA_READINESS_STATUS,
         artifact_loaded=predictor.is_loaded,
         training_dataset_type=dataset_type,
         evaluation_summary=eval_summary,
         disclaimer=DISCLAIMER_TEXT,
     )
+
+
+@app.get(
+    "/model/thresholds",
+    summary="Candidate risk thresholds, governance status, and trade-off analysis",
+    tags=["Governance"],
+)
+async def get_candidate_thresholds():
+    """Retrieve versioned candidate risk threshold configuration."""
+    if not CANDIDATE_THRESHOLDS_PATH.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Candidate threshold configuration file not found.",
+        )
+    try:
+        with open(CANDIDATE_THRESHOLDS_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error("Failed to read candidate threshold configuration: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not load candidate threshold configuration: {e}",
+        )
 
 
 @app.post(

@@ -31,3 +31,9 @@ __pycache__/
 *.pyc
 venv/
 .pytest_cache/
+
+# Large DEM GeoTIFF raster tiles (reproducible via automated acquisition scripts)
+ai-service/data/dem_tiles/
+*.tif
+*.tiff
+

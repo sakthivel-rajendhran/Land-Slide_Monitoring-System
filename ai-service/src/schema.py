@@ -100,6 +100,9 @@ class PredictionResponse(BaseModel):
     prediction_status: str
     model_version: str
     model_status: str
+    output_type: str = "UNCALIBRATED_HAZARD_SCORE"
+    calibration_status: str = "CALIBRATION_DEFERRED"
+    threshold_review_status: str = "PENDING_EXPERT_REVIEW"
     timestamp: str = Field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
@@ -121,10 +124,20 @@ class ModelStatusResponse(BaseModel):
     service_status: str
     model_version: str
     model_status: str
+    output_type: str = "UNCALIBRATED_HAZARD_SCORE"
+    calibration_status: str = "CALIBRATION_DEFERRED"
+    threshold_set_version: str = "1.0.0-candidate"
+    threshold_review_status: str = "PENDING_EXPERT_REVIEW"
+    data_readiness_status: str = "DATASET_INSUFFICIENT_FOR_OPERATIONAL_VALIDATION"
     artifact_loaded: bool
     training_dataset_type: str
     evaluation_summary: Optional[Dict[str, Any]] = None
+    uncertainty_notice: Optional[str] = (
+        "Model outputs are uncalibrated ensemble scores from an experimental pipeline. "
+        "Not certified for life-safety warnings or civil-protection emergency actions."
+    )
     disclaimer: str
     timestamp: str = Field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
+

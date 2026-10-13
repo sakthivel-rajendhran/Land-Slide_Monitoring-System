@@ -287,7 +287,7 @@ public class JpaReportService implements ReportService {
     }
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = InvalidStatusTransitionException.class)
     public AdminReportResponse updateReportStatus(Long id, ReportStatusUpdateRequest request, Long adminUserId, String adminEmail) {
         IncidentReport report = findReportOrThrow(id);
 

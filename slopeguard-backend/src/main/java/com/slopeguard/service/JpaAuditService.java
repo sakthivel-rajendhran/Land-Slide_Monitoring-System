@@ -40,7 +40,7 @@ public class JpaAuditService implements AuditService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public AuditEvent recordEvent(AuditEventType eventType,
                                   Long actorUserId,
                                   Long relatedReportId,

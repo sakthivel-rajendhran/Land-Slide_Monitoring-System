@@ -79,7 +79,7 @@
   width: 100%;
   height: 100%;
   position: relative;
-  background: #FAF8F2;
+  background: var(--lw-bg, #F8F6EE);
 }
 
 #riskMapCanvas {

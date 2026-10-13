@@ -6,14 +6,14 @@
 :root {
   /* Brand Colours (Bound directly to SlopeGuard Earthy Minimal master variables) */
   --lw-bg: var(--color-bg-main, #F8F6EE);
-  --lw-bg-secondary: var(--color-bg-secondary, #F0ECE1);
+  --lw-bg-secondary: var(--color-bg-secondary, #F8F6EE);
   --lw-surface: var(--color-bg-elevated, #FFFFFF);
   --lw-surface-glass: var(--color-glass-surface, #FFFFFF);
   --lw-surface-glass-strong: var(--color-glass-strong, #FFFFFF);
   --lw-border: var(--color-glass-border, #D9C9B2);
   --lw-border-highlight: var(--color-highlight-border, #C96F4F);
   
-  --lw-text: var(--color-text-primary, #2E3A2F);
+  --lw-text: var(--color-text-primary, #46566A);
   --lw-text-secondary: var(--color-text-secondary, #5C6E5C);
   --lw-text-muted: var(--color-text-muted, #7E8D7B);
   --lw-text-disabled: var(--color-text-disabled, #A6B0A4);
@@ -65,6 +65,7 @@
   --lw-font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --lw-font-serif: 'Newsreader', Georgia, serif;
   --lw-font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  --lw-font-captain: 'American Captain', Impact, 'Arial Black', sans-serif;
 
   /* Spacing Scale */
   --lw-s1: 4px;
