@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Landslide Risk Map — SlopeGuard</title>
+  <meta name="description" content="Explore monitored regions, view available landslide risk assessments, and identify areas that may require attention across the Western Ghats.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><polygon points='12,32 23,6 34,32' fill='%23C7F464'/><polygon points='4,32 16,14 24,32' fill='%23294B32'/></svg>">
+
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="css/leaflet.css">
+
+  <!-- Core Design System, Tokens, Components & Shells -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/shells.css">
+  <link rel="stylesheet" href="css/pages/map.css">
+
+  <!-- Immediate Authentication Guard -->
+  <script>
+    (function() {
+      function checkAuth() {
+        try {
+          var raw = sessionStorage.getItem("sg_user") || localStorage.getItem("sg_user");
+          var user = raw ? JSON.parse(raw) : null;
+          if (!user) {
+            var page = window.location.pathname.split('/').pop() || 'map.html';
+            var next = encodeURIComponent(page + window.location.search);
+            window.location.replace("login.html?next=" + next);
+          }
+        } catch (e) {
+          window.location.replace("login.html");
+        }
+      }
+      checkAuth();
+      window.addEventListener("pageshow", function(e) {
+        if (e.persisted) checkAuth();
+      });
+    })();
+  </script>
+</head>
+<body class="map-page-body" data-shell="user">
+
+  <!-- Dedicated Risk Map Top Bar (Clean, Non-floating Authenticated Header) -->
+  <header class="map-topbar" id="mapHeader">
+    <div class="map-topbar-left">
+      <a href="dashboard.html" class="map-brand-link" aria-label="SlopeGuard Dashboard">
+        <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width: 28px; height: 28px;">
+          <polygon points="4,32 16,14 24,32" fill="#2E3A2F" />
+          <polygon points="12,32 23,6 34,32" fill="#C96F4F" />
+          <polygon points="23,6 23,24 16,32" fill="#2E3A2F" />
+          <polygon points="23,6 30,19 23,24" fill="#D9FF8F" />
+          <polygon points="21,32 30,17 38,32" fill="#6B7F5B" />
+        </svg>
+        <span class="brand-name" style="font-size: 1.05rem; font-weight: 800; color: var(--lw-text); text-transform: uppercase; letter-spacing: 0.06em;">Slope<span style="color: var(--lw-cta);">Guard</span></span>
+        <span class="sidebar-brand-badge" style="margin-left: 6px; padding: 2px 6px; background: rgba(201,111,79,0.1); border: 1px solid rgba(201,111,79,0.25); border-radius: 3px; font-size: 0.65rem; color: var(--lw-cta); font-weight: 700;">NER</span>
+      </a>
+
+      <div class="map-breadcrumbs">
+        <span style="color: var(--lw-text-muted);">SlopeGuard NER</span>
+        <span style="color: var(--lw-text-muted); margin: 0 8px;">/</span>
+        <span style="color: var(--lw-cta); font-weight: 600;">Full Geographic Risk Map</span>
+      </div>
+    </div>
+
+    <div class="map-topbar-right">
+      <!-- Notification Bell Slot (Module 3) -->
+      <div id="lw-bell-slot"></div>
+
+      <!-- Report Hazard Incident Button -->
+      <a href="report-incident.html" class="lw-btn lw-btn--sm lw-btn--primary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <span>Report Incident</span>
+      </a>
+
+      <!-- Return to Dashboard Action Button -->
+      <a href="dashboard.html" class="lw-btn lw-btn--sm lw-btn--outline" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        <span>Return to Dashboard</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Map & List View Layout -->
+  <main id="mainContent" class="map-layout">
+    <!-- Floating Filter Toolbar Slot -->
+    <div class="map-toolbar-wrap" id="mapToolbarSlot"></div>
+
+    <!-- Map Canvas -->
+    <div class="map-canvas-container">
+      <div id="riskMapCanvas"></div>
+    </div>
+
+    <!-- Accessible Table List View (Toggled via toolbar) -->
+    <div class="map-table-view-container" id="mapTableViewContainer"></div>
+
+    <!-- Floating Risk Legend -->
+    <aside class="map-legend-wrap" aria-label="Landslide Risk Legend">
+      <h4>Risk Classification</h4>
+      
+      <div class="map-legend-item">
+        <span class="lw-risk lw-risk--critical"><span class="lw-risk__shape"></span>CRIT</span>
+        <span><strong>Critical:</strong> Imminent failure hazard</span>
+      </div>
+      
+      <div class="map-legend-item">
+        <span class="lw-risk lw-risk--high"><span class="lw-risk__shape"></span>HIGH</span>
+        <span><strong>High:</strong> Severe pore saturation</span>
+      </div>
+
+      <div class="map-legend-item">
+        <span class="lw-risk lw-risk--moderate"><span class="lw-risk__shape"></span>MOD</span>
+        <span><strong>Moderate:</strong> Elevated moisture</span>
+      </div>
+
+      <div class="map-legend-item">
+        <span class="lw-risk lw-risk--low"><span class="lw-risk__shape"></span>LOW</span>
+        <span><strong>Low:</strong> Normal equilibrium</span>
+      </div>
+
+      <div class="map-legend-item">
+        <span class="lw-risk lw-risk--none"><span class="lw-risk__shape"></span>NONE</span>
+        <span><strong>Not Assessed:</strong> Telemetry offline</span>
+      </div>
+
+      <!-- Strict Honesty Disclaimer -->
+      <div class="map-legend-disclaimer">
+        <em>Areas outside the monitored regions are not assessed. The absence of a marker does not mean an area is safe.</em>
+        <div style="margin-top: 6px; font-size: 0.6875rem; color: #8F2B14; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 4px;">
+          <strong>Model Status:</strong> DEMO_NOT_VALIDATED &bull; <strong>Calibration:</strong> Deferred &bull; <strong>Thresholds:</strong> Candidate v1.0.0 (Pending Expert Review). Experimental research prototype. Not an official warning system.
+        </div>
+      </div>
+    </aside>
+
+    <!-- Bottom Status Bar -->
+    <div class="map-status-bar" id="mapStatusBar">
+      <span class="map-status-indicator" id="mapStatusIndicator"></span>
+      <span id="mapStatusText">Connecting telemetry...</span>
+    </div>
+  </main>
+
+  <!-- Leaflet Scripts -->
+  <script src="js/leaflet.js"></script>
+
+  <!-- Core JavaScript Services -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/content.js"></script>
+  <script src="js/core/format.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/connectivity.js"></script>
+  <script src="js/core/api.js"></script>
+  <script src="js/core/ui.js"></script>
+  <script src="js/core/guard.js"></script>
+  <script src="js/core/shell.js"></script>
+
+  <!-- Components & Services -->
+  <script src="js/services/regions-service.js"></script>
+  <script src="js/services/incidents-service.js"></script>
+  <script src="js/services/notifications-store.js"></script>
+  <script src="js/services/sync.js"></script>
+  <script src="js/services/push.js"></script>
+  <script src="js/components/bell.js"></script>
+  <script src="js/components/map-markers.js"></script>
+  <script src="js/components/risk-map.js"></script>
+  <script src="js/components/region-panel.js"></script>
+  <script src="js/components/region-picker.js"></script>
+  <script src="js/components/filter-bar.js"></script>
+
+  <!-- Page Controller -->
+  <script src="js/pages/map.js"></script>
+</body>
+</html>
