@@ -229,49 +229,49 @@ window.LW.RiskMap = {
 
         // Rich Accessible Popup
         const statusBadge = isVerified ? 
-          `<span style="background: rgba(199,244,100,0.2); color: #C7F464; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: 700;">VERIFIED HAZARD</span>` : 
-          `<span style="background: rgba(232,209,122,0.2); color: #E8D17A; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: 700;">CITIZEN REPORT (PENDING VERIFICATION)</span>`;
+          `<span style="background: rgba(77, 120, 78, 0.15); color: #2E5A30; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: 700;">VERIFIED HAZARD</span>` : 
+          `<span style="background: rgba(196, 136, 41, 0.15); color: #8C5B12; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: 700;">PENDING VERIFICATION</span>`;
 
         const passBadge = incident.roadPassability === "completely blocked" ? 
-          `<span style="color: #F07878; font-weight: 700;">Completely Blocked</span>` : 
-          (incident.roadPassability === "partially blocked" ? `<span style="color: #F1A46B; font-weight: 700;">Partially Blocked</span>` : `<span style="color: #8FD694; font-weight: 700;">Open</span>`);
+          `<span style="color: #8F2618; font-weight: 700;">Completely Blocked</span>` : 
+          (incident.roadPassability === "partially blocked" ? `<span style="color: #9E492B; font-weight: 700;">Partially Blocked</span>` : `<span style="color: #2E5A30; font-weight: 700;">Open</span>`);
 
         const photosCount = incident.photos ? incident.photos.length : 0;
         const photoThumb = incident.photos && incident.photos[0] ? `
-          <div style="margin-top: 8px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(215,245,160,0.2);">
+          <div style="margin-top: 8px; border-radius: 4px; overflow: hidden; border: 1px solid #D9C9B2;">
             <img src="${incident.photos[0].url}" alt="Evidence" style="width: 100%; height: 110px; object-fit: cover; display: block;" onerror="this.style.display='none'" />
           </div>
         ` : '';
 
         const popupContent = `
-          <div class="lw-incident-popup" style="font-family: var(--lw-font-sans, system-ui); min-width: 240px; max-width: 300px; color: #F8FAFC;">
+          <div class="lw-incident-popup" style="font-family: var(--lw-font-sans, system-ui); min-width: 240px; max-width: 300px; color: #2E3A2F;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <span style="font-family: monospace; font-size: 11px; color: #C7F464; font-weight: 700;">${incident.id}</span>
+              <span style="font-family: monospace; font-size: 11px; color: #C96F4F; font-weight: 700;">${incident.id}</span>
               ${statusBadge}
             </div>
-            <h4 style="margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: #F8FAFC; line-height: 1.3;">
+            <h4 style="margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: #2E3A2F; line-height: 1.3;">
               ${incident.incidentType}
             </h4>
-            <div style="font-size: 11px; color: #A3B3A0; margin-bottom: 6px;">
+            <div style="font-size: 11px; color: #4A5D48; margin-bottom: 6px;">
               📍 ${loc.roadName ? `<strong>${loc.roadName}</strong> &bull; ` : ''}${loc.placeName || 'Regional Slopes'}
             </div>
-            <div style="font-size: 11px; margin-bottom: 4px; color: #E2E8F0;">
-              <strong>Verification Status:</strong> ${isVerified ? 'Verified Incident' : 'Reported Incident (Pending Geotechnical Review)'}
+            <div style="font-size: 11px; margin-bottom: 4px; color: #4A5D48;">
+              <strong style="color: #2E3A2F;">Verification Status:</strong> ${isVerified ? 'Verified Incident' : 'Reported Incident (Pending Geotechnical Review)'}
             </div>
-            <div style="font-size: 11px; line-height: 1.4; color: #CBD5E1; margin-bottom: 6px; max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
+            <div style="font-size: 11px; line-height: 1.4; color: #2E3A2F; margin-bottom: 6px; max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
               ${incident.description}
             </div>
-            <div style="font-size: 11px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; display: flex; justify-content: space-between;">
+            <div style="font-size: 11px; border-top: 1px solid #D9C9B2; padding-top: 6px; display: flex; justify-content: space-between; color: #2E3A2F;">
               <span>Road: ${passBadge}</span>
-              <span style="color: #94A3B8;">📷 ${photosCount} photo(s)</span>
+              <span style="color: #5E6F5C;">📷 ${photosCount} photo(s)</span>
             </div>
             ${incident.reviewReason ? `
-              <div style="margin-top: 6px; font-size: 11px; color: #D9FF8F; background: rgba(199,244,100,0.08); padding: 4px 6px; border-radius: 3px;">
-                <strong>Admin Update:</strong> ${incident.reviewReason}
+              <div style="margin-top: 6px; font-size: 11px; color: #2E3A2F; background: var(--lw-bg, #F8F6EE); border: 1px solid #D9C9B2; padding: 4px 6px; border-radius: 3px;">
+                <strong style="color: #8C5B12;">Admin Update:</strong> ${incident.reviewReason}
               </div>
             ` : ''}
             ${photoThumb}
-            <div style="margin-top: 8px; font-size: 10px; color: #72826F; text-align: right;">
+            <div style="margin-top: 8px; font-size: 10px; color: #5E6F5C; text-align: right;">
               Observed: ${new Date(incident.observedAt).toLocaleString()}
             </div>
           </div>
@@ -320,29 +320,29 @@ window.LW.RiskMap = {
           max-width: 250px;
         `;
         layerControlBox.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid rgba(215, 245, 160, 0.12); padding-bottom: 6px;">
-            <strong style="color: #C7F464; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.7rem;">GIS Map Layers</strong>
-            <span style="font-size: 0.65rem; color: #A3B3A0;">5 Active</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid rgba(217, 201, 178, 0.25); padding-bottom: 6px;">
+            <strong style="color: #F8F6EE; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.725rem; font-weight: 800;">GIS Map Layers</strong>
+            <span style="font-size: 0.6875rem; color: #D9C9B2; font-weight: 600;">5 Active</span>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; flex-direction: column; gap: 6px; color: #F8F6EE;">
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-              <input type="checkbox" id="layerToggle_susceptibility" checked style="accent-color: #C7F464;">
+              <input type="checkbox" id="layerToggle_susceptibility" checked style="accent-color: #C96F4F;">
               <span>Landslide Susceptibility Zones</span>
             </label>
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-              <input type="checkbox" id="layerToggle_assessments" checked style="accent-color: #C7F464;">
+              <input type="checkbox" id="layerToggle_assessments" checked style="accent-color: #C96F4F;">
               <span>Monitored Sensor Stations</span>
             </label>
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-              <input type="checkbox" id="layerToggle_reported" checked style="accent-color: #E8D17A;">
+              <input type="checkbox" id="layerToggle_reported" checked style="accent-color: #C48829;">
               <span>Citizen Reports (Unverified)</span>
             </label>
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-              <input type="checkbox" id="layerToggle_verifiedLandslides" checked style="accent-color: #F07878;">
+              <input type="checkbox" id="layerToggle_verifiedLandslides" checked style="accent-color: #B84333;">
               <span>Verified Landslide Incidents</span>
             </label>
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-              <input type="checkbox" id="layerToggle_verifiedBlockages" checked style="accent-color: #F1A46B;">
+              <input type="checkbox" id="layerToggle_verifiedBlockages" checked style="accent-color: #C96F4F;">
               <span>Verified Road Blockages</span>
             </label>
           </div>

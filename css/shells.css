@@ -24,6 +24,8 @@
 }
 
 /* Shell Layout Containers */
+html:has(.lw-shell-root),
+body[data-shell],
 .lw-shell-root {
   display: flex;
   flex-direction: column;
@@ -31,12 +33,23 @@
   background-color: var(--lw-bg);
   color: var(--lw-text);
   font-family: var(--lw-font-sans);
+  scroll-behavior: smooth;
 }
 
 .lw-shell-main {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+body[data-shell] section[id],
+body[data-shell] div[id],
+body[data-shell] [id],
+body[data-shell] [data-scroll-target],
+.panel-header,
+.panel-title,
+.card-title {
+  scroll-margin-top: calc(var(--topbar-height, 68px) + 12px);
 }
 
 /* Header Slot for Bell and Auth */
@@ -178,13 +191,15 @@
 }
 
 .lw-bell-item__time {
-  font-size: 0.6875rem;
-  color: var(--lw-text-muted);
+  font-size: 0.725rem;
+  color: var(--lw-text-secondary, #4A5D48);
+  font-weight: 500;
 }
 
 .lw-bell-item__region {
   font-size: 0.75rem;
-  color: var(--lw-text-muted);
+  color: var(--lw-text-secondary, #4A5D48);
+  font-weight: 500;
 }
 
 .lw-bell-dropdown__footer {
@@ -251,3 +266,26 @@
   width: 20px;
   height: 20px;
 }
+
+@media (max-width: 480px) {
+  .lw-bell-dropdown {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    right: -8px;
+  }
+  
+  .lw-bottom-nav {
+    height: 60px;
+  }
+  
+  .lw-bottom-nav__item {
+    font-size: 0.625rem;
+    gap: 2px;
+  }
+  
+  .lw-bottom-nav__item svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+

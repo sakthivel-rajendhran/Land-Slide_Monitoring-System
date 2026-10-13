@@ -148,6 +148,24 @@
           }
         }
       });
+
+      // Close mobile drawer and position top when clicking any navigation link
+      const navLinks = sidebar.querySelectorAll('.sidebar-nav a, .sidebar-nav button');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function () {
+          sidebar.classList.remove('mobile-open');
+        });
+      });
+    }
+  }
+
+  function initScrollBehavior() {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
     }
   }
 
@@ -155,11 +173,19 @@
     document.addEventListener('DOMContentLoaded', function () {
       syncActiveNavState();
       initSidebarUserAndLogout();
+      initScrollBehavior();
     });
   } else {
     syncActiveNavState();
     initSidebarUserAndLogout();
+    initScrollBehavior();
   }
+
+  window.addEventListener('pageshow', function (e) {
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+    }
+  });
 
   // Also listen for popstate for client-side navigation
   window.addEventListener('popstate', syncActiveNavState);

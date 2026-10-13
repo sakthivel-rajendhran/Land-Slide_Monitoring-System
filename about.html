@@ -175,6 +175,31 @@
         font-size: 2.125rem;
       }
     }
+
+    @media (max-width: 600px) {
+      .about-section {
+        padding: 0 16px;
+        margin-bottom: 48px;
+      }
+      .about-hero {
+        padding: calc(var(--nav-height) + 2rem) 16px 2.5rem;
+      }
+      .about-hero h1 {
+        font-size: 1.85rem;
+      }
+      .about-hero p {
+        font-size: 0.95rem;
+      }
+      .step-card, .info-type-card {
+        padding: 18px 16px;
+      }
+      .faq-question {
+        padding: 14px 16px;
+      }
+      .faq-answer {
+        padding: 0 16px 14px;
+      }
+    }
   </style>
 </head>
 <body class="public-body">
@@ -363,6 +388,12 @@
   </footer>
 
   <script>
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+    }
     document.querySelectorAll('.faq-question').forEach(q => {
       q.onclick = () => {
         q.parentElement.classList.toggle('active');

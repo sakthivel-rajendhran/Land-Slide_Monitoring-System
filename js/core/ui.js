@@ -128,6 +128,87 @@ window.LW.ui = (function() {
           `;
         }
       }
+    },
+
+    scrollToElement(el, smooth = true) {
+      if (!el) return;
+      const target = typeof el === "string" ? document.querySelector(el) : el;
+      if (!target) return;
+
+      // Locate destination heading or title element
+      const headingEl = (target.matches && target.matches('h1, h2, h3, .panel-title, .card-title, .section-title, .panel-header, .dashboard-card-header'))
+        ? target
+        : (target.querySelector?.('.panel-title, .card-title, .section-title, .panel-header, .dashboard-card-header, .section-header, h1, h2, h3') || target);
+
+      // Measure effective navbar bottom edge
+      const header = document.querySelector(".dashboard-topbar, .site-header, .public-header, header");
+      let navBottom = 68;
+      if (header) {
+        const rect = header.getBoundingClientRect();
+        const subContainer = header.querySelector('.dashboard-topbar, .header-container, .nav-bar') || header;
+        const subRect = subContainer.getBoundingClientRect();
+        navBottom = Math.max(Math.round(rect.bottom), Math.round(subRect.bottom));
+        if (navBottom <= 0) navBottom = 68;
+      }
+
+      const rect = headingEl.getBoundingClientRect();
+      const docY = window.pageYOffset || document.documentElement.scrollTop;
+
+      // Target heading position = navbar bottom + 12px (within 8-16px range)
+      const targetY = Math.max(0, Math.round(rect.top + docY - navBottom - 12));
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({
+        top: targetY,
+        behavior: (smooth && !prefersReduced) ? "smooth" : "auto"
+      });
     }
   };
+})();
+
+// Automatic Page Scroll Stabilization across portals and admin
+(function() {
+  if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+  }
+
+  function handleInitialScroll() {
+    if (window.location.hash) {
+      try {
+        const target = document.querySelector(window.location.hash);
+        if (target) {
+          setTimeout(() => {
+            window.LW?.ui?.scrollToElement(target, true);
+          }, 120);
+        }
+      } catch (_) {}
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", handleInitialScroll);
+  } else {
+    handleInitialScroll();
+  }
+
+  document.addEventListener("click", (e) => {
+    // If public navigation exists, main.js manages it to prevent duplicate scrolling
+    if (document.querySelector('.site-header .nav-links')) return;
+
+    const link = e.target.closest('a[href^="#"]');
+    if (!link) return;
+    const href = link.getAttribute("href");
+    if (!href || href === "#" || href === "#!") return;
+    try {
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        window.LW?.ui?.scrollToElement(target, true);
+        if (window.location.hash !== href) {
+          history.pushState(null, "", href);
+        }
+      }
+    } catch (_) {}
+  });
 })();

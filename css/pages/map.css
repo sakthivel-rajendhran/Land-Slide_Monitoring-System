@@ -197,13 +197,65 @@
   .map-legend-wrap {
     bottom: 8px;
     left: 8px;
-    right: 8px;
-    max-width: none;
+    right: auto;
+    max-width: 280px;
+    padding: 10px 12px;
   }
   .map-status-bar {
     display: none;
   }
   .map-table-view-container {
-    padding: 140px 12px 24px;
+    padding: 130px 12px 24px;
   }
 }
+
+@media (max-width: 640px) {
+  .map-layout {
+    height: calc(100vh - 54px);
+    min-height: 420px;
+  }
+  .map-topbar {
+    height: 54px;
+    padding: 0 10px;
+  }
+  .map-breadcrumbs {
+    display: none;
+  }
+  .map-topbar-right {
+    gap: 8px;
+  }
+  .map-topbar-right .lw-btn span {
+    display: none;
+  }
+  .map-topbar-right .lw-btn {
+    padding: 7px 10px;
+    min-height: 38px;
+  }
+  .map-toolbar-wrap {
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    padding: 6px 10px;
+  }
+  .map-legend-wrap {
+    bottom: 6px;
+    left: 6px;
+    max-width: 250px;
+    padding: 8px 10px;
+    font-size: 0.6875rem;
+  }
+  .map-legend-item {
+    gap: 6px;
+    margin-bottom: 5px;
+  }
+}
+
+@media (max-width: 380px) {
+  .map-legend-wrap {
+    max-width: calc(100vw - 12px);
+  }
+  .map-legend-disclaimer {
+    display: none;
+  }
+}
+

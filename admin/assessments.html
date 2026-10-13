@@ -287,6 +287,34 @@
       font-size: 0.6875rem;
       margin-bottom: 2px;
     }
+
+    @media (max-width: 600px) {
+      .sg-modal-overlay {
+        padding: 12px 8px;
+      }
+      .sg-modal-header {
+        padding: 14px 16px;
+      }
+      .sg-modal-body {
+        padding: 16px 14px;
+        gap: 12px;
+      }
+      .sg-modal-footer {
+        padding: 12px 14px;
+        flex-direction: column;
+      }
+      .sg-modal-footer button {
+        width: 100%;
+        min-height: 44px;
+      }
+      .info-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .metrics-summary-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
   </style>
 </head>
 <body class="dashboard-root" data-shell="admin">
@@ -531,28 +559,28 @@
           </div>
           <div class="summary-card">
             <span class="summary-card-label">Pending Staff Review</span>
-            <span class="summary-card-value" id="statIncidentsPending" style="color: #F6E08E;">0</span>
+            <span class="summary-card-value" id="statIncidentsPending" style="color: #8C5B12;">0</span>
             <span class="summary-card-meta">Awaiting geotechnical gate</span>
           </div>
           <div class="summary-card">
             <span class="summary-card-label">Verified Hazard Zones</span>
-            <span class="summary-card-value" id="statIncidentsVerified" style="color: var(--color-primary-lime, #C7F464);">0</span>
+            <span class="summary-card-value" id="statIncidentsVerified" style="color: var(--lw-cta, #C96F4F);">0</span>
             <span class="summary-card-meta">Confirmed slide debris or blockages</span>
           </div>
           <div class="summary-card">
             <span class="summary-card-label">Resolved / Cleared</span>
-            <span class="summary-card-value" id="statIncidentsResolved" style="color: #8FD694;">0</span>
+            <span class="summary-card-value" id="statIncidentsResolved" style="color: #2E5A30;">0</span>
             <span class="summary-card-meta">Debris removed & traffic restored</span>
           </div>
         </div>
 
         <!-- Duplicate Detection Warning Alert -->
-        <div id="incidentDuplicateBanner" style="display: none; background: rgba(232, 209, 122, 0.15); border: 1px solid rgba(232, 209, 122, 0.4); border-radius: var(--radius-card, 6px); padding: 12px 18px; margin-bottom: 20px; font-size: 0.8125rem; color: #F6E08E;">
+        <div id="incidentDuplicateBanner" style="display: none; background: rgba(196, 136, 41, 0.12); border: 1px solid rgba(196, 136, 41, 0.4); border-radius: var(--radius-card, 6px); padding: 12px 18px; margin-bottom: 20px; font-size: 0.8125rem; color: #8C5B12;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            <strong id="duplicateBannerTitle">Potential Duplicate Incidents Detected:</strong>
+            <strong id="duplicateBannerTitle" style="color: #8C5B12;">Potential Duplicate Incidents Detected:</strong>
           </div>
-          <p id="duplicateBannerDesc" style="margin: 4px 0 0 26px; color: #CBD5E1; font-size: 0.75rem;">
+          <p id="duplicateBannerDesc" style="margin: 4px 0 0 26px; color: var(--color-text-secondary, #4A5D48); font-size: 0.75rem;">
             Two reports have near-identical geographic coordinates within 1.5 km. Review photos and timestamps to avoid redundant advisories.
           </p>
         </div>
@@ -634,7 +662,7 @@
         </div>
 
         <!-- Coordinates & Map Link -->
-        <div style="background: rgba(17, 26, 19, 0.8); border: 1px solid var(--color-glass-border, #30432D); border-radius: 4px; padding: 12px 14px;">
+        <div style="background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); border-radius: 4px; padding: 12px 14px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <div class="info-item-label">Captured Location (Browser GPS)</div>
             <a href="#" id="modalMapLink" target="_blank" class="lw-btn lw-btn--sm lw-btn--outline" style="font-size: 0.725rem; padding: 2px 8px; text-decoration: none;">
@@ -642,7 +670,7 @@
               Open on Risk Map
             </a>
           </div>
-          <div style="font-size: 0.875rem; font-weight: 700; color: var(--color-primary-lime, #C7F464); margin-bottom: 4px;" id="modalPlaceName">--</div>
+          <div style="font-size: 0.875rem; font-weight: 700; color: var(--lw-cta, #C96F4F); margin-bottom: 4px;" id="modalPlaceName">--</div>
           <div style="font-family: var(--lw-font-mono); font-size: 0.8125rem; color: var(--color-text-primary);" id="modalCoords">--</div>
         </div>
 
@@ -661,7 +689,7 @@
         </div>
 
         <!-- Environmental Sources & Limitations -->
-        <div style="font-size: 0.75rem; color: var(--color-text-secondary); background: rgba(14, 23, 17, 0.6); padding: 10px 12px; border-radius: 4px; border: 1px solid rgba(48, 67, 45, 0.3);">
+        <div style="font-size: 0.75rem; color: var(--color-text-secondary, #4A5D48); background: var(--lw-bg, #F8F6EE); padding: 10px 12px; border-radius: 4px; border: 1px solid var(--lw-border, #D9C9B2);">
           <div style="margin-bottom: 4px;">
             <strong style="color: var(--color-text-primary);">Supporting Data Sources:</strong>
             <span id="modalSourcesList">--</span>
@@ -677,7 +705,7 @@
           <label style="display: block; font-size: 0.8125rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 6px;">
             Review Status Action
           </label>
-          <select id="modalReviewStatusSelect" class="form-input" style="width: 100%; background: #070B08; color: #FFF; border: 1px solid var(--color-glass-border); padding: 8px 10px; border-radius: 4px; font-family: inherit;">
+          <select id="modalReviewStatusSelect" class="form-input" style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px; font-family: inherit;">
             <option value="Confirmed">Confirmed — Accept AI estimate as verified ground truth</option>
             <option value="Corrected">Corrected — Override risk classification based on geotechnical evidence</option>
             <option value="Flagged for Investigation">Flagged for Investigation — Dispatch field/drone reconnaissance</option>
@@ -691,7 +719,7 @@
           <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #D8B4FE; margin-bottom: 4px;">
             Corrected Hazard Level
           </label>
-          <select id="modalCorrectedRiskSelect" class="form-input" style="width: 100%; background: #070B08; color: #FFF; border: 1px solid #7E22CE; padding: 6px 10px; border-radius: 4px;">
+          <select id="modalCorrectedRiskSelect" class="form-input" style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid #7E22CE; padding: 6px 10px; border-radius: 4px;">
             <option value="critical">CRITICAL (Immediate Evacuation Precaution)</option>
             <option value="high">HIGH (Severe Hazard Zone)</option>
             <option value="moderate">MODERATE (Elevated Soil Moisture / Buffer)</option>
@@ -705,7 +733,7 @@
           <label style="display: block; font-size: 0.8125rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 6px;">
             Geotechnical Review Notes & Rationale
           </label>
-          <textarea id="modalReviewNotes" class="form-input" rows="3" placeholder="Enter geotechnical rationale, sensor correlation, or reason for correction..." style="width: 100%; background: #070B08; color: #FFF; border: 1px solid var(--color-glass-border); padding: 8px 10px; border-radius: 4px; font-family: inherit; font-size: 0.8125rem;"></textarea>
+          <textarea id="modalReviewNotes" class="form-input" rows="3" placeholder="Enter geotechnical rationale, sensor correlation, or reason for correction..." style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px; font-family: inherit; font-size: 0.8125rem;"></textarea>
         </div>
 
         <!-- Audit Trail / History -->
@@ -742,7 +770,7 @@
         <div class="info-grid-2">
           <div class="info-item">
             <div class="info-item-label">Incident Reference</div>
-            <div class="info-item-value" id="incModalRef" style="color: var(--color-primary-lime, #C7F464); font-family: var(--lw-font-mono);">--</div>
+            <div class="info-item-value" id="incModalRef" style="color: var(--lw-cta, #C96F4F); font-family: var(--lw-font-mono); font-weight: 700;">--</div>
             <div style="font-size: 0.725rem; color: var(--color-text-secondary);" id="incModalCitizen">Citizen: Anonymous</div>
           </div>
           <div class="info-item">
@@ -753,7 +781,7 @@
         </div>
 
         <!-- Location & Map Link -->
-        <div style="background: rgba(17, 26, 19, 0.8); border: 1px solid var(--color-glass-border, #30432D); border-radius: 4px; padding: 12px 14px;">
+        <div style="background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); border-radius: 4px; padding: 12px 14px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <div class="info-item-label">Geographic Location & Corridor</div>
             <a href="#" id="incModalMapLink" target="_blank" class="lw-btn lw-btn--sm lw-btn--outline" style="font-size: 0.725rem; padding: 2px 8px; text-decoration: none;">
@@ -761,18 +789,18 @@
               View on Risk Map
             </a>
           </div>
-          <div style="font-size: 0.875rem; font-weight: 700; color: var(--color-primary-lime, #C7F464); margin-bottom: 4px;" id="incModalRoadLandmark">--</div>
+          <div style="font-size: 0.875rem; font-weight: 700; color: var(--lw-cta, #C96F4F); margin-bottom: 4px;" id="incModalRoadLandmark">--</div>
           <div style="font-family: var(--lw-font-mono); font-size: 0.8125rem; color: var(--color-text-primary);" id="incModalCoords">--</div>
         </div>
 
         <!-- Citizen Observation (Preserved Separately) -->
-        <div style="background: rgba(20, 37, 26, 0.85); border: 1px solid var(--color-glass-border, #30432D); border-radius: 4px; padding: 14px;">
+        <div style="background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); border-radius: 4px; padding: 14px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span class="info-item-label" style="color: #A3B3A0;">Citizen's Original Observation (Preserved)</span>
+            <span class="info-item-label" style="color: var(--lw-text-secondary, #4A5D48); font-weight: 700;">Citizen's Original Observation (Preserved)</span>
             <span class="status-badge" id="incModalCitizenPassabilityBadge">PASSABILITY: UNKNOWN</span>
           </div>
-          <div style="font-weight: 700; color: #F8FAFC; margin-bottom: 6px;" id="incModalCitizenType">--</div>
-          <p style="font-size: 0.8125rem; color: #CBD5E1; margin: 0 0 6px 0; line-height: 1.45;" id="incModalDescription">--</p>
+          <div style="font-weight: 700; color: var(--lw-text, #2E3A2F); margin-bottom: 6px;" id="incModalCitizenType">--</div>
+          <p style="font-size: 0.8125rem; color: var(--lw-text-secondary, #4A5D48); margin: 0 0 6px 0; line-height: 1.45;" id="incModalDescription">--</p>
           <div style="font-size: 0.725rem; color: var(--color-text-muted);" id="incModalAdditionalInfo"></div>
         </div>
 
@@ -797,7 +825,7 @@
             <label style="display: block; font-size: 0.8125rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 6px;">
               Verification Status Action
             </label>
-            <select id="incModalStatusSelect" class="form-input" style="width: 100%; background: #070B08; color: #FFF; border: 1px solid var(--color-glass-border); padding: 8px 10px; border-radius: 4px;">
+            <select id="incModalStatusSelect" class="form-input" style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px;">
               <option value="Under Review">Under Review — Keep active in field investigation pipeline</option>
               <option value="Verified">Verified — Geotechnical confirmation of hazard/blockage</option>
               <option value="Additional Info Requested">Additional Info Requested — Inquire with citizen for more details</option>
@@ -809,10 +837,10 @@
 
           <!-- Verified Incident Type (Distinct from citizen's observation) -->
           <div id="incModalVerifiedTypeWrap">
-            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--color-primary-lime, #C7F464); margin-bottom: 4px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--color-text-primary, #2E3A2F); margin-bottom: 4px;">
               Geotechnically Confirmed Cause / Classification
             </label>
-            <select id="incModalVerifiedTypeSelect" class="form-input" style="width: 100%; background: #070B08; color: #FFF; border: 1px solid var(--color-glass-border); padding: 8px 10px; border-radius: 4px;">
+            <select id="incModalVerifiedTypeSelect" class="form-input" style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px;">
               <option value="Road blocked by landslide debris">Road blocked by landslide debris</option>
               <option value="Road covered by fallen rocks">Road covered by fallen rocks</option>
               <option value="Road damaged by slope movement">Road damaged by slope movement</option>
@@ -826,10 +854,10 @@
 
           <!-- Confirmed Passability -->
           <div id="incModalVerifiedPassabilityWrap">
-            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--color-primary-lime, #C7F464); margin-bottom: 4px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--color-text-primary, #2E3A2F); margin-bottom: 4px;">
               Confirmed Road Passability Status
             </label>
-            <select id="incModalVerifiedPassabilitySelect" class="form-input" style="width: 100%; background: #070B08; color: #FFF; border: 1px solid var(--color-glass-border); padding: 8px 10px; border-radius: 4px;">
+            <select id="incModalVerifiedPassabilitySelect" class="form-input" style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px;">
               <option value="completely blocked">Completely Blocked — Impassable for all traffic</option>
               <option value="partially blocked">Partially Blocked — Single lane / cautious transit</option>
               <option value="open">Open — Passable with cautionary driving</option>
@@ -842,12 +870,12 @@
             <label style="display: block; font-size: 0.8125rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 6px;">
               Adjudication Reason & Rationale <span style="color: var(--color-risk-severe, #F87171);">*</span>
             </label>
-            <textarea id="incModalReasonInput" class="form-input" rows="3" placeholder="Provide geotechnical evaluation rationale, patrol observations, or reason for rejection/info request..." style="width: 100%; background: #070B08; color: #FFF; border: 1px solid var(--color-glass-border); padding: 8px 10px; border-radius: 4px; font-family: inherit; font-size: 0.8125rem;"></textarea>
+            <textarea id="incModalReasonInput" class="form-input" rows="3" placeholder="Provide geotechnical evaluation rationale, patrol observations, or reason for rejection/info request..." style="width: 100%; background: #FFFFFF; color: var(--color-text-primary, #2E3A2F); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 10px; border-radius: 4px; font-family: inherit; font-size: 0.8125rem;"></textarea>
           </div>
 
           <!-- Authority Disclaimer -->
-          <div style="font-size: 0.725rem; color: #72826F; background: rgba(11, 18, 13, 0.7); border: 1px solid rgba(48, 67, 45, 0.4); padding: 8px 12px; border-radius: 4px;">
-            <strong>Authority Notice:</strong> Verifying an incident publishes it to authenticated situational map layers for regional awareness. Official statutory road closures remain subject to State Highway Authority / Police orders.
+          <div style="font-size: 0.725rem; color: var(--lw-text-secondary, #4A5D48); background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); padding: 8px 12px; border-radius: 4px;">
+            <strong style="color: var(--lw-text, #2E3A2F);">Authority Notice:</strong> Verifying an incident publishes it to authenticated situational map layers for regional awareness. Official statutory road closures remain subject to State Highway Authority / Police orders.
           </div>
 
           <!-- Audit Trail History -->
@@ -1544,7 +1572,7 @@
           return `
             <tr>
               <td>
-                <div style="font-family: var(--lw-font-mono); font-weight: 700; color: var(--color-primary-lime, #C7F464); font-size: 0.8125rem;">
+                <div style="font-family: var(--lw-font-mono); font-weight: 700; color: var(--lw-cta, #C96F4F); font-size: 0.8125rem;">
                   ${item.id}
                 </div>
                 <div style="font-size: 0.725rem; color: var(--color-text-secondary); margin-top: 2px;">

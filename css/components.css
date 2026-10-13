@@ -252,23 +252,24 @@
 
 .lw-stat__label {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--lw-text-muted);
+  color: var(--lw-text-secondary, #4A5D48);
 }
 
 .lw-stat__value {
   font-family: var(--lw-font-sans);
   font-size: 1.375rem;
-  font-weight: 700;
-  color: var(--lw-text);
+  font-weight: 800;
+  color: var(--lw-text, #2E3A2F);
   line-height: 1.2;
 }
 
 .lw-stat__freshness {
-  font-size: 0.6875rem;
-  color: var(--lw-text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--lw-text-secondary, #4A5D48);
 }
 
 /* --- Badges & Chips (lw-risk, lw-source, lw-chip) --- */
@@ -656,9 +657,11 @@
 }
 
 /* Data Table */
-.lw-table-container {
+.lw-table-container,
+.lw-table-responsive {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--lw-border);
   border-radius: var(--lw-r-sm);
   background: #FFFFFF;
@@ -666,6 +669,7 @@
 
 .lw-table {
   width: 100%;
+  min-width: 640px;
   border-collapse: collapse;
   text-align: left;
   font-size: 0.875rem;
@@ -678,17 +682,106 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--lw-text-secondary);
+  color: var(--lw-text, #2E3A2F);
   border-bottom: 1px solid var(--lw-border);
+  white-space: nowrap;
 }
 
 .lw-table td {
   padding: 12px 14px;
   border-bottom: 1px solid var(--lw-border);
-  color: var(--lw-text-secondary);
+  color: var(--lw-text, #2E3A2F);
+  font-weight: 500;
 }
 
 .lw-table tr:hover td {
   background: rgba(107, 127, 91, 0.06);
-  color: var(--lw-text);
+  color: var(--lw-text, #2E3A2F);
 }
+
+/* --- Shared Responsive Modal Component --- */
+.sg-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(46, 58, 47, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.sg-modal-card {
+  background: #FFFFFF;
+  border: 1px solid var(--lw-border, #D9C9B2);
+  border-radius: var(--lw-r-md, 8px);
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 16px 36px rgba(46, 58, 47, 0.18);
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Mobile Viewport Adjustments (<= 768px and <= 480px) --- */
+@media (max-width: 768px) {
+  .lw-field__input,
+  .lw-search__input {
+    font-size: 1rem; /* Prevents auto-zoom on iOS Safari */
+    min-height: 44px;
+  }
+
+  .lw-btn {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .lw-toast {
+    min-width: 0;
+    max-width: calc(100vw - 32px);
+    width: 100%;
+  }
+
+  .lw-toast-container {
+    left: 16px;
+    right: 16px;
+    bottom: 76px; /* Offset for mobile bottom nav bar */
+  }
+}
+
+@media (max-width: 480px) {
+  .sg-modal-overlay {
+    padding: 12px 8px;
+  }
+
+  .sg-modal-card {
+    max-height: 94vh;
+    border-radius: var(--lw-r-sm, 6px);
+  }
+
+  .sg-modal-header,
+  .sg-modal-body,
+  .sg-modal-footer {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+/* --- Leaflet Map Mobile Responsive Bounds --- */
+.leaflet-popup-content-wrapper {
+  max-width: calc(100vw - 32px) !important;
+  box-sizing: border-box;
+}
+
+.leaflet-popup-content {
+  max-width: calc(100vw - 48px) !important;
+  box-sizing: border-box;
+  margin: 12px 14px !important;
+  font-family: var(--lw-font-sans, inherit);
+}
+

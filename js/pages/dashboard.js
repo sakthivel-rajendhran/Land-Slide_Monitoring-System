@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // =========================================================================
-  // Render: Risk Distribution Horizontal Bars
+  // Render: Risk Distribution Horizontal Bar Chart
   // =========================================================================
   function renderRiskDistribution(dist, regions) {
     const total = regions.length || 1;
@@ -115,6 +115,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       low: regions.filter(r => r.risk_level === "low").length,
       unassessed: regions.filter(r => !r.risk_level || r.risk_level === "none").length
     };
+
+    // Consistent horizontal axis scale (0% to 40% maximum domain)
+    const maxPct = Math.max(...Object.values(counts).map(c => Math.round((c / total) * 100)));
+    const scaleMax = Math.max(40, Math.ceil(maxPct / 10) * 10);
 
     updateBar("critical", counts.critical, total);
     updateBar("high", counts.high, total);
@@ -127,7 +131,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const countEl = document.getElementById(`riskDistCount_${key}`);
       const fillEl = document.getElementById(`riskDistFill_${key}`);
       if (countEl) countEl.textContent = `${count} (${pct}%)`;
-      if (fillEl) fillEl.style.width = `${pct}%`;
+      if (fillEl) {
+        const barWidth = Math.min(100, Math.round((pct / scaleMax) * 1000) / 10);
+        fillEl.style.width = `${barWidth}%`;
+        fillEl.setAttribute("aria-valuenow", count);
+        fillEl.setAttribute("aria-valuetext", `${count} sectors (${pct}%)`);
+      }
     }
   }
 
@@ -411,12 +420,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.LW.ui?.confirm(
       report.title,
       `
-        <div style="font-size: 0.8125rem; color: var(--color-text-secondary); text-align: left; display: flex; flex-direction: column; gap: 8px;">
-          <div><strong>Area:</strong> ${report.area} (${report.district}, ${report.state})</div>
-          <div><strong>Investigating Body:</strong> ${report.author}</div>
-          <div><strong>Classification:</strong> ${report.category} &bull; <span style="text-transform: uppercase; color: var(--color-primary); font-weight: 700;">${report.severity}</span></div>
-          <div><strong>Published:</strong> ${format.dateTimeIST(report.created_at)}</div>
-          <div style="background: rgba(17,26,19,0.8); padding: 10px; border-radius: 4px; border: 1px solid var(--color-glass-border); line-height: 1.45; margin-top: 6px;">
+        <div style="font-size: 0.8125rem; color: var(--color-text-secondary, #4A5D48); text-align: left; display: flex; flex-direction: column; gap: 8px;">
+          <div><strong style="color: var(--color-text-primary, #2E3A2F);">Area:</strong> ${report.area} (${report.district}, ${report.state})</div>
+          <div><strong style="color: var(--color-text-primary, #2E3A2F);">Investigating Body:</strong> ${report.author}</div>
+          <div><strong style="color: var(--color-text-primary, #2E3A2F);">Classification:</strong> ${report.category} &bull; <span style="text-transform: uppercase; color: var(--color-primary); font-weight: 700;">${report.severity}</span></div>
+          <div><strong style="color: var(--color-text-primary, #2E3A2F);">Published:</strong> ${format.dateTimeIST(report.created_at)}</div>
+          <div style="background: var(--lw-bg, #F8F6EE); padding: 12px; border-radius: 4px; border: 1px solid var(--lw-border, #D9C9B2); color: var(--color-text-primary, #2E3A2F); line-height: 1.5; margin-top: 6px;">
             ${report.summary}
           </div>
         </div>
@@ -431,11 +440,35 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Tab Routing & Navigation
   // =========================================================================
   function setupTabRouting() {
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const initialTab = urlParams.get("tab") || "overview";
     switchTab(initialTab, false);
 
-    // Sidebar Navigation Click Handlers
+    // Ensure initial page load starts cleanly at top unless specific hash targeted
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+    } else {
+      setTimeout(() => {
+        const target = document.querySelector(window.location.hash);
+        if (target) {
+          if (window.LW?.ui?.scrollToElement) {
+            window.LW.ui.scrollToElement(target, true);
+          } else {
+            const heading = target.querySelector('.panel-title, .card-title, h1, h2, h3') || target;
+            const topbar = document.querySelector(".dashboard-topbar");
+            const navBottom = topbar ? Math.round(topbar.getBoundingClientRect().bottom) : 68;
+            const y = heading.getBoundingClientRect().top + window.pageYOffset - navBottom - 12;
+            window.scrollTo({ top: Math.max(0, Math.round(y)), behavior: "smooth" });
+          }
+        }
+      }, 150);
+    }
+
+    // Sidebar & Internal Tab Navigation Click Handlers
     document.querySelectorAll("[data-nav-tab]").forEach(item => {
       item.onclick = (e) => {
         e.preventDefault();
@@ -503,6 +536,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (pushHistory) {
       const newUrl = tabId === "overview" ? window.location.pathname : `${window.location.pathname}?tab=${tabId}`;
       window.history.pushState({ tab: tabId }, "", newUrl);
+
+      // Scroll to top of visible content area when tab is switched
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({
+        top: 0,
+        behavior: prefersReduced ? "auto" : "smooth"
+      });
     }
 
     // Close mobile drawer if open

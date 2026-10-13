@@ -13,10 +13,10 @@
   --lw-border: var(--color-glass-border, #D9C9B2);
   --lw-border-highlight: var(--color-highlight-border, #C96F4F);
   
-  --lw-text: var(--color-text-primary, #46566A);
-  --lw-text-secondary: var(--color-text-secondary, #5C6E5C);
-  --lw-text-muted: var(--color-text-muted, #7E8D7B);
-  --lw-text-disabled: var(--color-text-disabled, #A6B0A4);
+  --lw-text: var(--color-text-primary, #2E3A2F);
+  --lw-text-secondary: var(--color-text-secondary, #4A5D48);
+  --lw-text-muted: var(--color-text-muted, #5E6F5C);
+  --lw-text-disabled: var(--color-text-disabled, #768774);
 
   /* Primary Accent & CTA Tokens (Terracotta Accent) */
   --lw-cta: var(--color-primary-lime, #C96F4F);
@@ -90,4 +90,11 @@
 
   /* Container */
   --lw-container: 1240px;
+
+  /* Sticky & Fixed Header Heights & Scroll Offsets */
+  --nav-height: 76px;
+  --topbar-height: 68px;
+  --scroll-gap: 12px;
+  --scroll-offset-public: calc(var(--nav-height) + var(--scroll-gap));
+  --scroll-offset-dashboard: calc(var(--topbar-height) + var(--scroll-gap));
 }

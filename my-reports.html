@@ -231,6 +231,22 @@
       padding: 24px;
       box-shadow: var(--lw-shadow-lg);
     }
+
+    @media (max-width: 640px) {
+      .reports-list-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .modal-overlay {
+        padding: 12px 8px;
+      }
+      .modal-card {
+        padding: 16px 14px;
+      }
+      .incident-item-card {
+        padding: 16px;
+      }
+    }
   </style>
 </head>
 <body class="dashboard-root" data-shell="user">
@@ -369,10 +385,10 @@
         <div class="modal-card">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid var(--color-glass-border); padding-bottom: 12px;">
             <div>
-              <span style="font-family: monospace; font-size: 0.75rem; color: var(--color-primary); font-weight: 700;" id="modalRef">INC-XXXX</span>
-              <h2 style="font-size: 1.25rem; color: #F8FAFC; margin: 4px 0 0 0;" id="modalCategory">Incident Title</h2>
+              <span style="font-family: monospace; font-size: 0.75rem; color: var(--lw-cta, #C96F4F); font-weight: 700;" id="modalRef">INC-XXXX</span>
+              <h2 style="font-size: 1.25rem; color: var(--color-text-primary, #2E3A2F); font-weight: 800; margin: 4px 0 0 0;" id="modalCategory">Incident Title</h2>
             </div>
-            <button type="button" id="btnCloseDetailModal" style="background: none; border: none; color: #CBD5E1; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            <button type="button" id="btnCloseDetailModal" style="background: none; border: none; color: var(--color-text-secondary, #4A5D48); font-size: 1.5rem; cursor: pointer;">&times;</button>
           </div>
 
           <div style="margin-bottom: 18px;" id="modalStatusBadgeWrap"></div>
@@ -401,19 +417,19 @@
           </div>
 
           <div style="margin-bottom: 18px;">
-            <h4 style="font-size: 0.8125rem; text-transform: uppercase; color: var(--color-text-muted); margin: 0 0 6px 0;">Description</h4>
-            <div style="font-size: 0.875rem; color: #E2E8F0; line-height: 1.5; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 4px;" id="modalDesc">--</div>
+            <h4 style="font-size: 0.8125rem; text-transform: uppercase; color: var(--color-text-secondary, #4A5D48); font-weight: 700; margin: 0 0 6px 0;">Description</h4>
+            <div style="font-size: 0.875rem; color: var(--color-text-primary, #2E3A2F); line-height: 1.5; background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); padding: 12px; border-radius: 4px;" id="modalDesc">--</div>
           </div>
 
           <!-- Photo Gallery -->
           <div style="margin-bottom: 18px;">
-            <h4 style="font-size: 0.8125rem; text-transform: uppercase; color: var(--color-text-muted); margin: 0 0 8px 0;">Photo Evidence</h4>
+            <h4 style="font-size: 0.8125rem; text-transform: uppercase; color: var(--color-text-secondary, #4A5D48); font-weight: 700; margin: 0 0 8px 0;">Photo Evidence</h4>
             <div id="modalPhotosGallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;"></div>
           </div>
 
           <!-- Audit & Review Timeline -->
           <div style="margin-bottom: 18px;">
-            <h4 style="font-size: 0.8125rem; text-transform: uppercase; color: var(--color-text-muted); margin: 0 0 8px 0;">Official Review & Audit History</h4>
+            <h4 style="font-size: 0.8125rem; text-transform: uppercase; color: var(--color-text-secondary, #4A5D48); font-weight: 700; margin: 0 0 8px 0;">Official Review & Audit History</h4>
             <div id="modalAuditTimeline" style="display: flex; flex-direction: column; gap: 8px;"></div>
           </div>
 
@@ -508,13 +524,13 @@
 
         if (filtered.length === 0) {
           container.innerHTML = `
-            <div style="background: rgba(14,23,17,0.7); border: 1px dashed var(--color-glass-border); border-radius: var(--radius-card); padding: 50px 20px; text-align: center;">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-text-muted); margin-bottom: 12px;">
+            <div style="background: #FFFFFF; border: 1px dashed var(--lw-border, #D9C9B2); border-radius: var(--radius-card, 6px); padding: 50px 20px; text-align: center;">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-text-muted, #5E6F5C); margin-bottom: 12px;">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
               </svg>
-              <h3 style="color: #F8FAFC; margin: 0 0 8px 0; font-size: 1.1rem;">No reports found in this view</h3>
-              <p style="color: var(--color-text-secondary); margin: 0 0 18px 0; font-size: 0.8125rem;">
+              <h3 style="color: var(--color-text-primary, #2E3A2F); margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 800;">No reports found in this view</h3>
+              <p style="color: var(--color-text-secondary, #4A5D48); margin: 0 0 18px 0; font-size: 0.8125rem;">
                 ${activeFilter === 'all' ? 'You have not submitted any road blockage or landslide reports yet.' : 'No reports matching the selected verification filter.'}
               </p>
               <a href="report-incident.html" class="btn-dashboard-primary" style="text-decoration: none; display: inline-block;">
@@ -642,12 +658,12 @@
         const timeline = document.getElementById("modalAuditTimeline");
         const audit = report.auditTrail || [];
         timeline.innerHTML = audit.map(a => `
-          <div style="background: rgba(11,18,13,0.7); border-left: 3px solid var(--color-primary); padding: 8px 12px; border-radius: 2px; font-size: 0.75rem;">
-            <div style="display: flex; justify-content: space-between; color: var(--color-text-muted); margin-bottom: 2px;">
-              <strong>${a.actor || 'System'}</strong> &bull; ${a.action}
-              <span>${new Date(a.timestamp).toLocaleString()}</span>
+          <div style="background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); border-left: 3px solid var(--lw-cta, #C96F4F); padding: 10px 12px; border-radius: 4px; font-size: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; color: var(--color-text-secondary, #4A5D48); margin-bottom: 3px;">
+              <strong style="color: var(--color-text-primary, #2E3A2F);">${a.actor || 'System'}</strong> &bull; ${a.action}
+              <span style="color: var(--color-text-muted, #5E6F5C); font-size: 0.71875rem;">${new Date(a.timestamp).toLocaleString()}</span>
             </div>
-            <div style="color: #F8FAFC;">${a.notes || a.reason || 'Status recorded.'}</div>
+            <div style="color: var(--color-text-primary, #2E3A2F); font-weight: 500;">${a.notes || a.reason || 'Status recorded.'}</div>
           </div>
         `).join("");
 

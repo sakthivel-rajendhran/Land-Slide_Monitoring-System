@@ -330,6 +330,38 @@
       text-align: center;
       box-shadow: var(--lw-shadow-lg);
     }
+    @media (max-width: 640px) {
+      .report-card {
+        padding: 16px 14px;
+      }
+      .emergency-safety-banner {
+        padding: 14px;
+        gap: 12px;
+      }
+      .photo-upload-zone {
+        padding: 18px 12px;
+      }
+      .submission-modal-overlay {
+        padding: 12px 8px;
+      }
+      .submission-modal-card {
+        padding: 20px 14px;
+      }
+      .location-coords-badge {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      .passability-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+    }
+    @media (max-width: 380px) {
+      .passability-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body class="dashboard-root" data-shell="user">
@@ -703,27 +735,27 @@
           <div style="width: 56px; height: 56px; background: rgba(199, 244, 100, 0.2); border: 2px solid var(--color-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C7F464" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
-          <h2 style="font-size: 1.35rem; color: #F8FAFC; margin: 0 0 8px 0;">Report Submitted Successfully</h2>
-          <p style="font-size: 0.875rem; color: #CBD5E1; margin: 0 0 20px 0; line-height: 1.5;" id="modalSuccessDesc">
+          <h2 style="font-size: 1.35rem; color: var(--color-text-primary, #2E3A2F); margin: 0 0 8px 0; font-weight: 800;">Report Submitted Successfully</h2>
+          <p style="font-size: 0.875rem; color: var(--color-text-secondary, #4A5D48); margin: 0 0 20px 0; line-height: 1.5;" id="modalSuccessDesc">
             Your road blockage observation has been recorded and submitted for authorized geotechnical verification.
           </p>
 
-          <div style="background: rgba(11, 18, 13, 0.8); border: 1px solid var(--color-glass-border); border-radius: 4px; padding: 14px; text-align: left; margin-bottom: 24px; font-size: 0.8125rem;">
+          <div style="background: var(--lw-bg, #F8F6EE); border: 1px solid var(--lw-border, #D9C9B2); border-radius: 6px; padding: 14px; text-align: left; margin-bottom: 24px; font-size: 0.8125rem;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-              <span style="color: var(--color-text-muted);">Incident Reference:</span>
-              <strong style="color: var(--color-primary); font-family: monospace;" id="modalIncidentRef">INC-NER-XXXX</strong>
+              <span style="color: var(--color-text-muted, #5E6F5C); font-weight: 500;">Incident Reference:</span>
+              <strong style="color: var(--color-primary-lime, #C96F4F); font-family: monospace; font-weight: 700;" id="modalIncidentRef">INC-NER-XXXX</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center;">
+              <span style="color: var(--color-text-muted, #5E6F5C); font-weight: 500;">Initial Status:</span>
+              <span style="color: #8C5B12; background: rgba(196, 136, 41, 0.12); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.75rem;">Pending Verification</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-              <span style="color: var(--color-text-muted);">Initial Status:</span>
-              <span style="color: #F6E08E; font-weight: 600;">Pending Verification</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-              <span style="color: var(--color-text-muted);">Observation Time:</span>
-              <span id="modalObservedTime">--</span>
+              <span style="color: var(--color-text-muted, #5E6F5C); font-weight: 500;">Observation Time:</span>
+              <span id="modalObservedTime" style="color: var(--color-text-primary, #2E3A2F); font-weight: 600;">--</span>
             </div>
             <div style="display: flex; justify-content: space-between;">
-              <span style="color: var(--color-text-muted);">Submission Timestamp:</span>
-              <span id="modalSubmittedTime">--</span>
+              <span style="color: var(--color-text-muted, #5E6F5C); font-weight: 500;">Submission Timestamp:</span>
+              <span id="modalSubmittedTime" style="color: var(--color-text-primary, #2E3A2F); font-weight: 600;">--</span>
             </div>
           </div>
 

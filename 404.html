@@ -54,10 +54,28 @@
       flex-wrap: wrap;
       justify-content: center;
     }
+    @media (max-width: 480px) {
+      .not-found-container {
+        padding: 30px 16px;
+      }
+      .not-found-code {
+        font-size: 3.5rem;
+      }
+      .not-found-title {
+        font-size: 1.35rem;
+      }
+      .not-found-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      .not-found-actions .lw-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body class="public-body">
-
   <header class="public-header">
     <div class="nav-container">
       <div class="brand-group">
@@ -83,7 +101,6 @@
       </div>
     </div>
   </header>
-
   <main class="not-found-container">
     <div class="not-found-code">404</div>
     <h1 class="not-found-title">Geological Route Not Found</h1>

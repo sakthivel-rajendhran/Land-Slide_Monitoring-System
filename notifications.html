@@ -64,6 +64,7 @@
       display: flex;
       gap: 8px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
     .notif-card-item {
       margin-bottom: 14px;
@@ -74,6 +75,29 @@
     .notif-card-item.severity-high { border-left-color: var(--lw-risk-high); }
     .notif-card-item.severity-moderate { border-left-color: var(--lw-risk-mod); }
     .notif-card-item.unread { background: rgba(201, 111, 79, 0.05); }
+
+    @media (max-width: 768px) {
+      .topbar-breadcrumbs {
+        display: none;
+      }
+      .notif-page-wrap {
+        padding: 16px 14px;
+      }
+      .notif-header h1 {
+        font-size: 1.35rem;
+      }
+      .notif-filter-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+        flex-wrap: nowrap;
+      }
+    }
+    @media (max-width: 520px) {
+      .topbar-right a:not(.lw-btn--primary) {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body class="dashboard-root" data-shell="user">
@@ -150,7 +174,7 @@
     </div>
 
     <!-- Honesty & Legal Disclaimer -->
-    <div class="lw-card" style="margin-top: 40px; background: rgba(11,18,13,0.5); font-size: 0.8125rem; color: var(--lw-text-muted);">
+    <div class="lw-card" style="margin-top: 40px; background: #FFFFFF; border: 1px solid var(--lw-border, #D9C9B2); font-size: 0.8125rem; color: var(--lw-text-secondary, #4A5D48); line-height: 1.5;">
       <p style="margin: 0;" data-lw-disclaimer></p>
     </div>
   </main>
@@ -265,6 +289,7 @@
           tab.classList.add("active");
           currentTab = tab.dataset.notifTab;
           render();
+          window.scrollTo({ top: 0, behavior: "smooth" });
         };
       });
 

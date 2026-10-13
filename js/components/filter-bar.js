@@ -59,7 +59,7 @@ window.LW.filterBar = {
           <button type="button" class="lw-btn lw-btn--ghost lw-btn--sm lw-filter-chip" data-filter-risk="low">Low</button>
 
           <span style="font-size: 0.75rem; color: var(--lw-text-muted); font-weight: 600; text-transform: uppercase; margin-left: 8px;">Telemetry:</span>
-          <select id="lw-filter-status" style="padding: 4px 10px; background: rgba(17,26,19,0.85); border: 1px solid var(--lw-border); border-radius: var(--lw-r-sm); color: var(--lw-text-secondary); font-size: 0.75rem;">
+          <select id="lw-filter-status" style="padding: 4px 10px; background: #FFFFFF; border: 1px solid var(--lw-border); border-radius: var(--lw-r-sm); color: var(--lw-text, #2E3A2F); font-size: 0.75rem;">
             <option value="all">All Telemetry</option>
             <option value="current">Current Only</option>
             <option value="delayed">Delayed</option>

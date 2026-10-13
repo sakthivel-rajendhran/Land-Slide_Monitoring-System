@@ -68,7 +68,8 @@ function initMobileMenu() {
     }
   };
 
-  closeMobileMenuHandler = () => toggleMenu(false);
+  window.closeMobileMenu = () => toggleMenu(false);
+  const closeMobileMenuHandler = window.closeMobileMenu;
 
   toggleBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -133,6 +134,31 @@ function initNavigationAndScrollTracking() {
   }
 
   /**
+   * Locates the primary heading element inside a destination section
+   */
+  function getDestinationHeading(targetEl) {
+    if (!targetEl) return null;
+    if (/^H[1-6]$/i.test(targetEl.tagName)) return targetEl;
+    return targetEl.querySelector(
+      '.features-header, .map-section-header, .workflow-header, .intro-content, .cta-content-wrapper, .section-header, .panel-header, .section-title, .section-badge, h1, h2, h3'
+    ) || targetEl;
+  }
+
+  /**
+   * Calculates the real bottom edge of the sticky/fixed navbar in the viewport
+   */
+  function getEffectiveNavbarBottom() {
+    if (!header) {
+      return window.innerWidth <= 960 ? 60 : 72;
+    }
+    const rect = header.getBoundingClientRect();
+    const subContainer = header.querySelector('.header-container, .nav-bar') || header;
+    const subRect = subContainer.getBoundingClientRect();
+    const bottom = Math.max(rect.bottom, subRect.bottom);
+    return Math.round(bottom > 0 ? bottom : (window.innerWidth <= 960 ? 60 : 72));
+  }
+
+  /**
    * Evaluates active section based on scroll position and viewport visibility
    */
   function updateActiveSectionOnScroll() {
@@ -157,15 +183,17 @@ function initNavigationAndScrollTracking() {
       return;
     }
 
-    // 3. Middle sections: Determine which section is currently below the navbar
-    const navHeight = header ? header.offsetHeight : 80;
-    const threshold = navHeight + 100;
+    // 3. Middle sections: Determine which section heading is currently at or below the navbar
+    const navBottom = getEffectiveNavbarBottom();
+    const threshold = navBottom + 36;
 
     let currentSectionId = 'home';
     for (let i = 0; i < navigableSections.length; i++) {
       const section = navigableSections[i];
-      const rect = section.getBoundingClientRect();
-      if (rect.top <= threshold && rect.bottom > navHeight) {
+      const heading = getDestinationHeading(section);
+      const headingRect = heading.getBoundingClientRect();
+      const sectionRect = section.getBoundingClientRect();
+      if (headingRect.top <= threshold && sectionRect.bottom > navBottom) {
         currentSectionId = section.id;
       }
     }
@@ -174,16 +202,18 @@ function initNavigationAndScrollTracking() {
   }
 
   /**
-   * Calculates the exact scroll destination using CSS scroll-margin-top
+   * Calculates the exact scroll destination using actual navbar bottom and 12px visual gap (within 8-16px)
    */
   function getSectionScrollTop(targetEl) {
     if (!targetEl || targetEl.id === 'home') {
       return 0;
     }
-    const computedMargin = parseFloat(window.getComputedStyle(targetEl).scrollMarginTop);
-    const navMargin = !isNaN(computedMargin) && computedMargin > 0 ? computedMargin : (header ? header.offsetHeight : 80);
-    const elementRect = targetEl.getBoundingClientRect();
-    return Math.max(0, elementRect.top + window.pageYOffset - navMargin);
+    const headingEl = getDestinationHeading(targetEl);
+    const navBottom = getEffectiveNavbarBottom();
+    const headingDocTop = headingEl.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop);
+    // Target heading position = navbar bottom + 12px
+    const targetY = headingDocTop - navBottom - 12;
+    return Math.max(0, Math.round(targetY));
   }
 
   /**
@@ -199,7 +229,7 @@ function initNavigationAndScrollTracking() {
   }
 
   /**
-   * Handle in-page navigation clicks cleanly
+   * Handle in-page navigation clicks cleanly without stopping mid-section
    */
   function handleLinkClick(e) {
     const href = this.getAttribute('href');
@@ -213,33 +243,45 @@ function initNavigationAndScrollTracking() {
 
     e.preventDefault();
 
-    // Close mobile menu if currently open
-    if (typeof closeMobileMenuHandler === 'function') {
-      closeMobileMenuHandler();
+    // 1. Immediately close mobile menu if currently open and unlock scroll
+    if (typeof window.closeMobileMenu === 'function') {
+      window.closeMobileMenu();
     }
+    const navBar = document.querySelector('.nav-bar');
+    if (navBar) navBar.classList.remove('nav-open');
+    document.body.style.overflow = '';
 
-    // Immediately update active nav state without waiting for scroll
+    // 2. Immediately update active nav state without waiting for scroll
     setActiveNavLink(targetId);
 
-    // Lock automatic scroll tracking during programmatic animation to avoid intermediate flashing
-    isClickScrolling = true;
-    if (clickScrollTimer) clearTimeout(clickScrollTimer);
+    // 3. Defer scroll calculation to next animation frame so header layout reflow completes
+    requestAnimationFrame(() => {
+      isClickScrolling = true;
+      if (clickScrollTimer) clearTimeout(clickScrollTimer);
 
-    const targetY = (targetId === 'home' || !targetId) ? 0 : getSectionScrollTop(targetEl);
+      const targetY = (targetId === 'home' || !targetId) ? 0 : getSectionScrollTop(targetEl);
 
-    window.scrollTo({
-      top: targetY,
-      behavior: prefersReduced ? 'auto' : 'smooth'
+      window.scrollTo({
+        top: targetY,
+        behavior: prefersReduced ? 'auto' : 'smooth'
+      });
+
+      if (window.location.hash !== `#${targetId}`) {
+        history.pushState(null, '', `#${targetId}`);
+      }
+
+      // Stability verification after smooth scroll completes
+      const scrollDuration = prefersReduced ? 50 : 850;
+      clickScrollTimer = setTimeout(() => {
+        if (targetEl && targetId !== 'home') {
+          const finalY = getSectionScrollTop(targetEl);
+          if (Math.abs(window.pageYOffset - finalY) > 10) {
+            window.scrollTo({ top: finalY, behavior: 'auto' });
+          }
+        }
+        onScrollFinished();
+      }, scrollDuration);
     });
-
-    if (window.location.hash !== `#${targetId}`) {
-      history.pushState(null, '', `#${targetId}`);
-    }
-
-    // Unlock after scroll finishes
-    clickScrollTimer = setTimeout(() => {
-      onScrollFinished();
-    }, prefersReduced ? 50 : 800);
   }
 
   // Support native 'scrollend' event for precision unlocking
@@ -272,8 +314,12 @@ function initNavigationAndScrollTracking() {
     updateActiveSectionOnScroll();
   }, { passive: true });
 
-  // Handle initial page position and deep links
+  // Handle initial page position, deep links, and page refresh
   function handleInitialPosition() {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
     const hash = window.location.hash;
     if (hash && hash !== '#home') {
       const targetId = hash.slice(1);
@@ -289,15 +335,21 @@ function initNavigationAndScrollTracking() {
           behavior: 'auto'
         });
 
-        clickScrollTimer = setTimeout(() => {
+        // Stabilize after dynamic assets / fonts / images settle
+        setTimeout(() => {
+          const finalY = getSectionScrollTop(targetEl);
+          if (Math.abs(window.pageYOffset - finalY) > 10) {
+            window.scrollTo({ top: finalY, behavior: 'auto' });
+          }
           onScrollFinished();
-        }, 300);
+        }, 250);
         return;
       }
     }
 
-    // Fresh visit or at top
-    if (window.scrollY <= 60) {
+    // Fresh visit or homepage link: always land cleanly at top of page
+    if (!hash || hash === '#home') {
+      window.scrollTo(0, 0);
       setActiveNavLink('home');
     } else {
       updateActiveSectionOnScroll();
@@ -306,7 +358,19 @@ function initNavigationAndScrollTracking() {
 
   // Execute initial placement and listen for hash changes
   handleInitialPosition();
-  window.addEventListener('load', handleInitialPosition);
+  window.addEventListener('load', () => {
+    // Re-check hash target once all high-resolution images have fully loaded
+    const hash = window.location.hash;
+    if (hash && hash !== '#home') {
+      const targetEl = document.getElementById(hash.slice(1));
+      if (targetEl) {
+        const accurateY = getSectionScrollTop(targetEl);
+        if (Math.abs(window.pageYOffset - accurateY) > 8) {
+          window.scrollTo({ top: accurateY, behavior: 'auto' });
+        }
+      }
+    }
+  });
   window.addEventListener('hashchange', handleInitialPosition);
 }
 

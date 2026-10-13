@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/shells.css">
-  <link rel="stylesheet" href="css/pages/dashboard.css">
+  <link rel="stylesheet" href="css/pages/dashboard.css?v=1.2">
 
   <!-- Immediate Authentication Guard -->
   <script>
@@ -239,22 +239,22 @@
         </section>
 
         <!-- Citizen Incident Reporting Quick Action Banner -->
-        <div style="background: linear-gradient(135deg, rgba(20, 37, 26, 0.95), rgba(11, 18, 13, 0.9)); border: 1px solid var(--color-glass-border); border-left: 4px solid var(--color-primary); border-radius: var(--radius-card); padding: 18px 22px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div class="citizen-action-card" style="background: linear-gradient(135deg, #1C2B20 0%, #131E16 100%); border: 1px solid var(--lw-border, #D9C9B2); border-left: 4px solid var(--lw-cta, #C96F4F); border-radius: var(--radius-card, 6px); padding: 18px 22px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 4px 16px rgba(11, 18, 13, 0.14);">
           <div style="max-width: 680px;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-              <span class="sidebar-brand-badge" style="background: rgba(199,244,100,0.15); color: var(--color-primary); border: 1px solid rgba(199,244,100,0.3);">CITIZEN ACTION</span>
-              <strong style="color: var(--color-text-primary); font-size: 0.9375rem;">Observed a Road Blockage, Rockfall, or Slope Debris?</strong>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+              <span class="citizen-action-badge" style="display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 4px; background: rgba(201, 111, 79, 0.22); color: #F8F6EE; border: 1px solid rgba(217, 201, 178, 0.45); font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">CITIZEN ACTION</span>
+              <strong class="citizen-action-heading" style="color: #F8F6EE; font-size: 0.975rem; font-weight: 700; letter-spacing: -0.01em;">Observed a Road Blockage, Rockfall, or Slope Debris?</strong>
             </div>
-            <p style="margin: 0; font-size: 0.8125rem; color: var(--color-text-secondary); line-height: 1.45;">
+            <p class="citizen-action-desc" style="margin: 0; font-size: 0.825rem; color: #D9C9B2; line-height: 1.5; font-weight: 400;">
               Submit photo evidence with GPS coordinates. Your observation alerts district emergency monitoring authorities and updates the live Risk Map.
             </p>
           </div>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <a href="report-incident.html" class="btn-dashboard-primary" style="text-decoration: none; padding: 9px 16px; font-size: 0.8125rem;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+            <a href="report-incident.html" class="btn-dashboard-primary" style="text-decoration: none; padding: 10px 18px; font-size: 0.8125rem; font-weight: 700; color: #FFFFFF; background-color: var(--lw-cta, #C96F4F); border: 1px solid var(--lw-cta, #C96F4F); display: inline-flex; align-items: center; gap: 8px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
               <span>Report an Observation</span>
             </a>
-            <a href="my-reports.html" class="lw-btn lw-btn--sm lw-btn--outline" style="text-decoration: none; padding: 9px 14px; font-size: 0.8125rem;">
+            <a href="my-reports.html" class="citizen-action-btn-outline" style="display: inline-flex; align-items: center; justify-content: center; padding: 9px 16px; font-size: 0.8125rem; font-weight: 700; color: #F8F6EE; border: 1px solid #D9C9B2; background: rgba(248, 246, 238, 0.1); border-radius: var(--lw-r-sm, 6px); text-decoration: none; white-space: nowrap;">
               <span>My Reports</span>
             </a>
           </div>
@@ -331,75 +331,111 @@
               <a href="map.html" class="panel-action-link">View on Risk Map &rarr;</a>
             </div>
 
-            <div class="risk-dist-list">
-              <!-- Critical -->
-              <div class="risk-dist-row">
-                <div class="risk-dist-meta">
-                  <div class="risk-dist-info">
-                    <span class="lw-risk lw-risk--critical" style="padding: 2px 6px;"><span class="lw-risk__shape"></span>CRITICAL</span>
-                    <span class="risk-dist-desc">Imminent Failure Zone</span>
-                  </div>
-                  <span class="risk-dist-count" id="riskDistCount_critical">--</span>
+            <!-- Professional Horizontal Bar Chart -->
+            <div class="risk-bar-chart" role="region" aria-label="Risk Distribution Horizontal Bar Chart">
+              <!-- Chart Body: Y-Axis Labels, Plot Grid with Horizontal Bars, Value Labels -->
+              <div class="chart-plot-container">
+                <!-- Background Vertical Gridlines aligned to scale (0%, 10%, 20%, 30%, 40%) -->
+                <div class="chart-gridlines" aria-hidden="true">
+                  <div class="gridline" style="left: 0%;"></div>
+                  <div class="gridline" style="left: 25%;"></div>
+                  <div class="gridline" style="left: 50%;"></div>
+                  <div class="gridline" style="left: 75%;"></div>
+                  <div class="gridline" style="left: 100%;"></div>
                 </div>
-                <div class="risk-dist-track">
-                  <div class="risk-dist-fill risk-fill-critical" id="riskDistFill_critical" style="width: 0%;"></div>
+
+                <!-- Row 1: Critical -->
+                <div class="chart-row">
+                  <div class="chart-y-axis-label" title="Critical — Imminent Failure Zone">
+                    Critical
+                  </div>
+                  <div class="chart-bar-slot">
+                    <div class="chart-bar chart-bar-critical" id="riskDistFill_critical" style="width: 52.5%; background-color: #C44736;" role="progressbar" aria-valuenow="3" aria-valuemin="0" aria-valuemax="14" aria-label="Critical: 3 sectors (21%)"></div>
+                  </div>
+                  <div class="chart-value-label" id="riskDistCount_critical">
+                    3 (21%)
+                  </div>
+                </div>
+
+                <!-- Row 2: High -->
+                <div class="chart-row">
+                  <div class="chart-y-axis-label" title="High — Severe Saturation Slip Hazard">
+                    High
+                  </div>
+                  <div class="chart-bar-slot">
+                    <div class="chart-bar chart-bar-high" id="riskDistFill_high" style="width: 90%; background-color: #C96F4F;" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="14" aria-label="High: 5 sectors (36%)"></div>
+                  </div>
+                  <div class="chart-value-label" id="riskDistCount_high">
+                    5 (36%)
+                  </div>
+                </div>
+
+                <!-- Row 3: Moderate -->
+                <div class="chart-row">
+                  <div class="chart-y-axis-label" title="Moderate — Elevated Soil Moisture">
+                    Moderate
+                  </div>
+                  <div class="chart-bar-slot">
+                    <div class="chart-bar chart-bar-moderate" id="riskDistFill_moderate" style="width: 52.5%; background-color: #C58A2B;" role="progressbar" aria-valuenow="3" aria-valuemin="0" aria-valuemax="14" aria-label="Moderate: 3 sectors (21%)"></div>
+                  </div>
+                  <div class="chart-value-label" id="riskDistCount_moderate">
+                    3 (21%)
+                  </div>
+                </div>
+
+                <!-- Row 4: Low -->
+                <div class="chart-row">
+                  <div class="chart-y-axis-label" title="Low — Normal Baseline Stability">
+                    Low
+                  </div>
+                  <div class="chart-bar-slot">
+                    <div class="chart-bar chart-bar-low" id="riskDistFill_low" style="width: 35%; background-color: #6B7F5B;" role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="14" aria-label="Low: 2 sectors (14%)"></div>
+                  </div>
+                  <div class="chart-value-label" id="riskDistCount_low">
+                    2 (14%)
+                  </div>
+                </div>
+
+                <!-- Row 5: Not Assessed -->
+                <div class="chart-row">
+                  <div class="chart-y-axis-label" title="Not Assessed — Telemetry Offline">
+                    Not Assessed
+                  </div>
+                  <div class="chart-bar-slot">
+                    <div class="chart-bar chart-bar-unassessed" id="riskDistFill_unassessed" style="width: 17.5%; background-color: #879080;" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="14" aria-label="Not Assessed: 1 sector (7%)"></div>
+                  </div>
+                  <div class="chart-value-label" id="riskDistCount_unassessed">
+                    1 (7%)
+                  </div>
                 </div>
               </div>
 
-              <!-- High -->
-              <div class="risk-dist-row">
-                <div class="risk-dist-meta">
-                  <div class="risk-dist-info">
-                    <span class="lw-risk lw-risk--high" style="padding: 2px 6px;"><span class="lw-risk__shape"></span>HIGH</span>
-                    <span class="risk-dist-desc">Severe Saturation Slip Hazard</span>
+              <!-- Horizontal Axis (X-Axis): Scale Ticks and Labels -->
+              <div class="chart-x-axis" aria-hidden="true">
+                <div class="chart-x-axis-spacer"></div>
+                <div class="chart-x-axis-scale">
+                  <div class="x-tick-mark" style="left: 0%;">
+                    <span class="x-tick-line"></span>
+                    <span class="x-tick-label">0%</span>
                   </div>
-                  <span class="risk-dist-count" id="riskDistCount_high">--</span>
-                </div>
-                <div class="risk-dist-track">
-                  <div class="risk-dist-fill risk-fill-high" id="riskDistFill_high" style="width: 0%;"></div>
-                </div>
-              </div>
-
-              <!-- Moderate -->
-              <div class="risk-dist-row">
-                <div class="risk-dist-meta">
-                  <div class="risk-dist-info">
-                    <span class="lw-risk lw-risk--moderate" style="padding: 2px 6px;"><span class="lw-risk__shape"></span>MODERATE</span>
-                    <span class="risk-dist-desc">Elevated Soil Moisture</span>
+                  <div class="x-tick-mark" style="left: 25%;">
+                    <span class="x-tick-line"></span>
+                    <span class="x-tick-label">10%</span>
                   </div>
-                  <span class="risk-dist-count" id="riskDistCount_moderate">--</span>
-                </div>
-                <div class="risk-dist-track">
-                  <div class="risk-dist-fill risk-fill-moderate" id="riskDistFill_moderate" style="width: 0%;"></div>
-                </div>
-              </div>
-
-              <!-- Low -->
-              <div class="risk-dist-row">
-                <div class="risk-dist-meta">
-                  <div class="risk-dist-info">
-                    <span class="lw-risk lw-risk--low" style="padding: 2px 6px;"><span class="lw-risk__shape"></span>LOW</span>
-                    <span class="risk-dist-desc">Normal Baseline Stability</span>
+                  <div class="x-tick-mark" style="left: 50%;">
+                    <span class="x-tick-line"></span>
+                    <span class="x-tick-label">20%</span>
                   </div>
-                  <span class="risk-dist-count" id="riskDistCount_low">--</span>
-                </div>
-                <div class="risk-dist-track">
-                  <div class="risk-dist-fill risk-fill-low" id="riskDistFill_low" style="width: 0%;"></div>
-                </div>
-              </div>
-
-              <!-- Unassessed -->
-              <div class="risk-dist-row">
-                <div class="risk-dist-meta">
-                  <div class="risk-dist-info">
-                    <span class="lw-risk lw-risk--none" style="padding: 2px 6px;"><span class="lw-risk__shape"></span>NOT ASSESSED</span>
-                    <span class="risk-dist-desc">Telemetry Offline</span>
+                  <div class="x-tick-mark" style="left: 75%;">
+                    <span class="x-tick-line"></span>
+                    <span class="x-tick-label">30%</span>
                   </div>
-                  <span class="risk-dist-count" id="riskDistCount_unassessed">--</span>
+                  <div class="x-tick-mark" style="left: 100%;">
+                    <span class="x-tick-line"></span>
+                    <span class="x-tick-label">40%</span>
+                  </div>
                 </div>
-                <div class="risk-dist-track">
-                  <div class="risk-dist-fill risk-fill-unassessed" id="riskDistFill_unassessed" style="width: 0%;"></div>
-                </div>
+                <div class="chart-x-axis-val-spacer"></div>
               </div>
             </div>
           </div>
@@ -730,8 +766,8 @@
       </div>
 
       <!-- Mandatory Legal Safety Disclaimer on Dashboard Footer -->
-      <footer style="margin-top: 40px; padding: 16px 20px; background: rgba(11, 18, 13, 0.6); border: 1px solid var(--color-glass-border); border-radius: var(--radius-card, 6px); font-size: 0.75rem; color: var(--color-text-muted); line-height: 1.45;">
-        <strong>Safety & Operational Disclaimer:</strong> Risk assessments are computed from regional geological telemetry and computational failure models. They are not guaranteed predictions and do not replace official emergency evacuation instructions from district disaster management authorities (SDMA/DDMA). Unmonitored sectors are not assessed.
+      <footer style="margin-top: 40px; padding: 16px 20px; background: #FFFFFF; border: 1px solid var(--lw-border, #D9C9B2); border-radius: var(--radius-card, 6px); font-size: 0.775rem; color: var(--lw-text-secondary, #4A5D48); line-height: 1.5; box-shadow: var(--lw-shadow-sm);">
+        <strong style="color: var(--lw-text, #2E3A2F); font-weight: 700;">Safety & Operational Disclaimer:</strong> Risk assessments are computed from regional geological telemetry and computational failure models. They are not guaranteed predictions and do not replace official emergency evacuation instructions from district disaster management authorities (SDMA/DDMA). Unmonitored sectors are not assessed.
       </footer>
     </main>
   </div>

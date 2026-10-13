@@ -62,6 +62,16 @@
     .filter-select:focus {
       border-color: var(--lw-cta, #C96F4F);
     }
+    @media (max-width: 600px) {
+      .filter-controls-row > div {
+        width: 100%;
+      }
+      .filter-select {
+        width: 100%;
+        min-height: 44px;
+        font-size: 0.9375rem;
+      }
+    }
   </style>
 </head>
 <body class="dashboard-root" data-shell="user">
@@ -456,7 +466,7 @@
                     <div><strong>Authoring Authority:</strong> ${report.author}</div>
                     <div><strong>Hazard Classification:</strong> <span style="text-transform: uppercase; color: var(--color-primary); font-weight: 700;">${report.severity}</span></div>
                     <div><strong>Published Timestamp:</strong> ${format.dateTimeIST ? format.dateTimeIST(report.created_at) : report.created_at}</div>
-                    <div style="background: rgba(17,26,19,0.8); padding: 12px; border-radius: 4px; border: 1px solid var(--color-glass-border); line-height: 1.5; margin-top: 6px;">
+                    <div style="background: var(--lw-bg, #F8F6EE); padding: 12px; border-radius: 4px; border: 1px solid var(--lw-border, #D9C9B2); color: var(--color-text-primary, #2E3A2F); line-height: 1.5; margin-top: 6px;">
                       ${report.summary}
                     </div>
                   </div>
