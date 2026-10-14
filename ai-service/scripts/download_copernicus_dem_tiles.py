@@ -21,10 +21,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("download_copernicus_dem_tiles")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DEM_DIR = BASE_DIR / "data" / "dem_tiles"
+DATASET_DIR = BASE_DIR.parent / "dataset"
+DEM_DIR = DATASET_DIR / "dem_tiles"
 DEM_DIR.mkdir(parents=True, exist_ok=True)
 
-TILE_INDEX_CSV = BASE_DIR / "data" / "processed" / "copernicus_dem_tile_index_requirements.csv"
+TILE_INDEX_CSV = DATASET_DIR / "processed" / "copernicus_dem_tile_index_requirements.csv"
 AWS_S3_BASE_URL = "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com"
 
 

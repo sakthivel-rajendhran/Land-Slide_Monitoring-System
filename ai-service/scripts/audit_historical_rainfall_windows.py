@@ -21,8 +21,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("audit_historical_rainfall_windows")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
-REPORTS_DIR = BASE_DIR / "data" / "reports"
+DATASET_DIR = BASE_DIR.parent / "dataset"
+PROCESSED_DIR = DATASET_DIR / "processed"
+REPORTS_DIR = DATASET_DIR / "reports"
 
 EVENTS_CSV = PROCESSED_DIR / "historical_landslide_events_ner.csv"
 V1_RAINFALL_CSV = PROCESSED_DIR / "historical_rainfall_features_ner.csv"

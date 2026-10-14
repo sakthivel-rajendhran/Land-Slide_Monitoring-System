@@ -30,9 +30,10 @@ from scripts.extract_copernicus_dem_terrain import process_all_terrain_features
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("run_data_pipeline")
 
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+DATASET_DIR = BASE_DIR.parent / "dataset"
+PROCESSED_DIR = DATASET_DIR / "processed"
 MANIFEST_LOCAL = PROCESSED_DIR / "dataset_manifest.json"
-MANIFEST_ROOT = BASE_DIR.parent / "dataset_manifest.json"
+MANIFEST_ROOT = PROCESSED_DIR / "dataset_manifest.json"
 
 
 def sha256_of_file(filepath: Path) -> str:

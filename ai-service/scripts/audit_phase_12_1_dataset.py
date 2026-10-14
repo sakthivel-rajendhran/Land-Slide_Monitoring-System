@@ -33,10 +33,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("phase_12_1_audit")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
-RAW_DIR = BASE_DIR / "data" / "raw"
-DEM_DIR = BASE_DIR / "data" / "dem_tiles"
-REPORTS_DIR = BASE_DIR / "data" / "reports"
+DATASET_DIR = BASE_DIR.parent / "dataset"
+PROCESSED_DIR = DATASET_DIR / "processed"
+RAW_DIR = DATASET_DIR / "raw"
+DEM_DIR = DATASET_DIR / "dem_tiles"
+REPORTS_DIR = DATASET_DIR / "reports"
 
 EVENTS_CSV = PROCESSED_DIR / "historical_landslide_events_ner.csv"
 V1_RAINFALL_CSV = PROCESSED_DIR / "historical_rainfall_features_ner.csv"
@@ -48,7 +49,7 @@ RAW_GLC_CSV = RAW_DIR / "Global_Landslide_Catalog_Export_rows.csv"
 CACHE_FILE = PROCESSED_DIR / "open_meteo_rainfall_cache.json"
 TILE_INDEX_CSV = PROCESSED_DIR / "copernicus_dem_tile_index_requirements.csv"
 LOCAL_MANIFEST = PROCESSED_DIR / "dataset_manifest.json"
-ROOT_MANIFEST = BASE_DIR.parent / "dataset_manifest.json"
+ROOT_MANIFEST = DATASET_DIR / "processed" / "dataset_manifest.json"
 
 
 def compute_sha256(file_path: Path) -> str:

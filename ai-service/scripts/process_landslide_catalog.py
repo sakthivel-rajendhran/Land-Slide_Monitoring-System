@@ -24,8 +24,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("process_landslide_catalog")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-RAW_CSV_PATH = BASE_DIR / "data" / "raw" / "Global_Landslide_Catalog_Export_rows.csv"
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+DATASET_DIR = BASE_DIR.parent / "dataset"
+RAW_CSV_PATH = DATASET_DIR / "raw" / "Global_Landslide_Catalog_Export_rows.csv"
+PROCESSED_DIR = DATASET_DIR / "processed"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_CSV_PATH = PROCESSED_DIR / "historical_landslide_events_ner.csv"
 

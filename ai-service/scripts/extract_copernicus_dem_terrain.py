@@ -22,8 +22,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("extract_copernicus_dem_terrain")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
-DEM_DIR = BASE_DIR / "data" / "dem_tiles"
+DATASET_DIR = BASE_DIR.parent / "dataset"
+PROCESSED_DIR = DATASET_DIR / "processed"
+DEM_DIR = DATASET_DIR / "dem_tiles"
 DEM_DIR.mkdir(parents=True, exist_ok=True)
 
 INPUT_CSV = PROCESSED_DIR / "historical_landslide_events_ner.csv"
@@ -31,7 +32,7 @@ OUTPUT_TERRAIN_CSV = PROCESSED_DIR / "terrain_features_ner.csv"
 OUTPUT_TILE_INDEX_CSV = PROCESSED_DIR / "copernicus_dem_tile_index_requirements.csv"
 
 # Pre-existing local Shillong ASCII tile for backward compatibility / audit
-SHILLONG_DEM_ASC = BASE_DIR.parent / "slopeguard-backend" / "src" / "main" / "resources" / "dem" / "copernicus_dem_glo30_shillong.asc"
+SHILLONG_DEM_ASC = DATASET_DIR / "dem_tiles" / "copernicus_dem_glo30_shillong.asc"
 
 
 def get_required_tile_name(lat: float, lon: float) -> str:

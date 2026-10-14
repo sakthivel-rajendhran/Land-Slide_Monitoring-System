@@ -24,7 +24,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("acquire_historical_rainfall")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+DATASET_DIR = BASE_DIR.parent / "dataset"
+PROCESSED_DIR = DATASET_DIR / "processed"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 INPUT_CSV = PROCESSED_DIR / "historical_landslide_events_ner.csv"

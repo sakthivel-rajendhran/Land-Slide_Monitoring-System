@@ -5,15 +5,16 @@ from pathlib import Path
 
 # Base Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
-MODELS_DIR = BASE_DIR / "models"
+PROJECT_ROOT = BASE_DIR.parent
+DATA_DIR = PROJECT_ROOT / "dataset"
+MODELS_DIR = DATA_DIR / "models"
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Default Artifact Files
 MODEL_ARTIFACT_PATH = MODELS_DIR / "landslide_rf_model.joblib"
 METADATA_ARTIFACT_PATH = MODELS_DIR / "model_metadata.json"
 EVALUATION_REPORT_PATH = MODELS_DIR / "evaluation_report.json"
-SYNTHETIC_DATA_PATH = DATA_DIR / "synthetic_fixtures.csv"
+SYNTHETIC_DATA_PATH = DATA_DIR / "processed" / "synthetic_fixtures.csv"
 
 # Model Status & Governance
 MODEL_VERSION = "0.1.0-prototype"
@@ -27,7 +28,7 @@ THRESHOLD_SET_VERSION = "1.0.0-candidate"
 THRESHOLD_REVIEW_STATUS = "PENDING_EXPERT_REVIEW"
 DATA_READINESS_STATUS = "DATASET_INSUFFICIENT_FOR_OPERATIONAL_VALIDATION"
 
-THRESHOLDS_DIR = BASE_DIR / "thresholds"
+THRESHOLDS_DIR = DATA_DIR / "models"
 CANDIDATE_THRESHOLDS_PATH = THRESHOLDS_DIR / "candidate_thresholds_v1.json"
 
 # Default Random Seed
